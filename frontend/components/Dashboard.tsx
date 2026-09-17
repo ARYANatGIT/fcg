@@ -1,13 +1,15 @@
 "use client";
 
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import Map, { Marker } from "react-map-gl/maplibre";
 import "maplibre-gl/dist/maplibre-gl.css";
 import {
   Activity, Clock, MapPin, Server,
   Info, TrendingUp, RefreshCw,
   BarChart3, Sparkles, Navigation,
-  Plus, Minus, RotateCcw, ArrowRight
+  Plus, Minus, RotateCcw, Play, Pause,
+  Sliders, Cpu, Archive, FileText, Compass,
+  Layers, CloudRain, Sun, Wind
 } from "lucide-react";
 import {
   ResponsiveContainer, AreaChart, Area, BarChart, Bar,
@@ -15,6 +17,14 @@ import {
 } from "recharts";
 import { analyzeForecast, getHealth, getSpatialGrid } from "@/lib/api";
 import { AnalysisResponse, StationData } from "@/lib/types";
+
+// Modular Subcomponents
+import CircularGauge from "./CircularGauge";
+import WhatIfSimulator from "./WhatIfSimulator";
+import SynopticRegimes from "./SynopticRegimes";
+import ModelInspector from "./ModelInspector";
+import HistoricalArchive from "./HistoricalArchive";
+import AdvisoryModal from "./AdvisoryModal";
 
 interface RegionPreset {
   id: string;
@@ -41,7 +51,10 @@ const REGIONS: RegionPreset[] = [
 
 const DEFAULT_VIEW_STATE = { longitude: 80.0, latitude: 21.5, zoom: 4.0 };
 
+type ActiveTab = "cockpit" | "sandbox" | "regimes" | "model" | "archive";
+
 export default function Dashboard() {
+  const [activeTab, setActiveTab] = useState<ActiveTab>("cockpit");
   const [apiHealth, setApiHealth] = useState(false);
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState<AnalysisResponse | null>(null);
@@ -50,6 +63,10 @@ export default function Dashboard() {
   const [stations, setStations] = useState<StationData[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [mapViewState, setMapViewState] = useState(DEFAULT_VIEW_STATE);
+  const [isPlayingProgression, setIsPlayingProgression] = useState(false);
+  const [isAdvisoryOpen, setIsAdvisoryOpen] = useState(false);
+
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
 
   // Load Station Grid for Map
   const loadSpatialGrid = useCallback(async (day: number) => {
@@ -59,7 +76,7 @@ export default function Dashboard() {
         setStations(res.data.stations);
       }
     } catch {
-      // Fallback
+      // Fallback handling
     }
   }, []);
 
@@ -115,6 +132,24 @@ export default function Dashboard() {
     handleAnalyze(selectedRegion, leadDay);
   }, [handleAnalyze, selectedRegion, leadDay]);
 
+  // Auto-play Lead Day progression scrubber
+  useEffect(() => {
+    if (isPlayingProgression) {
+      timerRef.current = setInterval(() => {
+        setLeadDay((prev) => (prev >= 10 ? 1 : prev + 1));
+      }, 1600);
+    } else if (timerRef.current) {
+      clearInterval(timerRef.current);
+    }
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
+  }, [isPlayingProgression]);
+
+  const toggleAutoPlay = () => {
+    setIsPlayingProgression((prev) => !prev);
+  };
+
   const onSelectStation = (station: StationData) => {
     const matched = REGIONS.find(r => r.name.toLowerCase() === station.name.toLowerCase()) || {
       id: station.name.toLowerCase(),
@@ -135,6 +170,7 @@ export default function Dashboard() {
   const loadDemoCase = () => {
     setSelectedRegion(REGIONS[0]);
     setLeadDay(5);
+    setActiveTab("cockpit");
     setMapViewState({ longitude: 80.0, latitude: 20.0, zoom: 5.0 });
   };
 
@@ -148,6 +184,56 @@ export default function Dashboard() {
 
   const zoomOut = () => {
     setMapViewState(prev => ({ ...prev, zoom: Math.max(prev.zoom - 0.8, 3) }));
+  };
+
+  // Callback from What-If Simulator
+  const handleApplyScenario = (params: {
+    rainfall: number;
+    windSpeed: number;
+    temp: number;
+    pressure: number;
+    humidity: number;
+    leadDay: number;
+  }) => {
+    setSelectedRegion(prev => ({
+      ...prev,
+      rainfall: params.rainfall,
+      windSpeed: params.windSpeed,
+      temp: params.temp,
+      pressure: params.pressure,
+      humidity: params.humidity
+    }));
+    setLeadDay(params.leadDay);
+    setActiveTab("cockpit");
+  };
+
+  // Callback from Synoptic Regimes
+  const handleSelectRegime = (regime: {
+    name: string;
+    lat: number;
+    lon: number;
+    rainfall: number;
+    windSpeed: number;
+    temp: number;
+    pressure: number;
+    humidity: number;
+    leadDay: number;
+  }) => {
+    setSelectedRegion({
+      id: regime.name.toLowerCase(),
+      name: regime.name,
+      state: "Synoptic Scenario",
+      lat: regime.lat,
+      lon: regime.lon,
+      rainfall: regime.rainfall,
+      windSpeed: regime.windSpeed,
+      temp: regime.temp,
+      pressure: regime.pressure,
+      humidity: regime.humidity
+    });
+    setLeadDay(regime.leadDay);
+    setMapViewState({ longitude: regime.lon, latitude: regime.lat, zoom: 5.5 });
+    setActiveTab("cockpit");
   };
 
   const pred = data?.data?.prediction_and_explanation?.prediction_details;
@@ -176,18 +262,19 @@ export default function Dashboard() {
     return combined.sort((a, b) => Math.abs(b.contribution) - Math.abs(a.contribution)).slice(0, 6);
   }, [supportingShap, reducingShap]);
 
-  const bustProbPct = pred ? (pred.calibrated_bust_probability * 100).toFixed(1) : "--";
-  const confidencePct = pred ? (pred.forecast_confidence * 100).toFixed(1) : "--";
-  const isHighRisk = pred ? pred.calibrated_bust_probability >= 0.65 : false;
-  const isModRisk = pred ? pred.calibrated_bust_probability >= 0.35 && pred.calibrated_bust_probability < 0.65 : false;
+  const bustProbabilityValue = pred ? pred.calibrated_bust_probability : 0.45;
+  const confidenceValue = pred ? pred.forecast_confidence : 0.55;
+  const isHighRisk = bustProbabilityValue >= 0.65;
+  const isModRisk = bustProbabilityValue >= 0.35 && bustProbabilityValue < 0.65;
   const riskCategory = pred?.risk_category || (isHighRisk ? "HIGH" : isModRisk ? "MODERATE" : "LOW") || "UNKNOWN";
 
   return (
     <div className="min-h-screen bg-[#08090a] text-[#d0d6e0] font-sans antialiased selection:bg-[#e4f222] selection:text-[#08090a]">
+      
       {/* 1. Header Navigation Bar */}
       <nav className="border-b border-[#23252a] bg-[#08090a]/90 backdrop-blur-md sticky top-0 z-50 px-4 md:px-8 py-3.5">
-        <div className="max-w-[1360px] mx-auto flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-          <div className="flex items-center gap-3">
+        <div className="max-w-[1380px] mx-auto flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+          <div className="flex items-center gap-3.5">
             {/* Linear-style geometric glyph */}
             <div className="w-8 h-8 rounded-[8px] bg-[#0f1011] border border-[#23252a] flex items-center justify-center text-[#e4f222] shadow-sm shrink-0">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
@@ -225,6 +312,16 @@ export default function Dashboard() {
               <span className="font-linear-mono">DATA: SYNTHETIC</span>
             </div>
 
+            {/* Export Advisory Bulletin */}
+            <button
+              onClick={() => setIsAdvisoryOpen(true)}
+              className="btn-ghost text-[13px] cursor-pointer"
+              title="Generate operational forecast bust bulletin"
+            >
+              <FileText size={14} />
+              <span>Advisory Bulletin</span>
+            </button>
+
             {/* Primary Action Button (Acid Lime) */}
             <button
               onClick={loadDemoCase}
@@ -238,522 +335,631 @@ export default function Dashboard() {
         </div>
       </nav>
 
-      {/* Main Content Area */}
-      <main className="max-w-[1360px] mx-auto p-4 md:p-8 space-y-6">
-        
-        {/* 2. Precision Command Bar (Station + Lead Day Selectors) */}
-        <section className="linear-card flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-5">
-          {/* Station Selection */}
-          <div className="flex flex-col sm:flex-row sm:items-center gap-3">
-            <label htmlFor="station-select" className="flex items-center gap-2 text-[13px] font-linear-mono text-[#8a8f98] uppercase tracking-wider shrink-0">
-              <MapPin size={15} className="text-[#e4f222]" /> Evaluation Target:
-            </label>
-            <select
-              id="station-select"
-              value={selectedRegion.id}
-              onChange={(e) => {
-                const r = REGIONS.find(item => item.id === e.target.value) || REGIONS[0];
-                setSelectedRegion(r);
-                setMapViewState(prev => ({ ...prev, longitude: r.lon, latitude: r.lat, zoom: 5.5 }));
-              }}
-              className="h-10 bg-[#161718] border border-[#23252a] text-[#ffffff] text-[14px] rounded-[6px] px-3.5 py-2 focus:outline-none focus:border-[#e4f222]/50 transition font-normal min-w-[280px]"
-            >
-              {REGIONS.map(r => (
-                <option key={r.id} value={r.id}>
-                  {r.name} — {r.state} ({r.lat.toFixed(1)}°N, {r.lon.toFixed(1)}°E)
-                </option>
-              ))}
-            </select>
-          </div>
+      {/* 2. Secondary Navigation Tabs */}
+      <div className="border-b border-[#23252a] bg-[#0f1011]/60 px-4 md:px-8">
+        <div className="max-w-[1380px] mx-auto flex items-center gap-1 overflow-x-auto py-2">
+          <button
+            onClick={() => setActiveTab("cockpit")}
+            className={`px-3.5 py-1.5 rounded-[6px] text-[13px] font-medium transition cursor-pointer flex items-center gap-2 shrink-0 ${
+              activeTab === "cockpit"
+                ? "bg-[#161718] text-[#ffffff] border border-[#23252a]"
+                : "text-[#8a8f98] hover:text-[#ffffff] hover:bg-[#161718]/40"
+            }`}
+          >
+            <Navigation size={14} className={activeTab === "cockpit" ? "text-[#e4f222]" : ""} />
+            <span>Operational Bust Cockpit</span>
+          </button>
 
-          {/* Lead Day Segmented Selector */}
-          <div className="flex flex-col sm:flex-row sm:items-center gap-3">
-            <div className="flex items-center gap-2 text-[13px] font-linear-mono text-[#8a8f98] uppercase tracking-wider shrink-0">
-              <Clock size={15} className="text-[#e4f222]" /> Lead Day:
-            </div>
-            <div className="flex flex-wrap items-center gap-1.5 bg-[#161718] p-1.5 rounded-[8px] border border-[#23252a]">
-              {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(d => (
-                <button
-                  key={d}
-                  onClick={() => setLeadDay(d)}
-                  className={`h-9 min-w-[38px] px-2.5 text-[13px] font-linear-mono rounded-[6px] transition cursor-pointer flex items-center justify-center ${
-                    leadDay === d
-                      ? "bg-[#e4f222] text-[#08090a] font-[590] shadow-sm"
-                      : "text-[#8a8f98] hover:text-[#ffffff] hover:bg-[#23252a]"
-                  }`}
-                  aria-label={`Select Lead Day ${d}`}
-                >
-                  D{d}
-                </button>
-              ))}
-            </div>
-          </div>
-        </section>
+          <button
+            onClick={() => setActiveTab("sandbox")}
+            className={`px-3.5 py-1.5 rounded-[6px] text-[13px] font-medium transition cursor-pointer flex items-center gap-2 shrink-0 ${
+              activeTab === "sandbox"
+                ? "bg-[#161718] text-[#ffffff] border border-[#23252a]"
+                : "text-[#8a8f98] hover:text-[#ffffff] hover:bg-[#161718]/40"
+            }`}
+          >
+            <Sliders size={14} className={activeTab === "sandbox" ? "text-[#e4f222]" : ""} />
+            <span>What-If Scenario Sandbox</span>
+          </button>
 
-        {error && (
-          <div className="p-4 rounded-[8px] bg-[#0f1011] border border-[#eb5757]/40 text-[#eb5757] text-[14px] flex items-center gap-3 font-linear-mono">
-            <span className="w-2 h-2 rounded-full bg-[#eb5757] shrink-0" />
-            <span>{error}</span>
-          </div>
-        )}
+          <button
+            onClick={() => setActiveTab("regimes")}
+            className={`px-3.5 py-1.5 rounded-[6px] text-[13px] font-medium transition cursor-pointer flex items-center gap-2 shrink-0 ${
+              activeTab === "regimes"
+                ? "bg-[#161718] text-[#ffffff] border border-[#23252a]"
+                : "text-[#8a8f98] hover:text-[#ffffff] hover:bg-[#161718]/40"
+            }`}
+          >
+            <CloudRain size={14} className={activeTab === "regimes" ? "text-[#e4f222]" : ""} />
+            <span>Synoptic Threat Matrix</span>
+          </button>
 
-        {/* 3. Hero Layer: Interactive Map & Bust Probability Card */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          
-          {/* Map Frame (7 cols) */}
-          <div className="lg:col-span-7 linear-card p-0 overflow-hidden flex flex-col min-h-[440px]">
-            <div className="px-5 py-3.5 border-b border-[#23252a] flex flex-wrap justify-between items-center bg-[#0f1011] gap-2">
-              <div className="flex items-center gap-2.5 text-[14px] font-[510] text-[#ffffff] tracking-[-0.011em]">
-                <Navigation size={15} className="text-[#e4f222]" /> Spatial Bust Risk Distribution (India)
-              </div>
-              
-              {/* Risk Legend */}
-              <div className="flex items-center gap-4 text-[12px] font-linear-mono text-[#8a8f98]">
-                <span className="flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-[#27a644]"></span> Low (&lt;35%)
-                </span>
-                <span className="flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-[#f59e0b]"></span> Mod (35–65%)
-                </span>
-                <span className="flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-[#eb5757]"></span> High (&gt;65%)
-                </span>
-              </div>
-            </div>
+          <button
+            onClick={() => setActiveTab("model")}
+            className={`px-3.5 py-1.5 rounded-[6px] text-[13px] font-medium transition cursor-pointer flex items-center gap-2 shrink-0 ${
+              activeTab === "model"
+                ? "bg-[#161718] text-[#ffffff] border border-[#23252a]"
+                : "text-[#8a8f98] hover:text-[#ffffff] hover:bg-[#161718]/40"
+            }`}
+          >
+            <Cpu size={14} className={activeTab === "model" ? "text-[#e4f222]" : ""} />
+            <span>Model &amp; Benchmark Deck</span>
+          </button>
 
-            <div className="relative flex-1 min-h-[380px]">
-              <Map
-                {...mapViewState}
-                onMove={evt => setMapViewState(evt.viewState)}
-                mapStyle="https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json"
-                style={{ width: "100%", height: "100%" }}
-              >
-                {stations.map((st) => {
-                  const isSelected = selectedRegion.name.toLowerCase() === st.name.toLowerCase();
-                  return (
-                    <Marker
-                      key={st.name}
-                      longitude={st.longitude}
-                      latitude={st.latitude}
-                      anchor="center"
-                      onClick={() => onSelectStation(st)}
-                    >
-                      <div
-                        className={`cursor-pointer group relative flex items-center justify-center rounded-full transition-all duration-200 ${
-                          isSelected
-                            ? "w-5 h-5 ring-2 ring-[#e4f222] ring-offset-2 ring-offset-[#08090a] scale-110 z-30"
-                            : "w-4 h-4 ring-1 ring-[#08090a] opacity-90 hover:scale-125 z-10"
-                        }`}
-                        style={{ backgroundColor: st.bust_probability >= 0.65 ? "#eb5757" : st.bust_probability >= 0.35 ? "#f59e0b" : "#27a644" }}
-                      >
-                        {/* Hover Tooltip */}
-                        <div className="absolute bottom-6 hidden group-hover:flex flex-col bg-[#0f1011] border border-[#23252a] text-[#ffffff] text-[12px] font-linear-mono px-3 py-1.5 rounded-[6px] shadow-xl whitespace-nowrap z-50 pointer-events-none gap-0.5">
-                          <span className="font-semibold text-white">{st.name} ({st.region})</span>
-                          <span className="text-[#8a8f98]">Bust Probability: {(st.bust_probability * 100).toFixed(1)}%</span>
-                        </div>
-                      </div>
-                    </Marker>
-                  );
-                })}
-              </Map>
-
-              {/* On-Map Zoom & View Controls */}
-              <div className="absolute top-3 right-3 flex flex-col gap-1.5 z-20">
-                <button
-                  onClick={zoomIn}
-                  className="w-8 h-8 rounded-[6px] bg-[#0f1011]/90 border border-[#23252a] text-[#ffffff] flex items-center justify-center hover:bg-[#161718] transition cursor-pointer"
-                  title="Zoom In"
-                  aria-label="Zoom In"
-                >
-                  <Plus size={15} />
-                </button>
-                <button
-                  onClick={zoomOut}
-                  className="w-8 h-8 rounded-[6px] bg-[#0f1011]/90 border border-[#23252a] text-[#ffffff] flex items-center justify-center hover:bg-[#161718] transition cursor-pointer"
-                  title="Zoom Out"
-                  aria-label="Zoom Out"
-                >
-                  <Minus size={15} />
-                </button>
-                <button
-                  onClick={resetMapView}
-                  className="w-8 h-8 rounded-[6px] bg-[#0f1011]/90 border border-[#23252a] text-[#ffffff] flex items-center justify-center hover:bg-[#161718] transition cursor-pointer"
-                  title="Reset Map View"
-                  aria-label="Reset Map View"
-                >
-                  <RotateCcw size={14} />
-                </button>
-              </div>
-
-              {/* Bottom Telemetry Status Bar */}
-              <div className="absolute bottom-3 left-3 right-3 bg-[#08090a]/90 backdrop-blur-md border border-[#23252a] px-4 py-2 rounded-[8px] flex flex-wrap justify-between items-center text-[12px] font-linear-mono text-[#8a8f98] gap-2">
-                <span>
-                  TARGET: <strong className="text-[#ffffff] font-medium">{selectedRegion.name}</strong> ({selectedRegion.lat}°N, {selectedRegion.lon}°E)
-                </span>
-                <span>
-                  VALID: <strong className="text-[#ffffff] font-medium">Day {leadDay} Forecast Cycle</strong>
-                </span>
-              </div>
-            </div>
-          </div>
-
-          {/* Bust Probability Hero Panel (5 cols) */}
-          <div className="lg:col-span-5 flex flex-col gap-4">
-            <div className="linear-card flex-1 flex flex-col justify-between">
-              <div>
-                {/* Station & Risk Tag */}
-                <div className="flex justify-between items-start border-b border-[#23252a] pb-4 mb-4">
-                  <div>
-                    <span className="text-[12px] font-linear-mono text-[#8a8f98] uppercase tracking-wider block mb-0.5">
-                      Forecast Evaluation
-                    </span>
-                    <h2 className="text-[20px] font-[510] text-[#ffffff] tracking-[-0.022em]">
-                      {selectedRegion.name}, {selectedRegion.state}
-                    </h2>
-                  </div>
-
-                  <span className={`linear-badge font-linear-mono text-[12px] px-3 py-1 border font-medium ${
-                    isHighRisk
-                      ? "bg-[#eb5757]/15 text-[#eb5757] border-[#eb5757]/40"
-                      : isModRisk
-                      ? "bg-[#f59e0b]/15 text-[#f59e0b] border-[#f59e0b]/40"
-                      : "bg-[#27a644]/15 text-[#27a644] border-[#27a644]/40"
-                  }`}>
-                    {riskCategory} RISK
-                  </span>
-                </div>
-
-                {loading ? (
-                  <div className="py-14 flex flex-col items-center justify-center text-[#8a8f98] gap-3">
-                    <RefreshCw className="animate-spin text-[#e4f222]" size={24} />
-                    <span className="text-[13px] font-linear-mono">CALCULATING PROBABILITY...</span>
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-2 gap-4 my-3">
-                    {/* Calibrated Bust Probability */}
-                    <div className="bg-[#161718] p-4 rounded-[8px] border border-[#23252a]">
-                      <div className="text-[12px] font-linear-mono text-[#8a8f98] uppercase tracking-wider mb-1">
-                        Bust Probability
-                      </div>
-                      <div className={`text-[52px] leading-none font-[510] tracking-[-0.022em] ${
-                        isHighRisk ? "text-[#eb5757]" : isModRisk ? "text-[#f59e0b]" : "text-[#27a644]"
-                      }`}>
-                        {bustProbPct}%
-                      </div>
-                      <div className="text-[12px] font-linear-mono text-[#62666d] mt-2">
-                        Calibrated Isotonic
-                      </div>
-                    </div>
-
-                    {/* Forecast Confidence */}
-                    <div className="bg-[#161718] p-4 rounded-[8px] border border-[#23252a]">
-                      <div className="text-[12px] font-linear-mono text-[#8a8f98] uppercase tracking-wider mb-1">
-                        Forecast Confidence
-                      </div>
-                      <div className="text-[52px] leading-none font-[510] tracking-[-0.022em] text-[#ffffff]">
-                        {confidencePct}%
-                      </div>
-                      <div className="text-[12px] font-linear-mono text-[#62666d] mt-2">
-                        1 - P(bust) Metric
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Weather Telemetry Strip */}
-              <div className="border-t border-[#23252a] pt-4 grid grid-cols-3 gap-3 text-center">
-                <div className="bg-[#161718] p-2.5 rounded-[6px] border border-[#23252a]">
-                  <span className="text-[#8a8f98] block text-[11px] font-linear-mono uppercase mb-0.5">Rainfall</span>
-                  <span className="text-[#ffffff] text-[15px] font-medium font-linear-mono">{selectedRegion.rainfall} mm</span>
-                </div>
-                <div className="bg-[#161718] p-2.5 rounded-[6px] border border-[#23252a]">
-                  <span className="text-[#8a8f98] block text-[11px] font-linear-mono uppercase mb-0.5">Wind Speed</span>
-                  <span className="text-[#ffffff] text-[15px] font-medium font-linear-mono">{selectedRegion.windSpeed} m/s</span>
-                </div>
-                <div className="bg-[#161718] p-2.5 rounded-[6px] border border-[#23252a]">
-                  <span className="text-[#8a8f98] block text-[11px] font-linear-mono uppercase mb-0.5">Temperature</span>
-                  <span className="text-[#ffffff] text-[15px] font-medium font-linear-mono">{selectedRegion.temp} °C</span>
-                </div>
-              </div>
-            </div>
-          </div>
+          <button
+            onClick={() => setActiveTab("archive")}
+            className={`px-3.5 py-1.5 rounded-[6px] text-[13px] font-medium transition cursor-pointer flex items-center gap-2 shrink-0 ${
+              activeTab === "archive"
+                ? "bg-[#161718] text-[#ffffff] border border-[#23252a]"
+                : "text-[#8a8f98] hover:text-[#ffffff] hover:bg-[#161718]/40"
+            }`}
+          >
+            <Archive size={14} className={activeTab === "archive" ? "text-[#e4f222]" : ""} />
+            <span>Historical Bust Archive</span>
+          </button>
         </div>
+      </div>
 
-        {/* 4. Diagnostic Layer: SHAP Risk, Forecast Revision, Historical Analogs */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          
-          {/* SHAP Attributions Card */}
-          <div className="linear-card flex flex-col justify-between">
-            <div>
-              <div className="flex items-center justify-between mb-4 border-b border-[#23252a] pb-2.5">
-                <h3 className="text-[15px] font-[510] text-[#ffffff] flex items-center gap-2 tracking-[-0.011em]">
-                  <Info size={16} className="text-[#e4f222]" /> Why is this forecast at risk?
-                </h3>
-                <span className="linear-badge font-linear-mono text-[11px]">SHAP LOCAL</span>
+      {/* Main Content Container */}
+      <main className="max-w-[1380px] mx-auto p-4 md:p-8 space-y-6">
+        
+        {/* VIEW 1: OPERATIONAL BUST COCKPIT */}
+        {activeTab === "cockpit" && (
+          <div className="space-y-6">
+            {/* Command Bar */}
+            <section className="linear-card flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-5">
+              {/* Station Selection */}
+              <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+                <label htmlFor="station-select" className="flex items-center gap-2 text-[13px] font-linear-mono text-[#8a8f98] uppercase tracking-wider shrink-0">
+                  <MapPin size={15} className="text-[#e4f222]" /> Evaluation Target:
+                </label>
+                <select
+                  id="station-select"
+                  value={selectedRegion.id}
+                  onChange={(e) => {
+                    const r = REGIONS.find(item => item.id === e.target.value) || REGIONS[0];
+                    setSelectedRegion(r);
+                    setMapViewState(prev => ({ ...prev, longitude: r.lon, latitude: r.lat, zoom: 5.5 }));
+                  }}
+                  className="h-10 bg-[#161718] border border-[#23252a] text-[#ffffff] text-[14px] rounded-[6px] px-3.5 py-2 focus:outline-none focus:border-[#e4f222]/50 transition font-normal min-w-[280px]"
+                >
+                  {REGIONS.map(r => (
+                    <option key={r.id} value={r.id}>
+                      {r.name} — {r.state} ({r.lat.toFixed(1)}°N, {r.lon.toFixed(1)}°E)
+                    </option>
+                  ))}
+                </select>
               </div>
 
-              {loading ? (
-                <div className="space-y-3 py-4">
-                  {[1, 2, 3].map(i => (
-                    <div key={i} className="h-10 bg-[#161718] rounded-[6px] animate-pulse"></div>
-                  ))}
+              {/* Lead Day Segmented Selector + Auto-Play Scrubber */}
+              <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+                <div className="flex items-center gap-2 text-[13px] font-linear-mono text-[#8a8f98] uppercase tracking-wider shrink-0">
+                  <Clock size={15} className="text-[#e4f222]" /> Lead Day:
                 </div>
-              ) : shapReasons.length > 0 ? (
-                <div className="space-y-2.5">
-                  {shapReasons.slice(0, 4).map((r, i) => (
-                    <div key={i} className="bg-[#161718] p-3 rounded-[6px] border border-[#23252a] flex items-center justify-between">
-                      <div className="pr-2">
-                        <div className="font-medium text-[#ffffff] text-[13px]">{r.code.replace(/_/g, " ")}</div>
-                        <div className="text-[12px] text-[#8a8f98] mt-0.5">{r.text}</div>
-                      </div>
-                      <div className={`font-linear-mono text-[14px] font-medium shrink-0 ${
-                        r.contribution >= 0 ? "text-[#eb5757]" : "text-[#27a644]"
-                      }`}>
-                        {r.contribution >= 0 ? `+${r.contribution.toFixed(2)}` : r.contribution.toFixed(2)}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-[13px] text-[#8a8f98] italic py-8 text-center font-linear-mono">
-                  No SHAP attribution signals available.
-                </div>
-              )}
-            </div>
-
-            <div className="text-[12px] text-[#62666d] italic mt-4 pt-2.5 border-t border-[#23252a]">
-              SHAP reflects statistical attributions, not confirmed physical causality.
-            </div>
-          </div>
-
-          {/* Forecast Revision Evolution Card */}
-          <div className="linear-card flex flex-col justify-between">
-            <div>
-              <div className="flex items-center justify-between mb-4 border-b border-[#23252a] pb-2.5">
-                <h3 className="text-[15px] font-[510] text-[#ffffff] flex items-center gap-2 tracking-[-0.011em]">
-                  <TrendingUp size={16} className="text-[#e4f222]" /> Run-to-Run Forecast Revision
-                </h3>
-                <span className="linear-badge font-linear-mono text-[11px]">MULTI-RUN</span>
-              </div>
-
-              {loading ? (
-                <div className="h-32 bg-[#161718] rounded-[6px] animate-pulse my-4"></div>
-              ) : revisions ? (
-                <div className="space-y-3.5">
-                  <div className="flex items-center justify-between">
-                    <span className="text-[13px] text-[#8a8f98]">Inter-cycle Stability:</span>
-                    <span className={`linear-badge font-linear-mono text-[12px] px-2.5 py-1 border font-medium ${
-                      revisions.large_revision
-                        ? "bg-[#eb5757]/15 text-[#eb5757] border-[#eb5757]/40"
-                        : "bg-[#27a644]/15 text-[#27a644] border-[#27a644]/40"
-                    }`}>
-                      {revisions.large_revision ? "⚠ LARGE REVISION" : "✓ STABLE EVOLUTION"}
-                    </span>
+                
+                <div className="flex items-center gap-2">
+                  <div className="flex flex-wrap items-center gap-1.5 bg-[#161718] p-1.5 rounded-[8px] border border-[#23252a]">
+                    {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(d => (
+                      <button
+                        key={d}
+                        onClick={() => setLeadDay(d)}
+                        className={`h-9 min-w-[36px] px-2 text-[13px] font-linear-mono rounded-[6px] transition cursor-pointer flex items-center justify-center ${
+                          leadDay === d
+                            ? "bg-[#e4f222] text-[#08090a] font-[590] shadow-sm"
+                            : "text-[#8a8f98] hover:text-[#ffffff] hover:bg-[#23252a]"
+                        }`}
+                        aria-label={`Select Lead Day ${d}`}
+                      >
+                        D{d}
+                      </button>
+                    ))}
                   </div>
 
-                  {revisions.runs && (
-                    <div className="bg-[#161718] p-3 rounded-[6px] border border-[#23252a] space-y-2">
-                      <div className="text-[11px] font-linear-mono text-[#8a8f98] uppercase tracking-wider">
-                        Precipitation Evolution
-                      </div>
-                      <div className="flex items-center justify-between text-[13px] font-linear-mono">
-                        {revisions.runs.map((r, i) => (
-                          <div key={i} className="text-center flex-1">
-                            <span className="text-[#8a8f98] block text-[11px] mb-0.5">{r.run.split(" ")[0]}</span>
-                            <span className="text-[#ffffff] font-medium">{r.rainfall_mm}mm</span>
+                  {/* Play / Pause Scrubber */}
+                  <button
+                    onClick={toggleAutoPlay}
+                    className={`h-10 px-3 rounded-[6px] border border-[#23252a] flex items-center gap-1.5 text-[12px] font-linear-mono transition cursor-pointer ${
+                      isPlayingProgression ? "bg-[#e4f222]/15 text-[#e4f222] border-[#e4f222]/40" : "bg-[#161718] text-[#8a8f98] hover:text-[#ffffff]"
+                    }`}
+                    title={isPlayingProgression ? "Pause auto-progression" : "Auto-advance lead days"}
+                  >
+                    {isPlayingProgression ? <Pause size={13} /> : <Play size={13} />}
+                    <span className="hidden sm:inline">{isPlayingProgression ? "Pause" : "Play D1-D10"}</span>
+                  </button>
+                </div>
+              </div>
+            </section>
+
+            {error && (
+              <div className="p-4 rounded-[8px] bg-[#0f1011] border border-[#eb5757]/40 text-[#eb5757] text-[14px] flex items-center gap-3 font-linear-mono">
+                <span className="w-2 h-2 rounded-full bg-[#eb5757] shrink-0" />
+                <span>{error}</span>
+              </div>
+            )}
+
+            {/* Top Grid: Interactive Map (7 cols) + Circular Gauge Hero Panel (5 cols) */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+              
+              {/* Map Frame (7 cols) */}
+              <div className="lg:col-span-7 linear-card p-0 overflow-hidden flex flex-col min-h-[440px]">
+                <div className="px-5 py-3.5 border-b border-[#23252a] flex flex-wrap justify-between items-center bg-[#0f1011] gap-2">
+                  <div className="flex items-center gap-2.5 text-[14px] font-[510] text-[#ffffff] tracking-[-0.011em]">
+                    <Navigation size={15} className="text-[#e4f222]" /> Spatial Bust Risk Distribution (India)
+                  </div>
+                  
+                  {/* Risk Legend */}
+                  <div className="flex items-center gap-4 text-[12px] font-linear-mono text-[#8a8f98]">
+                    <span className="flex items-center gap-1.5">
+                      <span className="w-2 h-2 rounded-full bg-[#27a644]"></span> Low (&lt;35%)
+                    </span>
+                    <span className="flex items-center gap-1.5">
+                      <span className="w-2 h-2 rounded-full bg-[#f59e0b]"></span> Mod (35–65%)
+                    </span>
+                    <span className="flex items-center gap-1.5">
+                      <span className="w-2 h-2 rounded-full bg-[#eb5757]"></span> High (&gt;65%)
+                    </span>
+                  </div>
+                </div>
+
+                <div className="relative flex-1 min-h-[380px]">
+                  <Map
+                    {...mapViewState}
+                    onMove={evt => setMapViewState(evt.viewState)}
+                    mapStyle="https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json"
+                    style={{ width: "100%", height: "100%" }}
+                  >
+                    {stations.map((st) => {
+                      const isSelected = selectedRegion.name.toLowerCase() === st.name.toLowerCase();
+                      return (
+                        <Marker
+                          key={st.name}
+                          longitude={st.longitude}
+                          latitude={st.latitude}
+                          anchor="center"
+                          onClick={() => onSelectStation(st)}
+                        >
+                          <div
+                            className={`cursor-pointer group relative flex items-center justify-center rounded-full transition-all duration-200 ${
+                              isSelected
+                                ? "w-5 h-5 ring-2 ring-[#e4f222] ring-offset-2 ring-offset-[#08090a] scale-110 z-30"
+                                : "w-4 h-4 ring-1 ring-[#08090a] opacity-90 hover:scale-125 z-10"
+                            }`}
+                            style={{ backgroundColor: st.bust_probability >= 0.65 ? "#eb5757" : st.bust_probability >= 0.35 ? "#f59e0b" : "#27a644" }}
+                          >
+                            <div className="absolute bottom-6 hidden group-hover:flex flex-col bg-[#0f1011] border border-[#23252a] text-[#ffffff] text-[12px] font-linear-mono px-3 py-1.5 rounded-[6px] shadow-xl whitespace-nowrap z-50 pointer-events-none gap-0.5">
+                              <span className="font-semibold text-white">{st.name} ({st.region})</span>
+                              <span className="text-[#8a8f98]">Bust Probability: {(st.bust_probability * 100).toFixed(1)}%</span>
+                            </div>
                           </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
+                        </Marker>
+                      );
+                    })}
+                  </Map>
 
-                  <div className="text-[12px] font-linear-mono flex justify-between text-[#8a8f98] bg-[#161718] p-2.5 rounded-[6px] border border-[#23252a]">
-                    <span>COMBINED SHIFT SCORE:</span>
-                    <span className="text-[#ffffff] font-medium">{revisions.combined_revision_score ?? "0.45"}</span>
+                  {/* On-Map Zoom & View Controls */}
+                  <div className="absolute top-3 right-3 flex flex-col gap-1.5 z-20">
+                    <button
+                      onClick={zoomIn}
+                      className="w-8 h-8 rounded-[6px] bg-[#0f1011]/90 border border-[#23252a] text-[#ffffff] flex items-center justify-center hover:bg-[#161718] transition cursor-pointer"
+                      title="Zoom In"
+                      aria-label="Zoom In"
+                    >
+                      <Plus size={15} />
+                    </button>
+                    <button
+                      onClick={zoomOut}
+                      className="w-8 h-8 rounded-[6px] bg-[#0f1011]/90 border border-[#23252a] text-[#ffffff] flex items-center justify-center hover:bg-[#161718] transition cursor-pointer"
+                      title="Zoom Out"
+                      aria-label="Zoom Out"
+                    >
+                      <Minus size={15} />
+                    </button>
+                    <button
+                      onClick={resetMapView}
+                      className="w-8 h-8 rounded-[6px] bg-[#0f1011]/90 border border-[#23252a] text-[#ffffff] flex items-center justify-center hover:bg-[#161718] transition cursor-pointer"
+                      title="Reset Map View"
+                      aria-label="Reset Map View"
+                    >
+                      <RotateCcw size={14} />
+                    </button>
                   </div>
-                </div>
-              ) : (
-                <div className="text-[13px] text-[#8a8f98] italic py-8 text-center font-linear-mono">
-                  No multi-cycle forecast history available.
-                </div>
-              )}
-            </div>
 
-            <div className="text-[12px] text-[#62666d] italic mt-4 pt-2.5 border-t border-[#23252a]">
-              Run-to-run changes indicate numerical forecast instability.
-            </div>
-          </div>
-
-          {/* Historical Analogs Card */}
-          <div className="linear-card flex flex-col justify-between">
-            <div>
-              <div className="flex items-center justify-between mb-4 border-b border-[#23252a] pb-2.5">
-                <h3 className="text-[15px] font-[510] text-[#ffffff] flex items-center gap-2 tracking-[-0.011em]">
-                  <Activity size={16} className="text-[#e4f222]" /> Historical Analogs
-                </h3>
-                <span className="linear-badge font-linear-mono text-[11px]">TOP-5 CASES</span>
-              </div>
-
-              {loading ? (
-                <div className="h-32 bg-[#161718] rounded-[6px] animate-pulse my-4"></div>
-              ) : (
-                <div>
-                  <div className="flex items-baseline justify-between mb-3 text-[13px]">
-                    <span className="text-[#8a8f98]">Historical Bust Rate:</span>
-                    <span className="font-linear-mono text-[15px] font-medium text-[#ffffff]">
-                      {analogSummary ? `${Math.round(analogSummary.historical_analog_bust_rate * 5)} / 5 (${(analogSummary.historical_analog_bust_rate * 100).toFixed(0)}%)` : "--"}
+                  {/* Bottom Telemetry Status Bar */}
+                  <div className="absolute bottom-3 left-3 right-3 bg-[#08090a]/90 backdrop-blur-md border border-[#23252a] px-4 py-2 rounded-[8px] flex flex-wrap justify-between items-center text-[12px] font-linear-mono text-[#8a8f98] gap-2">
+                    <span>
+                      TARGET: <strong className="text-[#ffffff] font-medium">{selectedRegion.name}</strong> ({selectedRegion.lat}°N, {selectedRegion.lon}°E)
+                    </span>
+                    <span>
+                      VALID: <strong className="text-[#ffffff] font-medium">Day {leadDay} Forecast Cycle</strong>
                     </span>
                   </div>
+                </div>
+              </div>
 
-                  <div className="space-y-2 max-h-[170px] overflow-y-auto pr-1">
-                    {analogs.length > 0 ? (
-                      analogs.slice(0, 4).map((a, i) => (
-                        <div key={i} className="flex justify-between items-center text-[12px] font-linear-mono bg-[#161718] p-2.5 rounded-[6px] border border-[#23252a]">
-                          <span className="text-[#ffffff] font-medium">
-                            #{i + 1} {a.initialization_time.split(" ")[0]}
-                          </span>
-                          <span className="text-[#8a8f98]">
-                            dist={a.similarity_distance?.toFixed(2)}
-                          </span>
-                          <span className={`px-2 py-0.5 rounded-[4px] text-[11px] font-medium ${
-                            a.bust === 1 ? "bg-[#eb5757]/15 text-[#eb5757] border border-[#eb5757]/40" : "bg-[#27a644]/15 text-[#27a644] border border-[#27a644]/40"
-                          }`}>
-                            {a.bust === 1 ? "BUST" : "ACCURATE"}
+              {/* Bust Probability Hero Panel (5 cols) with Circular Gauge */}
+              <div className="lg:col-span-5 flex flex-col gap-4">
+                <div className="linear-card flex-1 flex flex-col justify-between">
+                  <div>
+                    {/* Station & Risk Tag */}
+                    <div className="flex justify-between items-start border-b border-[#23252a] pb-4 mb-3">
+                      <div>
+                        <span className="text-[12px] font-linear-mono text-[#8a8f98] uppercase tracking-wider block mb-0.5">
+                          Forecast Evaluation
+                        </span>
+                        <h2 className="text-[20px] font-[510] text-[#ffffff] tracking-[-0.022em]">
+                          {selectedRegion.name}, {selectedRegion.state}
+                        </h2>
+                      </div>
+
+                      <span className={`linear-badge font-linear-mono text-[12px] px-3 py-1 border font-medium ${
+                        isHighRisk
+                          ? "bg-[#eb5757]/15 text-[#eb5757] border-[#eb5757]/40"
+                          : isModRisk
+                          ? "bg-[#f59e0b]/15 text-[#f59e0b] border-[#f59e0b]/40"
+                          : "bg-[#27a644]/15 text-[#27a644] border-[#27a644]/40"
+                      }`}>
+                        {riskCategory} RISK
+                      </span>
+                    </div>
+
+                    {loading ? (
+                      <div className="py-14 flex flex-col items-center justify-center text-[#8a8f98] gap-3">
+                        <RefreshCw className="animate-spin text-[#e4f222]" size={24} />
+                        <span className="text-[13px] font-linear-mono">CALCULATING PROBABILITY...</span>
+                      </div>
+                    ) : (
+                      <div className="flex flex-col items-center justify-center py-2">
+                        {/* Circular Gauge */}
+                        <CircularGauge
+                          value={bustProbabilityValue}
+                          label="Bust Probability"
+                          sublabel={`Confidence: ${(confidenceValue * 100).toFixed(1)}%`}
+                          size={210}
+                          strokeWidth={13}
+                        />
+
+                        {/* Status Message */}
+                        <div className="mt-1 text-center">
+                          <p className="text-[13px] text-[#ffffff] font-medium">
+                            {isHighRisk
+                              ? "Severe forecast failure likely over this target."
+                              : isModRisk
+                              ? "Moderate uncertainty detected; verify ensemble spread."
+                              : "High numerical model agreement across cycles."}
+                          </p>
+                          <span className="text-[11px] font-linear-mono text-[#62666d] block mt-0.5">
+                            Calibrated LightGBM Isotonic Posterior
                           </span>
                         </div>
-                      ))
-                    ) : (
-                      <div className="text-[13px] text-[#8a8f98] italic py-6 text-center font-linear-mono">
-                        No prior historical analogs matched filter.
                       </div>
                     )}
                   </div>
+
+                  {/* Weather Telemetry Strip */}
+                  <div className="border-t border-[#23252a] pt-3.5 grid grid-cols-3 gap-3 text-center">
+                    <div className="bg-[#161718] p-2 rounded-[6px] border border-[#23252a]">
+                      <span className="text-[#8a8f98] block text-[11px] font-linear-mono uppercase mb-0.5">Rainfall</span>
+                      <span className="text-[#ffffff] text-[14px] font-medium font-linear-mono">{selectedRegion.rainfall} mm</span>
+                    </div>
+                    <div className="bg-[#161718] p-2 rounded-[6px] border border-[#23252a]">
+                      <span className="text-[#8a8f98] block text-[11px] font-linear-mono uppercase mb-0.5">Wind Speed</span>
+                      <span className="text-[#ffffff] text-[14px] font-medium font-linear-mono">{selectedRegion.windSpeed} m/s</span>
+                    </div>
+                    <div className="bg-[#161718] p-2 rounded-[6px] border border-[#23252a]">
+                      <span className="text-[#8a8f98] block text-[11px] font-linear-mono uppercase mb-0.5">Temperature</span>
+                      <span className="text-[#ffffff] text-[14px] font-medium font-linear-mono">{selectedRegion.temp} °C</span>
+                    </div>
+                  </div>
                 </div>
-              )}
+              </div>
             </div>
 
-            <div className="text-[12px] text-[#62666d] italic mt-4 pt-2.5 border-t border-[#23252a]">
-              Filtered strictly to dates before current forecast initialization.
+            {/* Diagnostic Layer: SHAP Risk, Forecast Revision, Historical Analogs */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              
+              {/* SHAP Attributions Card */}
+              <div className="linear-card flex flex-col justify-between">
+                <div>
+                  <div className="flex items-center justify-between mb-4 border-b border-[#23252a] pb-2.5">
+                    <h3 className="text-[15px] font-[510] text-[#ffffff] flex items-center gap-2 tracking-[-0.011em]">
+                      <Info size={16} className="text-[#e4f222]" /> Why is this forecast at risk?
+                    </h3>
+                    <span className="linear-badge font-linear-mono text-[11px]">SHAP LOCAL</span>
+                  </div>
+
+                  {loading ? (
+                    <div className="space-y-3 py-4">
+                      {[1, 2, 3].map(i => (
+                        <div key={i} className="h-10 bg-[#161718] rounded-[6px] animate-pulse"></div>
+                      ))}
+                    </div>
+                  ) : shapReasons.length > 0 ? (
+                    <div className="space-y-2.5">
+                      {shapReasons.slice(0, 4).map((r, i) => (
+                        <div key={i} className="bg-[#161718] p-3 rounded-[6px] border border-[#23252a] flex items-center justify-between">
+                          <div className="pr-2">
+                            <div className="font-medium text-[#ffffff] text-[13px]">{r.code.replace(/_/g, " ")}</div>
+                            <div className="text-[12px] text-[#8a8f98] mt-0.5">{r.text}</div>
+                          </div>
+                          <div className={`font-linear-mono text-[14px] font-medium shrink-0 ${
+                            r.contribution >= 0 ? "text-[#eb5757]" : "text-[#27a644]"
+                          }`}>
+                            {r.contribution >= 0 ? `+${r.contribution.toFixed(2)}` : r.contribution.toFixed(2)}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-[13px] text-[#8a8f98] italic py-8 text-center font-linear-mono">
+                      No SHAP attribution signals available.
+                    </div>
+                  )}
+                </div>
+
+                <div className="text-[12px] text-[#62666d] italic mt-4 pt-2.5 border-t border-[#23252a]">
+                  SHAP reflects statistical attributions, not confirmed physical causality.
+                </div>
+              </div>
+
+              {/* Forecast Revision Evolution Card */}
+              <div className="linear-card flex flex-col justify-between">
+                <div>
+                  <div className="flex items-center justify-between mb-4 border-b border-[#23252a] pb-2.5">
+                    <h3 className="text-[15px] font-[510] text-[#ffffff] flex items-center gap-2 tracking-[-0.011em]">
+                      <TrendingUp size={16} className="text-[#e4f222]" /> Run-to-Run Forecast Revision
+                    </h3>
+                    <span className="linear-badge font-linear-mono text-[11px]">MULTI-RUN</span>
+                  </div>
+
+                  {loading ? (
+                    <div className="h-32 bg-[#161718] rounded-[6px] animate-pulse my-4"></div>
+                  ) : revisions ? (
+                    <div className="space-y-3.5">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[13px] text-[#8a8f98]">Inter-cycle Stability:</span>
+                        <span className={`linear-badge font-linear-mono text-[12px] px-2.5 py-1 border font-medium ${
+                          revisions.large_revision
+                            ? "bg-[#eb5757]/15 text-[#eb5757] border-[#eb5757]/40"
+                            : "bg-[#27a644]/15 text-[#27a644] border-[#27a644]/40"
+                        }`}>
+                          {revisions.large_revision ? "⚠ LARGE REVISION" : "✓ STABLE EVOLUTION"}
+                        </span>
+                      </div>
+
+                      {revisions.runs && (
+                        <div className="bg-[#161718] p-3 rounded-[6px] border border-[#23252a] space-y-2">
+                          <div className="text-[11px] font-linear-mono text-[#8a8f98] uppercase tracking-wider">
+                            Precipitation Evolution
+                          </div>
+                          <div className="flex items-center justify-between text-[13px] font-linear-mono">
+                            {revisions.runs.map((r, i) => (
+                              <div key={i} className="text-center flex-1">
+                                <span className="text-[#8a8f98] block text-[11px] mb-0.5">{r.run.split(" ")[0]}</span>
+                                <span className="text-[#ffffff] font-medium">{r.rainfall_mm}mm</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      <div className="text-[12px] font-linear-mono flex justify-between text-[#8a8f98] bg-[#161718] p-2.5 rounded-[6px] border border-[#23252a]">
+                        <span>COMBINED SHIFT SCORE:</span>
+                        <span className="text-[#ffffff] font-medium">{revisions.combined_revision_score ?? "0.45"}</span>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="text-[13px] text-[#8a8f98] italic py-8 text-center font-linear-mono">
+                      No multi-cycle forecast history available.
+                    </div>
+                  )}
+                </div>
+
+                <div className="text-[12px] text-[#62666d] italic mt-4 pt-2.5 border-t border-[#23252a]">
+                  Run-to-run changes indicate numerical forecast instability.
+                </div>
+              </div>
+
+              {/* Historical Analogs Card */}
+              <div className="linear-card flex flex-col justify-between">
+                <div>
+                  <div className="flex items-center justify-between mb-4 border-b border-[#23252a] pb-2.5">
+                    <h3 className="text-[15px] font-[510] text-[#ffffff] flex items-center gap-2 tracking-[-0.011em]">
+                      <Activity size={16} className="text-[#e4f222]" /> Historical Analogs
+                    </h3>
+                    <span className="linear-badge font-linear-mono text-[11px]">TOP-5 CASES</span>
+                  </div>
+
+                  {loading ? (
+                    <div className="h-32 bg-[#161718] rounded-[6px] animate-pulse my-4"></div>
+                  ) : (
+                    <div>
+                      <div className="flex items-baseline justify-between mb-3 text-[13px]">
+                        <span className="text-[#8a8f98]">Historical Bust Rate:</span>
+                        <span className="font-linear-mono text-[15px] font-medium text-[#ffffff]">
+                          {analogSummary ? `${Math.round(analogSummary.historical_analog_bust_rate * 5)} / 5 (${(analogSummary.historical_analog_bust_rate * 100).toFixed(0)}%)` : "--"}
+                        </span>
+                      </div>
+
+                      <div className="space-y-2 max-h-[170px] overflow-y-auto pr-1">
+                        {analogs.length > 0 ? (
+                          analogs.slice(0, 4).map((a, i) => (
+                            <div key={i} className="flex justify-between items-center text-[12px] font-linear-mono bg-[#161718] p-2.5 rounded-[6px] border border-[#23252a]">
+                              <span className="text-[#ffffff] font-medium">
+                                #{i + 1} {a.initialization_time.split(" ")[0]}
+                              </span>
+                              <span className="text-[#8a8f98]">
+                                dist={a.similarity_distance?.toFixed(2)}
+                              </span>
+                              <span className={`px-2 py-0.5 rounded-[4px] text-[11px] font-medium ${
+                                a.bust === 1 ? "bg-[#eb5757]/15 text-[#eb5757] border border-[#eb5757]/40" : "bg-[#27a644]/15 text-[#27a644] border border-[#27a644]/40"
+                              }`}>
+                                {a.bust === 1 ? "BUST" : "ACCURATE"}
+                              </span>
+                            </div>
+                          ))
+                        ) : (
+                          <div className="text-[13px] text-[#8a8f98] italic py-6 text-center font-linear-mono">
+                            No prior historical analogs matched filter.
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                <div className="text-[12px] text-[#62666d] italic mt-4 pt-2.5 border-t border-[#23252a]">
+                  Filtered strictly to dates before current forecast initialization.
+                </div>
+              </div>
+            </div>
+
+            {/* Recharts Analytics Visualizations */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              
+              {/* Bust Probability by Lead Day */}
+              <div className="linear-card">
+                <div className="flex items-center justify-between mb-4 border-b border-[#23252a] pb-2.5">
+                  <h3 className="text-[15px] font-[510] text-[#ffffff] flex items-center gap-2 tracking-[-0.011em]">
+                    <BarChart3 size={16} className="text-[#e4f222]" /> Bust Probability Progression (Day 1 – Day 10)
+                  </h3>
+                  <span className="linear-badge font-linear-mono text-[11px]">LEAD CURVE</span>
+                </div>
+
+                <div className="h-64 w-full">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart data={leadCurve} margin={{ top: 15, right: 15, left: -15, bottom: 5 }}>
+                      <defs>
+                        <linearGradient id="linearColorBust" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#02b8cc" stopOpacity={0.3} />
+                          <stop offset="95%" stopColor="#02b8cc" stopOpacity={0.0} />
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#23252a" opacity={0.7} />
+                      <XAxis 
+                        dataKey="lead_day" 
+                        tick={{ fill: "#8a8f98", fontSize: 12, fontFamily: "var(--font-berkeley-mono)" }} 
+                        tickFormatter={(val) => `D${val}`} 
+                      />
+                      <YAxis 
+                        tick={{ fill: "#8a8f98", fontSize: 12, fontFamily: "var(--font-berkeley-mono)" }} 
+                        domain={[0, 1]} 
+                        tickFormatter={(val) => `${(val * 100).toFixed(0)}%`} 
+                      />
+                      <Tooltip
+                        contentStyle={{ 
+                          backgroundColor: "#0f1011", 
+                          borderColor: "#23252a", 
+                          borderRadius: "8px", 
+                          fontSize: "12px", 
+                          fontFamily: "var(--font-berkeley-mono)",
+                          padding: "10px 14px",
+                          color: "#ffffff"
+                        }}
+                        formatter={(val: any) => [`${(Number(val) * 100).toFixed(1)}%`, "Bust Probability"]}
+                        labelFormatter={(label) => `Forecast Lead Day ${label}`}
+                      />
+                      <ReferenceLine 
+                        y={0.65} 
+                        stroke="#eb5757" 
+                        strokeDasharray="4 4" 
+                        label={{ value: "High Risk Threshold (65%)", fill: "#eb5757", fontSize: 11, position: "top" }} 
+                      />
+                      <Area 
+                        type="monotone" 
+                        dataKey="bust_probability" 
+                        stroke="#02b8cc" 
+                        strokeWidth={2} 
+                        fillOpacity={1} 
+                        fill="url(#linearColorBust)" 
+                      />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+
+              {/* Model Feature Contributions (SHAP Attributions) */}
+              <div className="linear-card">
+                <div className="flex items-center justify-between mb-4 border-b border-[#23252a] pb-2.5">
+                  <h3 className="text-[15px] font-[510] text-[#ffffff] flex items-center gap-2 tracking-[-0.011em]">
+                    <Activity size={16} className="text-[#e4f222]" /> Feature Attributions (SHAP Waterfall)
+                  </h3>
+                  <span className="linear-badge font-linear-mono text-[11px]">WATERFALL</span>
+                </div>
+
+                <div className="h-64 w-full">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={shapChartData} layout="vertical" margin={{ top: 10, right: 25, left: 45, bottom: 5 }}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#23252a" opacity={0.7} />
+                      <XAxis 
+                        type="number" 
+                        tick={{ fill: "#8a8f98", fontSize: 12, fontFamily: "var(--font-berkeley-mono)" }} 
+                      />
+                      <YAxis 
+                        type="category" 
+                        dataKey="feature" 
+                        tick={{ fill: "#ffffff", fontSize: 12, fontFamily: "var(--font-berkeley-mono)" }} 
+                        width={95} 
+                      />
+                      <Tooltip
+                        contentStyle={{ 
+                          backgroundColor: "#0f1011", 
+                          borderColor: "#23252a", 
+                          borderRadius: "8px", 
+                          fontSize: "12px", 
+                          fontFamily: "var(--font-berkeley-mono)",
+                          padding: "10px 14px",
+                          color: "#ffffff"
+                        }}
+                        formatter={(val: any) => [Number(val).toFixed(3), "SHAP Contribution"]}
+                      />
+                      <Bar dataKey="contribution" radius={[0, 4, 4, 0]}>
+                        {shapChartData.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={entry.contribution >= 0 ? "#eb5757" : "#27a644"} />
+                        ))}
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
+        )}
 
-        {/* 5. Recharts Analytics Visualizations */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          
-          {/* Bust Probability by Lead Day */}
-          <div className="linear-card">
-            <div className="flex items-center justify-between mb-4 border-b border-[#23252a] pb-2.5">
-              <h3 className="text-[15px] font-[510] text-[#ffffff] flex items-center gap-2 tracking-[-0.011em]">
-                <BarChart3 size={16} className="text-[#e4f222]" /> Bust Probability Progression (Day 1 – Day 10)
-              </h3>
-              <span className="linear-badge font-linear-mono text-[11px]">LEAD CURVE</span>
-            </div>
+        {/* VIEW 2: WHAT-IF SCENARIO SANDBOX */}
+        {activeTab === "sandbox" && (
+          <WhatIfSimulator
+            initialFeatures={{
+              rainfall: selectedRegion.rainfall,
+              windSpeed: selectedRegion.windSpeed,
+              temp: selectedRegion.temp,
+              pressure: selectedRegion.pressure,
+              humidity: selectedRegion.humidity,
+              leadDay: leadDay
+            }}
+            onApplyScenario={handleApplyScenario}
+          />
+        )}
 
-            <div className="h-64 w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={leadCurve} margin={{ top: 15, right: 15, left: -15, bottom: 5 }}>
-                  <defs>
-                    <linearGradient id="linearColorBust" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#02b8cc" stopOpacity={0.3} />
-                      <stop offset="95%" stopColor="#02b8cc" stopOpacity={0.0} />
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#23252a" opacity={0.7} />
-                  <XAxis 
-                    dataKey="lead_day" 
-                    tick={{ fill: "#8a8f98", fontSize: 12, fontFamily: "var(--font-berkeley-mono)" }} 
-                    tickFormatter={(val) => `D${val}`} 
-                  />
-                  <YAxis 
-                    tick={{ fill: "#8a8f98", fontSize: 12, fontFamily: "var(--font-berkeley-mono)" }} 
-                    domain={[0, 1]} 
-                    tickFormatter={(val) => `${(val * 100).toFixed(0)}%`} 
-                  />
-                  <Tooltip
-                    contentStyle={{ 
-                      backgroundColor: "#0f1011", 
-                      borderColor: "#23252a", 
-                      borderRadius: "8px", 
-                      fontSize: "12px", 
-                      fontFamily: "var(--font-berkeley-mono)",
-                      padding: "10px 14px",
-                      color: "#ffffff"
-                    }}
-                    formatter={(val: any) => [`${(Number(val) * 100).toFixed(1)}%`, "Bust Probability"]}
-                    labelFormatter={(label) => `Forecast Lead Day ${label}`}
-                  />
-                  <ReferenceLine 
-                    y={0.65} 
-                    stroke="#eb5757" 
-                    strokeDasharray="4 4" 
-                    label={{ value: "High Risk Threshold (65%)", fill: "#eb5757", fontSize: 11, position: "top" }} 
-                  />
-                  <Area 
-                    type="monotone" 
-                    dataKey="bust_probability" 
-                    stroke="#02b8cc" 
-                    strokeWidth={2} 
-                    fillOpacity={1} 
-                    fill="url(#linearColorBust)" 
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
+        {/* VIEW 3: SYNOPTIC REGIMES THREAT MATRIX */}
+        {activeTab === "regimes" && (
+          <SynopticRegimes onSelectRegime={handleSelectRegime} />
+        )}
 
-          {/* Model Feature Contributions (SHAP Attributions) */}
-          <div className="linear-card">
-            <div className="flex items-center justify-between mb-4 border-b border-[#23252a] pb-2.5">
-              <h3 className="text-[15px] font-[510] text-[#ffffff] flex items-center gap-2 tracking-[-0.011em]">
-                <Activity size={16} className="text-[#e4f222]" /> Feature Attributions (SHAP Waterfall)
-              </h3>
-              <span className="linear-badge font-linear-mono text-[11px]">WATERFALL</span>
-            </div>
+        {/* VIEW 4: MODEL INSPECTOR & BENCHMARK DECK */}
+        {activeTab === "model" && (
+          <ModelInspector />
+        )}
 
-            <div className="h-64 w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={shapChartData} layout="vertical" margin={{ top: 10, right: 25, left: 45, bottom: 5 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#23252a" opacity={0.7} />
-                  <XAxis 
-                    type="number" 
-                    tick={{ fill: "#8a8f98", fontSize: 12, fontFamily: "var(--font-berkeley-mono)" }} 
-                  />
-                  <YAxis 
-                    type="category" 
-                    dataKey="feature" 
-                    tick={{ fill: "#ffffff", fontSize: 12, fontFamily: "var(--font-berkeley-mono)" }} 
-                    width={95} 
-                  />
-                  <Tooltip
-                    contentStyle={{ 
-                      backgroundColor: "#0f1011", 
-                      borderColor: "#23252a", 
-                      borderRadius: "8px", 
-                      fontSize: "12px", 
-                      fontFamily: "var(--font-berkeley-mono)",
-                      padding: "10px 14px",
-                      color: "#ffffff"
-                    }}
-                    formatter={(val: any) => [Number(val).toFixed(3), "SHAP Contribution"]}
-                  />
-                  <Bar dataKey="contribution" radius={[0, 4, 4, 0]}>
-                    {shapChartData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.contribution >= 0 ? "#eb5757" : "#27a644"} />
-                    ))}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
-        </div>
+        {/* VIEW 5: HISTORICAL BUST ARCHIVE */}
+        {activeTab === "archive" && (
+          <HistoricalArchive />
+        )}
 
       </main>
 
       {/* 6. Footer */}
       <footer className="border-t border-[#23252a] mt-12 py-6 px-4 md:px-8 text-[#8a8f98] text-[13px] font-linear-mono">
-        <div className="max-w-[1360px] mx-auto flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
+        <div className="max-w-[1380px] mx-auto flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
           <div>
             ForecastGuard AI · MoES / NCMRWF Problem Statement ID: 26079
           </div>
@@ -762,6 +968,27 @@ export default function Dashboard() {
           </div>
         </div>
       </footer>
+
+      {/* 7. Operational Advisory Bulletin Modal */}
+      <AdvisoryModal
+        isOpen={isAdvisoryOpen}
+        onClose={() => setIsAdvisoryOpen(false)}
+        station={{
+          name: selectedRegion.name,
+          state: selectedRegion.state,
+          lat: selectedRegion.lat,
+          lon: selectedRegion.lon,
+          rainfall: selectedRegion.rainfall,
+          windSpeed: selectedRegion.windSpeed,
+          temp: selectedRegion.temp,
+        }}
+        leadDay={leadDay}
+        bustProbability={bustProbabilityValue}
+        confidence={confidenceValue}
+        riskCategory={riskCategory}
+        shapReasons={shapReasons}
+        revisions={revisions}
+      />
     </div>
   );
 }
