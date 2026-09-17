@@ -24,12 +24,28 @@
   --font-inter-variable: var(--font-inter, 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif);
   --font-berkeley-mono: var(--font-mono, 'JetBrains Mono', 'SF Mono', Menlo, Monaco, Consolas, monospace);
 
+  /* TypeUI Editorial Colors */
+  --typeui-canvas: #090909;
+  --typeui-surface-1: #111111;
+  --typeui-surface-2: #151515;
+  --typeui-surface-3: #1a1a1a;
+  --typeui-border: rgba(255, 255, 255, 0.08);
+  --typeui-border-active: rgba(255, 255, 255, 0.20);
+  --typeui-text-primary: #f5f5f5;
+  --typeui-text-secondary: #8a8a8a;
+  --typeui-text-muted: #555555;
+  --typeui-accent-violet: #8b5cf6;
+  --typeui-accent-electric: #6366f1;
+  --typeui-accent-cyan: #38bdf8;
+  --typeui-accent-lime: #e4f222;
+
   /* Shadows */
   --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.5), 0 1px 2px rgba(0, 0, 0, 0.4);
   --shadow-subtle: inset 0 0 0 1px rgba(255, 255, 255, 0.06);
   --shadow-card: 0 4px 20px -2px rgba(0, 0, 0, 0.5), 0 2px 6px -1px rgba(0, 0, 0, 0.3);
   --shadow-glow-lime: 0 0 20px -3px rgba(228, 242, 34, 0.25);
   --shadow-glow-red: 0 0 24px -2px rgba(239, 68, 68, 0.3);
+  --shadow-glow-violet: 0 0 25px -4px rgba(139, 92, 246, 0.3);
 }
 
 body {
@@ -41,6 +57,37 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+
+/* TypeUI Subtle Grid */
+.typeui-grid-bg {
+  background-image: linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                    linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+.typeui-dot-grid {
+  background-image: radial-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+/* Editorial Typography */
+.font-editorial {
+  letter-spacing: -0.038em;
+  line-height: 0.95;
+}
+
+/* TypeUI Card */
+.typeui-card {
+  background-color: var(--typeui-surface-1);
+  border: 1px solid var(--typeui-border);
+  border-radius: 12px;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.typeui-card:hover {
+  border-color: var(--typeui-border-active);
+}
+
 
 /* Linear Card Surfaces */
 .linear-card {
