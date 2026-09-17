@@ -281,3 +281,4 @@ class ERA5DataProvider(DataProvider):
         import xarray as xr
         ds = xr.open_dataset(era5_file)
         return ds.to_dataframe().reset_index()
+

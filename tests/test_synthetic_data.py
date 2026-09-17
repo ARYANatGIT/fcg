@@ -169,3 +169,4 @@ def test_data_provider_contract():
     assert grid_spec["lat_max"] == 37.0
     assert grid_spec["lon_min"] == 68.0
     assert grid_spec["lon_max"] == 97.0
+

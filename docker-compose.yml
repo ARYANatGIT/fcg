@@ -1,6 +1,23 @@
 version: '3.8'
 
 services:
+  mongodb:
+    image: mongo:7.0
+    container_name: forecastguard-mongodb
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    environment:
+      - MONGO_INITDB_DATABASE=forecastguard
+    volumes:
+      - mongodb_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
   backend:
     build:
       context: .
@@ -13,9 +30,13 @@ services:
       - DATA_MODE=synthetic
       - ALLOWED_ORIGINS=http://localhost:3000
       - DATABASE_URL=sqlite:///./data/forecastguard.db
+      - MONGO_URI=mongodb://mongodb:27017/forecastguard
     volumes:
       - ./data:/app/data
       - ./models:/app/models
+    depends_on:
+      mongodb:
+        condition: service_healthy
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/health"]
@@ -37,3 +58,7 @@ services:
       backend:
         condition: service_healthy
     restart: unless-stopped
+
+volumes:
+  mongodb_data:
+    driver: local

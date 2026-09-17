@@ -47,7 +47,11 @@ export default function Navbar() {
           </a>
           <Link href="/cockpit" className="text-[#38bdf8] hover:text-white transition-colors flex items-center gap-1.5">
             <span className="w-1.5 h-1.5 rounded-full bg-[#38bdf8] animate-pulse" />
-            <span>Operational App</span>
+            <span>Cockpit</span>
+          </Link>
+          <Link href="/live-prediction" className="text-[#8b5cf6] hover:text-white transition-colors flex items-center gap-1.5">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#8b5cf6] animate-ping" />
+            <span>Live Stream</span>
           </Link>
         </nav>
 
