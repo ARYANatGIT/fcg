@@ -15,7 +15,7 @@ import {
   ResponsiveContainer, AreaChart, Area, BarChart, Bar,
   XAxis, YAxis, Tooltip, CartesianGrid, ReferenceLine, Cell, Legend
 } from "recharts";
-import { analyzeForecast, getHealth, getSpatialGrid } from "@/lib/api";
+import { analyzeForecast, getHealth, getSpatialGrid, generateLocalAnalysis } from "@/lib/api";
 import { AnalysisResponse, StationData } from "@/lib/types";
 
 // Precision Subcomponents
@@ -42,18 +42,32 @@ export interface RegionPreset {
 }
 
 const REGIONS: RegionPreset[] = [
-  { id: "demo", name: "Waranga", state: "Maharashtra (Central)", lat: 20.0, lon: 80.0, rainfall: 42.5, windSpeed: 6.8, temp: 24.5, pressure: 1008.0, humidity: 82.0, category: "convective" },
-  { id: "mumbai", name: "Mumbai", state: "Maharashtra (West Coast)", lat: 19.07, lon: 72.87, rainfall: 85.0, windSpeed: 14.5, temp: 27.0, pressure: 1004.0, humidity: 92.0, category: "convective" },
-  { id: "bhubaneswar", name: "Bhubaneswar", state: "Odisha (East Coast)", lat: 20.3, lon: 85.8, rainfall: 68.0, windSpeed: 12.5, temp: 26.0, pressure: 1005.0, humidity: 90.0, category: "cyclonic" },
-  { id: "kolkata", name: "Kolkata", state: "West Bengal (Delta)", lat: 22.57, lon: 88.36, rainfall: 58.0, windSpeed: 10.0, temp: 28.5, pressure: 1006.0, humidity: 88.0, category: "cyclonic" },
-  { id: "delhi", name: "New Delhi", state: "NCR (North)", lat: 28.6, lon: 77.2, rainfall: 8.5, windSpeed: 4.8, temp: 22.5, pressure: 1014.0, humidity: 55.0, category: "plains" },
-  { id: "amritsar", name: "Amritsar", state: "Punjab (North)", lat: 31.6, lon: 74.9, rainfall: 14.0, windSpeed: 5.0, temp: 18.0, pressure: 1015.0, humidity: 60.0, category: "plains" },
-  { id: "ahmedabad", name: "Ahmedabad", state: "Gujarat (West)", lat: 23.0, lon: 72.6, rainfall: 15.0, windSpeed: 6.2, temp: 28.0, pressure: 1012.0, humidity: 65.0, category: "plains" },
-  { id: "srinagar", name: "Srinagar", state: "Jammu & Kashmir", lat: 34.08, lon: 74.79, rainfall: 32.0, windSpeed: 8.0, temp: 8.5, pressure: 1016.0, humidity: 80.0, category: "himalayan" },
-  { id: "guwahati", name: "Guwahati", state: "Assam (Northeast)", lat: 26.2, lon: 91.7, rainfall: 52.0, windSpeed: 5.8, temp: 22.0, pressure: 1011.0, humidity: 85.0, category: "convective" },
-  { id: "trivandrum", name: "Thiruvananthapuram", state: "Kerala (South)", lat: 8.5, lon: 76.9, rainfall: 55.0, windSpeed: 8.2, temp: 27.5, pressure: 1009.0, humidity: 88.0, category: "convective" },
-  { id: "chennai", name: "Chennai", state: "Tamil Nadu (Coromandel)", lat: 13.08, lon: 80.27, rainfall: 25.0, windSpeed: 7.5, temp: 29.0, pressure: 1010.0, humidity: 78.0, category: "cyclonic" },
-  { id: "bengaluru", name: "Bengaluru", state: "Karnataka (Deccan)", lat: 12.97, lon: 77.59, rainfall: 18.0, windSpeed: 5.5, temp: 23.0, pressure: 1012.0, humidity: 70.0, category: "plains" }
+  { id: "delhi", name: "New Delhi", state: "NCR (National Capital)", lat: 28.6139, lon: 77.209, rainfall: 8.5, windSpeed: 4.8, temp: 22.5, pressure: 1014.0, humidity: 55.0, category: "plains" },
+  { id: "srinagar", name: "Srinagar", state: "Jammu & Kashmir (Western Disturbance)", lat: 34.0837, lon: 74.7973, rainfall: 32.0, windSpeed: 8.0, temp: 8.5, pressure: 1016.0, humidity: 80.0, category: "himalayan" },
+  { id: "amritsar", name: "Amritsar", state: "Punjab Plains (North)", lat: 31.634, lon: 74.8723, rainfall: 14.0, windSpeed: 5.0, temp: 18.0, pressure: 1015.0, humidity: 60.0, category: "plains" },
+  { id: "lucknow", name: "Lucknow", state: "Uttar Pradesh (Gangetic Plain)", lat: 26.8467, lon: 80.9462, rainfall: 12.0, windSpeed: 4.2, temp: 23.0, pressure: 1013.0, humidity: 62.0, category: "plains" },
+  { id: "jaipur", name: "Jaipur", state: "Rajasthan (Arid / Heatwave)", lat: 26.9124, lon: 75.7873, rainfall: 4.0, windSpeed: 5.5, temp: 27.0, pressure: 1011.0, humidity: 45.0, category: "plains" },
+  { id: "shimla", name: "Shimla", state: "Himachal Pradesh (Sub-Himalayan)", lat: 31.1048, lon: 77.1734, rainfall: 22.0, windSpeed: 6.5, temp: 12.0, pressure: 1017.0, humidity: 75.0, category: "himalayan" },
+  { id: "mumbai", name: "Mumbai", state: "Maharashtra (Konkan Coast)", lat: 18.922, lon: 72.8347, rainfall: 85.0, windSpeed: 14.5, temp: 27.0, pressure: 1004.0, humidity: 92.0, category: "convective" },
+  { id: "ahmedabad", name: "Ahmedabad", state: "Gujarat (West)", lat: 23.0225, lon: 72.5714, rainfall: 15.0, windSpeed: 6.2, temp: 28.0, pressure: 1012.0, humidity: 65.0, category: "plains" },
+  { id: "pune", name: "Pune", state: "Maharashtra (Western Ghats Rainshadow)", lat: 18.5204, lon: 73.8567, rainfall: 24.0, windSpeed: 7.2, temp: 25.0, pressure: 1009.0, humidity: 76.0, category: "convective" },
+  { id: "surat", name: "Surat", state: "Gujarat Coast", lat: 21.1702, lon: 72.8311, rainfall: 60.0, windSpeed: 11.0, temp: 28.0, pressure: 1007.0, humidity: 85.0, category: "cyclonic" },
+  { id: "nagpur", name: "Nagpur", state: "Vidarbha (Central)", lat: 21.1458, lon: 79.0882, rainfall: 38.0, windSpeed: 6.5, temp: 26.0, pressure: 1008.0, humidity: 78.0, category: "convective" },
+  { id: "demo", name: "Waranga", state: "Maharashtra (Agro-met Node)", lat: 20.0, lon: 80.0, rainfall: 42.5, windSpeed: 6.8, temp: 24.5, pressure: 1008.0, humidity: 82.0, category: "convective" },
+  { id: "bhopal", name: "Bhopal", state: "Madhya Pradesh (Plateau)", lat: 23.2599, lon: 77.4126, rainfall: 28.0, windSpeed: 5.8, temp: 24.0, pressure: 1010.0, humidity: 72.0, category: "plains" },
+  { id: "indore", name: "Indore", state: "Madhya Pradesh (Malwa)", lat: 22.7196, lon: 75.8577, rainfall: 26.0, windSpeed: 6.0, temp: 24.5, pressure: 1010.0, humidity: 70.0, category: "plains" },
+  { id: "raipur", name: "Raipur", state: "Chhattisgarh (Central-East)", lat: 21.2514, lon: 81.6296, rainfall: 35.0, windSpeed: 6.2, temp: 26.5, pressure: 1009.0, humidity: 80.0, category: "convective" },
+  { id: "bengaluru", name: "Bengaluru", state: "Karnataka (Deccan)", lat: 12.9716, lon: 77.5946, rainfall: 18.0, windSpeed: 5.5, temp: 23.0, pressure: 1012.0, humidity: 70.0, category: "plains" },
+  { id: "chennai", name: "Chennai", state: "Tamil Nadu (Coromandel Coast)", lat: 13.0827, lon: 80.2707, rainfall: 25.0, windSpeed: 7.5, temp: 29.0, pressure: 1010.0, humidity: 78.0, category: "cyclonic" },
+  { id: "hyderabad", name: "Hyderabad", state: "Telangana (Plateau)", lat: 17.385, lon: 78.4867, rainfall: 22.0, windSpeed: 6.4, temp: 26.0, pressure: 1010.0, humidity: 72.0, category: "plains" },
+  { id: "kochi", name: "Kochi", state: "Kerala (Malabar Coast / Monsoon Onset)", lat: 9.9312, lon: 76.2673, rainfall: 72.0, windSpeed: 9.5, temp: 28.0, pressure: 1008.0, humidity: 90.0, category: "convective" },
+  { id: "trivandrum", name: "Thiruvananthapuram", state: "Kerala (Monsoon Gateway)", lat: 8.5241, lon: 76.9366, rainfall: 55.0, windSpeed: 8.2, temp: 27.5, pressure: 1009.0, humidity: 88.0, category: "convective" },
+  { id: "visakhapatnam", name: "Visakhapatnam", state: "Andhra Pradesh (Cyclone Corridor)", lat: 17.6868, lon: 83.2185, rainfall: 64.0, windSpeed: 12.0, temp: 28.0, pressure: 1006.0, humidity: 86.0, category: "cyclonic" },
+  { id: "kolkata", name: "Kolkata", state: "West Bengal (Ganges Delta)", lat: 22.5726, lon: 88.3639, rainfall: 58.0, windSpeed: 10.0, temp: 28.5, pressure: 1006.0, humidity: 88.0, category: "cyclonic" },
+  { id: "bhubaneswar", name: "Bhubaneswar", state: "Odisha (Depression Track)", lat: 20.2961, lon: 85.8245, rainfall: 68.0, windSpeed: 12.5, temp: 26.0, pressure: 1005.0, humidity: 90.0, category: "cyclonic" },
+  { id: "patna", name: "Patna", state: "Bihar (Gangetic Plains)", lat: 25.5941, lon: 85.1376, rainfall: 20.0, windSpeed: 5.0, temp: 24.0, pressure: 1012.0, humidity: 74.0, category: "plains" },
+  { id: "guwahati", name: "Guwahati", state: "Assam (Brahmaputra Valley)", lat: 26.1445, lon: 91.7362, rainfall: 52.0, windSpeed: 5.8, temp: 22.0, pressure: 1011.0, humidity: 85.0, category: "convective" },
+  { id: "shillong", name: "Shillong", state: "Meghalaya (Plateau)", lat: 25.5788, lon: 91.8933, rainfall: 78.0, windSpeed: 6.0, temp: 16.0, pressure: 1014.0, humidity: 89.0, category: "himalayan" },
 ];
 
 type ActiveTab = "cockpit" | "sandbox" | "regimes" | "model" | "archive";
@@ -64,7 +78,18 @@ export default function Dashboard() {
   const [activeTab, setActiveTab] = useState<ActiveTab>("cockpit");
   const [apiHealth, setApiHealth] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [data, setData] = useState<AnalysisResponse | null>(null);
+  const [data, setData] = useState<AnalysisResponse | null>(() => 
+    generateLocalAnalysis({
+      lead_day: 5,
+      features: {
+        forecast_rainfall: REGIONS[0].rainfall,
+        forecast_wind_speed: REGIONS[0].windSpeed,
+        forecast_temperature: REGIONS[0].temp,
+        forecast_pressure: REGIONS[0].pressure,
+        forecast_humidity: REGIONS[0].humidity,
+      }
+    })
+  );
   const [selectedRegion, setSelectedRegion] = useState<RegionPreset>(REGIONS[0]);
   const [leadDay, setLeadDay] = useState<number>(5);
   const [stations, setStations] = useState<StationData[]>([]);
@@ -115,6 +140,31 @@ export default function Dashboard() {
     setLoading(true);
     setError(null);
     try {
+      let curTemp = region.temp;
+      let curPressure = region.pressure;
+      let curHumidity = region.humidity;
+      let curWind = region.windSpeed;
+      let curRain = region.rainfall;
+
+      try {
+        let liveRes = await fetch(`/api/latest_prediction?station=${encodeURIComponent(region.name)}`).catch(() => null);
+        if (!liveRes || !liveRes.ok) {
+          liveRes = await fetch(`http://localhost:8000/api/latest_prediction?station=${encodeURIComponent(region.name)}`).catch(() => null);
+        }
+        if (liveRes && liveRes.ok) {
+          const liveJson = await liveRes.json();
+          if (liveJson?.raw_data) {
+            curTemp = Number(liveJson.raw_data.temperature_2m ?? curTemp);
+            curPressure = Number(liveJson.raw_data.surface_pressure ?? curPressure);
+            curHumidity = Number(liveJson.raw_data.relative_humidity_2m ?? curHumidity);
+            curWind = Number(liveJson.raw_data.wind_speed_10m ?? curWind);
+            curRain = Number(liveJson.raw_data.precipitation ?? curRain);
+          }
+        }
+      } catch {
+        // Fallback cleanly to region presets
+      }
+
       const payload = {
         initialization_time: "2026-01-05 00:00:00",
         valid_time: `2026-01-${(5 + day).toString().padStart(2, "0")} 00:00:00`,
@@ -125,21 +175,21 @@ export default function Dashboard() {
           latitude: region.lat,
           longitude: region.lon,
           lead_day: day,
-          forecast_temperature: region.temp,
-          forecast_rainfall: region.rainfall,
-          forecast_wind_u: region.windSpeed * 0.707,
-          forecast_wind_v: region.windSpeed * 0.707,
-          forecast_pressure: region.pressure,
-          forecast_humidity: region.humidity,
-          forecast_wind_speed: region.windSpeed,
+          forecast_temperature: curTemp,
+          forecast_rainfall: curRain,
+          forecast_wind_u: curWind * 0.707,
+          forecast_wind_v: curWind * 0.707,
+          forecast_pressure: curPressure,
+          forecast_humidity: curHumidity,
+          forecast_wind_speed: curWind,
           init_month: 1,
           init_day_of_year: 5,
           init_day_sin: 0.086,
           init_day_cos: 0.996,
           lead_day_squared: day * day,
           forecast_wind_direction: 45.0,
-          forecast_temp_humidity_interact: region.temp * region.humidity,
-          forecast_wind_pressure_interact: region.windSpeed * region.pressure,
+          forecast_temp_humidity_interact: curTemp * curHumidity,
+          forecast_wind_pressure_interact: curWind * curPressure,
           historical_error_lag1: 1.15
         }
       };
@@ -642,37 +692,37 @@ export default function Dashboard() {
                       </span>
                     </div>
 
-                    {loading ? (
-                      <div className="py-14 flex flex-col items-center justify-center text-[#94a3b8] gap-3">
-                        <RefreshCw className="animate-spin text-[#e4f222]" size={28} />
-                        <span className="text-[14px] font-linear-mono font-medium">INFERRING CALIBRATED PROBABILITY...</span>
-                      </div>
-                    ) : (
-                      <div className="flex flex-col items-center justify-center py-2">
-                        {/* Precision Circular Gauge */}
-                        <CircularGauge
-                          value={bustProbabilityValue}
-                          label="Calibrated Bust Risk"
-                          sublabel={`Model Confidence: ${(confidenceValue * 100).toFixed(1)}%`}
-                          size={220}
-                          strokeWidth={15}
-                        />
-
-                        {/* Meteorological Domain Explanation */}
-                        <div className="mt-3 text-center px-2">
-                          <p className="text-[14px] text-[#ffffff] font-medium leading-relaxed">
-                            {isHighRisk
-                              ? "Severe forecast failure likely. Strong convective precipitation under-catch and multi-cycle model divergence detected."
-                              : isModRisk
-                              ? "Moderate forecast sensitivity. Boundary layer moisture fluctuations warrant ensemble cluster verification."
-                              : "High numerical model agreement. Synoptic regime remains dynamically stable across consecutive cycles."}
-                          </p>
-                          <span className="text-[12px] font-linear-mono text-[#94a3b8] block mt-1">
-                            Calibrated LightGBM GBDT + Isotonic Regression Engine
-                          </span>
+                    <div className="relative flex flex-col items-center justify-center py-2">
+                      {loading && (
+                        <div className="absolute top-0 right-0 flex items-center gap-1.5 text-[11px] font-linear-mono text-[#e4f222] bg-[#151820] px-2.5 py-1 rounded-[6px] border border-[#e4f222]/30 shadow-md z-10">
+                          <RefreshCw className="animate-spin text-[#e4f222]" size={12} />
+                          <span>CALIBRATING...</span>
                         </div>
+                      )}
+
+                      {/* Precision Circular Gauge */}
+                      <CircularGauge
+                        value={bustProbabilityValue}
+                        label="Calibrated Bust Risk"
+                        sublabel={`Model Confidence: ${(confidenceValue * 100).toFixed(1)}%`}
+                        size={220}
+                        strokeWidth={15}
+                      />
+
+                      {/* Meteorological Domain Explanation */}
+                      <div className="mt-3 text-center px-2">
+                        <p className="text-[14px] text-[#ffffff] font-medium leading-relaxed">
+                          {isHighRisk
+                            ? "Severe forecast failure likely. Strong convective precipitation under-catch and multi-cycle model divergence detected."
+                            : isModRisk
+                            ? "Moderate forecast sensitivity. Boundary layer moisture fluctuations warrant ensemble cluster verification."
+                            : "High numerical model agreement. Synoptic regime remains dynamically stable across consecutive cycles."}
+                        </p>
+                        <span className="text-[12px] font-linear-mono text-[#94a3b8] block mt-1">
+                          Primary Trigger: High atmospheric moisture & convective boundary layer turbulence
+                        </span>
                       </div>
-                    )}
+                    </div>
                   </div>
 
                   {/* Prominent Atmospheric Telemetry Strip (4 Metrics) */}

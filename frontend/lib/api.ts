@@ -15,26 +15,40 @@ export async function getHealth(): Promise<boolean> {
   }
 }
 
-// Stations database for spatial fallback
-const DEFAULT_STATIONS = [
-  { name: "Waranga", region: "Maharashtra (Central)", latitude: 20.0, longitude: 80.0, baseRisk: 0.68 },
-  { name: "Ahmedabad", region: "Gujarat (West)", latitude: 23.0, longitude: 72.6, baseRisk: 0.28 },
-  { name: "Bhubaneswar", region: "Odisha (East)", latitude: 20.3, longitude: 85.8, baseRisk: 0.74 },
-  { name: "Thiruvananthapuram", region: "Kerala (South)", latitude: 8.5, longitude: 76.9, baseRisk: 0.62 },
-  { name: "Amritsar", region: "Punjab (North)", latitude: 31.6, longitude: 74.9, baseRisk: 0.38 },
-  { name: "Guwahati", region: "Assam (Northeast)", latitude: 26.2, longitude: 91.7, baseRisk: 0.58 },
-  { name: "New Delhi", region: "NCR (North)", latitude: 28.6, longitude: 77.2, baseRisk: 0.24 },
-  { name: "Mumbai", region: "Maharashtra (West Coast)", latitude: 19.07, longitude: 72.87, baseRisk: 0.81 },
-  { name: "Kolkata", region: "West Bengal (Delta)", latitude: 22.57, longitude: 88.36, baseRisk: 0.71 },
-  { name: "Chennai", region: "Tamil Nadu (Coromandel)", latitude: 13.08, longitude: 80.27, baseRisk: 0.44 },
-  { name: "Srinagar", region: "Jammu & Kashmir (Himalayas)", latitude: 34.08, longitude: 74.79, baseRisk: 0.64 },
-  { name: "Bengaluru", region: "Karnataka (Deccan)", latitude: 12.97, longitude: 77.59, baseRisk: 0.32 },
+// Stations database for spatial fallback across India's 26 synoptic corridors
+export const DEFAULT_STATIONS = [
+  { name: "New Delhi", region: "North (National Capital)", latitude: 28.6139, longitude: 77.209, baseRisk: 0.28 },
+  { name: "Srinagar", region: "North (Western Disturbance)", latitude: 34.0837, longitude: 74.7973, baseRisk: 0.64 },
+  { name: "Amritsar", region: "North (Punjab Plains)", latitude: 31.634, longitude: 74.8723, baseRisk: 0.38 },
+  { name: "Lucknow", region: "North (Gangetic Plain)", latitude: 26.8467, longitude: 80.9462, baseRisk: 0.35 },
+  { name: "Jaipur", region: "Northwest (Arid / Heatwave)", latitude: 26.9124, longitude: 75.7873, baseRisk: 0.22 },
+  { name: "Shimla", region: "North (Sub-Himalayan)", latitude: 31.1048, longitude: 77.1734, baseRisk: 0.58 },
+  { name: "Mumbai", region: "West (Konkan Coast)", latitude: 18.922, longitude: 72.8347, baseRisk: 0.81 },
+  { name: "Ahmedabad", region: "West (Gujarat)", latitude: 23.0225, longitude: 72.5714, baseRisk: 0.32 },
+  { name: "Pune", region: "West (Western Ghats Rainshadow)", latitude: 18.5204, longitude: 73.8567, baseRisk: 0.46 },
+  { name: "Surat", region: "West (Gujarat Coast)", latitude: 21.1702, longitude: 72.8311, baseRisk: 0.72 },
+  { name: "Nagpur", region: "Central-West (Vidarbha)", latitude: 21.1458, longitude: 79.0882, baseRisk: 0.62 },
+  { name: "Waranga", region: "Central (Agro-met Node)", latitude: 20.0, longitude: 80.0, baseRisk: 0.68 },
+  { name: "Bhopal", region: "Central (Madhya Pradesh)", latitude: 23.2599, longitude: 77.4126, baseRisk: 0.42 },
+  { name: "Indore", region: "Central (Malwa Plateau)", latitude: 22.7196, longitude: 75.8577, baseRisk: 0.39 },
+  { name: "Raipur", region: "Central-East (Chhattisgarh)", latitude: 21.2514, longitude: 81.6296, baseRisk: 0.56 },
+  { name: "Bengaluru", region: "South (Deccan Plateau)", latitude: 12.9716, longitude: 77.5946, baseRisk: 0.32 },
+  { name: "Chennai", region: "South (Coromandel Coast)", latitude: 13.0827, longitude: 80.2707, baseRisk: 0.52 },
+  { name: "Hyderabad", region: "South (Telangana Plateau)", latitude: 17.385, longitude: 78.4867, baseRisk: 0.41 },
+  { name: "Kochi", region: "South (Malabar Coast / Monsoon Onset)", latitude: 9.9312, longitude: 76.2673, baseRisk: 0.78 },
+  { name: "Thiruvananthapuram", region: "South (Monsoon Gateway)", latitude: 8.5241, longitude: 76.9366, baseRisk: 0.65 },
+  { name: "Visakhapatnam", region: "East Coast (Cyclone Corridor)", latitude: 17.6868, longitude: 83.2185, baseRisk: 0.76 },
+  { name: "Kolkata", region: "East (Ganges Delta)", latitude: 22.5726, longitude: 88.3639, baseRisk: 0.71 },
+  { name: "Bhubaneswar", region: "East (Depression Track)", latitude: 20.2961, longitude: 85.8245, baseRisk: 0.74 },
+  { name: "Patna", region: "East (Gangetic Plains)", latitude: 25.5941, longitude: 85.1376, baseRisk: 0.44 },
+  { name: "Guwahati", region: "Northeast (Brahmaputra Valley)", latitude: 26.1445, longitude: 91.7362, baseRisk: 0.58 },
+  { name: "Shillong", region: "Northeast (Meghalaya Plateau)", latitude: 25.5788, longitude: 91.8933, baseRisk: 0.82 },
 ];
 
 /**
  * High-fidelity meteorological simulation fallback when backend is offline
  */
-function generateLocalAnalysis(payload: any): AnalysisResponse {
+export function generateLocalAnalysis(payload: any): AnalysisResponse {
   const f = payload.features || {};
   const leadDay = payload.lead_day || 5;
   const rain = f.forecast_rainfall || 20;

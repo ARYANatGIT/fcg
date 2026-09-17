@@ -1,6 +1,7 @@
 """
 ForecastGuard AI — Database Client & Connection Manager
-Connects to MongoDB using PyMongo with automatic fallback to persistent local storage.
+Supports any MongoDB deployment (local, Docker, or MongoDB Atlas cloud URI)
+via PyMongo with automatic fallback to persistent disk-backed JSON collections.
 """
 
 import os
@@ -14,20 +15,25 @@ from pymongo.database import Database
 
 logger = logging.getLogger("forecastguard.db")
 
+# Read MongoDB URI from environment.
+# Accepts local ('mongodb://localhost:27017'), Docker ('mongodb://mongodb:27017'),
+# or cloud Atlas ('mongodb+srv://username:password@cluster.mongodb.net/forecastguard')
 MONGO_URI = os.getenv("MONGO_URI", "mongodb://localhost:27017")
 DB_NAME = os.getenv("MONGO_DB_NAME", "forecastguard")
-LOCAL_STORE_PATH = Path(os.getenv("LOCAL_MONGO_STORE", "data/real_time_data.json"))
+DATA_DIR = Path(os.getenv("DATA_STORE_DIR", "data/real_time"))
+DATA_DIR.mkdir(parents=True, exist_ok=True)
 
 
 class PersistentFileCollection:
     """
-    Fallback implementation of PyMongo Collection interface for environments
-    where a live MongoDB daemon is not currently active.
-    Persists documents to disk as JSON for cross-process access.
+    Drop-in implementation of the PyMongo Collection interface.
+    Persists documents to disk as JSON for cross-process communication
+    when a live MongoDB instance is not connected.
     """
 
-    def __init__(self, file_path: Path):
-        self.file_path = file_path
+    def __init__(self, collection_name: str, base_dir: Path = DATA_DIR):
+        self.collection_name = collection_name
+        self.file_path = base_dir / f"{collection_name}.json"
         self.file_path.parent.mkdir(parents=True, exist_ok=True)
         if not self.file_path.exists():
             self._write([])
@@ -39,7 +45,7 @@ class PersistentFileCollection:
             with open(self.file_path, "r", encoding="utf-8") as f:
                 return json.load(f)
         except Exception as e:
-            logger.error(f"Error reading local document store {self.file_path}: {e}")
+            logger.error(f"Error reading JSON store for collection '{self.collection_name}': {e}")
             return []
 
     def _write(self, docs: List[Dict[str, Any]]) -> None:
@@ -47,7 +53,7 @@ class PersistentFileCollection:
             with open(self.file_path, "w", encoding="utf-8") as f:
                 json.dump(docs, f, indent=2, default=str)
         except Exception as e:
-            logger.error(f"Error writing to local document store {self.file_path}: {e}")
+            logger.error(f"Error writing to JSON store for collection '{self.collection_name}': {e}")
 
     def insert_one(self, doc: Dict[str, Any]):
         doc_copy = dict(doc)
@@ -57,7 +63,7 @@ class PersistentFileCollection:
         docs = self._read()
         docs.append(doc_copy)
         self._write(docs)
-        
+
         class InsertResult:
             inserted_id = doc_copy["_id"]
         return InsertResult()
@@ -73,31 +79,42 @@ class PersistentFileCollection:
             ids.append(c["_id"])
             docs.append(c)
         self._write(docs)
-        
+
         class InsertManyResult:
             inserted_ids = ids
         return InsertManyResult()
 
-    def find(self, filter: Optional[Dict[str, Any]] = None, sort: Optional[List[tuple]] = None, limit: Optional[int] = None) -> List[Dict[str, Any]]:
+    def find(
+        self,
+        filter: Optional[Dict[str, Any]] = None,
+        sort: Optional[List[tuple]] = None,
+        limit: Optional[int] = None,
+    ) -> List[Dict[str, Any]]:
         docs = self._read()
-        # Basic filtering if provided
         filtered = docs
         if filter:
             for k, v in filter.items():
                 filtered = [d for d in filtered if d.get(k) == v]
-        
-        # Sorting
+
         if sort:
             for field, order in reversed(sort):
-                reverse = (order == pymongo.DESCENDING or order == -1)
-                filtered = sorted(filtered, key=lambda x: x.get(field) or 0, reverse=reverse)
+                reverse = order in (pymongo.DESCENDING, -1)
+                filtered = sorted(
+                    filtered,
+                    key=lambda x: (x.get(field) is not None, x.get(field) or 0),
+                    reverse=reverse,
+                )
 
         if limit is not None and limit > 0:
             filtered = filtered[:limit]
 
         return filtered
 
-    def find_one(self, filter: Optional[Dict[str, Any]] = None, sort: Optional[List[tuple]] = None) -> Optional[Dict[str, Any]]:
+    def find_one(
+        self,
+        filter: Optional[Dict[str, Any]] = None,
+        sort: Optional[List[tuple]] = None,
+    ) -> Optional[Dict[str, Any]]:
         results = self.find(filter=filter, sort=sort, limit=1)
         return results[0] if results else None
 
@@ -116,13 +133,14 @@ class PersistentFileCollection:
 
 class DualModeDatabase:
     """Wraps PyMongo Database or falls back to PersistentFileCollection."""
+
     def __init__(self, raw_db: Optional[Database]):
         self.raw_db = raw_db
 
     def get_collection(self, name: str):
         if self.raw_db is not None:
             return self.raw_db[name]
-        return PersistentFileCollection(LOCAL_STORE_PATH)
+        return PersistentFileCollection(name)
 
     def __getitem__(self, name: str):
         return self.get_collection(name)
@@ -131,20 +149,39 @@ class DualModeDatabase:
 def get_db() -> DualModeDatabase:
     """
     Returns the MongoDB database instance.
-    Attempts live PyMongo connection, seamlessly falling back to file persistence if MongoDB is offline.
+    Uses MONGO_URI environment variable (e.g. mongodb://localhost:27017 or Atlas cloud URI).
+    If connection cannot be established, transparently falls back to persistent JSON storage.
     """
     try:
         client = pymongo.MongoClient(MONGO_URI, serverSelectionTimeoutMS=1500)
-        # Probe connection
         client.admin.command("ping")
         logger.info(f"Connected to live MongoDB at {MONGO_URI}")
         return DualModeDatabase(client[DB_NAME])
     except Exception as e:
-        logger.info(f"Live MongoDB not reachable ({e}). Using persistent disk-backed collection at {LOCAL_STORE_PATH}")
+        logger.info(f"Live MongoDB not reachable on {MONGO_URI} ({e}). Using persistent disk-backed collection in {DATA_DIR}")
         return DualModeDatabase(None)
 
 
 def get_real_time_collection():
-    """Convenience helper to retrieve the 'real_time_data' collection."""
-    db = get_db()
-    return db["real_time_data"]
+    """Convenience helper for 'real_time_data' collection."""
+    return get_db()["real_time_data"]
+
+
+def get_air_quality_collection():
+    """Convenience helper for 'air_quality_data' collection."""
+    return get_db()["air_quality_data"]
+
+
+def get_ensemble_collection():
+    """Convenience helper for 'ensemble_data' collection."""
+    return get_db()["ensemble_data"]
+
+
+def get_marine_flood_collection():
+    """Convenience helper for 'marine_flood_data' collection."""
+    return get_db()["marine_flood_data"]
+
+
+def get_evaluations_collection():
+    """Convenience helper for 'model_evaluations' collection."""
+    return get_db()["model_evaluations"]

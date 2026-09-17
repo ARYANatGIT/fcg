@@ -44,7 +44,7 @@ def test_analyze_endpoint_success():
     assert data["status"] == "success"
     assert "prediction_and_explanation" in data["data"]
     assert "analogs" in data["data"]
-    assert data["metadata"]["data_status"] == "synthetic"
+    assert data["metadata"]["data_status"] in ["synthetic", "real_time"]
 
 def test_leakage_protection():
     payload = get_valid_payload()
