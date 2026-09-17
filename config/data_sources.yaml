@@ -1,0 +1,15 @@
+data_mode: synthetic
+forecast:
+  cycles:
+  - '00'
+  - '12'
+  max_lead_days: 10
+  source: NOAA_GFS_AWS
+region:
+  lat_max: 38.0
+  lat_min: 5.0
+  lon_max: 100.0
+  lon_min: 65.0
+  name: India_Extended
+verification:
+  source: ERA5

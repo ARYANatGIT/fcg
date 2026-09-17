@@ -1,0 +1,2 @@
+source,dataset,file_name,download_time,forecast_initialization,valid_time,spatial_resolution,variables,checksum,license,source_url,processing_version
+NOAA,GFS_Historical,none,N/A,N/A,N/A,0.25,tmp,N/A,Open,aws_s3,v1

@@ -1,0 +1,23 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #0f172a; /* Slate 900 */
+  --foreground: #f8fafc; /* Slate 50 */
+  --panel: #1e293b; /* Slate 800 */
+  --panel-border: #334155; /* Slate 700 */
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+}
+
+.dashboard-panel {
+  background-color: var(--panel);
+  border: 1px solid var(--panel-border);
+  border-radius: 0.5rem;
+  padding: 1rem;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+}

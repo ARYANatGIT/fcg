@@ -1,0 +1,71 @@
+{
+    "model_type": "LightGBM binary classification",
+    "features": [
+        "latitude",
+        "longitude",
+        "lead_day",
+        "forecast_temperature",
+        "forecast_rainfall",
+        "forecast_wind_u",
+        "forecast_wind_v",
+        "forecast_pressure",
+        "forecast_humidity",
+        "forecast_wind_speed",
+        "init_month",
+        "init_day_of_year",
+        "init_day_sin",
+        "init_day_cos",
+        "lead_day_squared",
+        "forecast_wind_direction",
+        "forecast_temp_humidity_interact",
+        "forecast_wind_pressure_interact",
+        "historical_error_lag1"
+    ],
+    "hyperparameters": {
+        "boosting_type": "gbdt",
+        "class_weight": null,
+        "colsample_bytree": 1.0,
+        "importance_type": "split",
+        "learning_rate": 0.05,
+        "max_depth": 7,
+        "min_child_samples": 20,
+        "min_child_weight": 0.001,
+        "min_split_gain": 0.0,
+        "n_estimators": 200,
+        "n_jobs": null,
+        "num_leaves": 31,
+        "objective": null,
+        "random_state": 42,
+        "reg_alpha": 0.0,
+        "reg_lambda": 0.0,
+        "subsample": 1.0,
+        "subsample_for_bin": 200000,
+        "subsample_freq": 0,
+        "scale_pos_weight": 9.104790419161677
+    },
+    "class_distribution": {
+        "train_pos_pct": 9.9,
+        "val_pos_pct": 10.18
+    },
+    "validation_metrics": {
+        "roc_auc": 0.7516926529086514,
+        "pr_auc": 0.3390335831131936,
+        "brier_score": 0.16425494305626118,
+        "log_loss": 0.5021823674169502,
+        "accuracy": 0.7718888888888888,
+        "precision": 0.23765574526995847,
+        "recall": 0.5622270742358079,
+        "f1": 0.3340901719104768
+    },
+    "test_metrics": {
+        "roc_auc": 0.7393727929182502,
+        "pr_auc": 0.3248370369495204,
+        "brier_score": 0.16747074330847964,
+        "log_loss": 0.5107869058832112,
+        "accuracy": 0.7671111111111111,
+        "precision": 0.22541743970315398,
+        "recall": 0.5328947368421053,
+        "f1": 0.31681877444589307
+    },
+    "warning": "Synthetic Demonstration Model \u2014 Not Validated for Operational Weather Forecasting"
+}

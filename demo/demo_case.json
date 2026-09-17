@@ -1,0 +1,9 @@
+{
+  "location": "Waranga, Maharashtra, India",
+  "latitude": 20.0,
+  "longitude": 80.0,
+  "initialization_time": "2026-01-05 00:00:00",
+  "lead_day": 5,
+  "dataset": "Synthetic Prototype",
+  "model_version": "1.0"
+}

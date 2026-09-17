@@ -1,0 +1,24 @@
+precipitation:
+  conversion: kg_m2_s_to_mm
+  internal_name: precipitation
+  source_name: prate
+  units: mm
+  vertical_level: surface
+temperature:
+  conversion: K_to_C
+  internal_name: temperature
+  source_name: tmp2m
+  units: C
+  vertical_level: 2m
+u_wind:
+  conversion: none
+  internal_name: u_wind
+  source_name: ugrd10m
+  units: m/s
+  vertical_level: 10m
+v_wind:
+  conversion: none
+  internal_name: v_wind
+  source_name: vgrd10m
+  units: m/s
+  vertical_level: 10m

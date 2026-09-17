@@ -1,0 +1,18 @@
+{
+    "calibration_method": "Isotonic Calibrated",
+    "probability_bins": 10,
+    "validation_metrics": {
+        "Model": "Isotonic Calibrated",
+        "Brier": 0.07921101917286015,
+        "Log Loss": 0.2801193556465824,
+        "ECE": 1.1965737043182243e-18
+    },
+    "test_metrics": {
+        "Brier": 0.08090073557652631,
+        "Log Loss": 0.2988773917948344,
+        "ECE": 0.007096003253032461,
+        "ROC_AUC": 0.7379847581211932,
+        "PR_AUC": 0.30714445986110256
+    },
+    "warning": "Synthetic Demonstration Model \u2014 Not Validated for Operational Weather Forecasting"
+}

@@ -1,0 +1,21 @@
+{
+    "forecast_temperature": {"display_name": "Forecast Temperature", "description": "Predicted temperature", "category": "Forecast", "unit": "°C", "reason_code": "TEMPERATURE_SIGNAL"},
+    "forecast_rainfall": {"display_name": "Forecast Rainfall", "description": "Predicted precipitation", "category": "Forecast", "unit": "mm", "reason_code": "RAINFALL_SIGNAL"},
+    "forecast_wind_speed": {"display_name": "Forecast Wind Speed", "description": "Predicted wind magnitude", "category": "Forecast", "unit": "m/s", "reason_code": "WIND_SPEED_SIGNAL"},
+    "forecast_pressure": {"display_name": "Forecast Pressure", "description": "Predicted surface pressure", "category": "Forecast", "unit": "hPa", "reason_code": "PRESSURE_SIGNAL"},
+    "forecast_humidity": {"display_name": "Forecast Humidity", "description": "Predicted relative humidity", "category": "Forecast", "unit": "%", "reason_code": "HUMIDITY_SIGNAL"},
+    "lead_day": {"display_name": "Forecast Lead Time", "description": "Days until valid time", "category": "Lead Time", "unit": "days", "reason_code": "LEAD_TIME_RISK"},
+    "lead_day_squared": {"display_name": "Lead Time (Squared)", "description": "Non-linear penalty for far-out forecasts", "category": "Lead Time", "unit": "", "reason_code": "EXTREME_LEAD_TIME"},
+    "historical_error_lag1": {"display_name": "Historical Error Lag", "description": "Forecast error from previous cycle", "category": "Historical", "unit": "", "reason_code": "HISTORICAL_RISK"},
+    "forecast_temp_humidity_interact": {"display_name": "Temp-Humidity Interaction", "description": "Combined heat/moisture signal", "category": "Derived Forecast", "unit": "", "reason_code": "INSTABILITY_SIGNAL"},
+    "forecast_wind_pressure_interact": {"display_name": "Wind-Pressure Interaction", "description": "Gradient/cyclonic signal", "category": "Derived Forecast", "unit": "", "reason_code": "STORM_DYNAMICS_SIGNAL"},
+    "latitude": {"display_name": "Latitude", "description": "Grid latitude", "category": "Spatial", "unit": "°N", "reason_code": "REGIONAL_BIAS"},
+    "longitude": {"display_name": "Longitude", "description": "Grid longitude", "category": "Spatial", "unit": "°E", "reason_code": "REGIONAL_BIAS"},
+    "init_month": {"display_name": "Initialization Month", "description": "Time of year", "category": "Temporal", "unit": "", "reason_code": "SEASONAL_SIGNAL"},
+    "init_day_of_year": {"display_name": "Day of Year", "description": "Time of year", "category": "Temporal", "unit": "", "reason_code": "SEASONAL_SIGNAL"},
+    "init_day_sin": {"display_name": "Cyclic Day (Sin)", "description": "Time of year", "category": "Temporal", "unit": "", "reason_code": "SEASONAL_SIGNAL"},
+    "init_day_cos": {"display_name": "Cyclic Day (Cos)", "description": "Time of year", "category": "Temporal", "unit": "", "reason_code": "SEASONAL_SIGNAL"},
+    "forecast_wind_u": {"display_name": "Wind U-Vector", "description": "Zonal wind component", "category": "Forecast", "unit": "m/s", "reason_code": "WIND_DIRECTION_SIGNAL"},
+    "forecast_wind_v": {"display_name": "Wind V-Vector", "description": "Meridional wind component", "category": "Forecast", "unit": "m/s", "reason_code": "WIND_DIRECTION_SIGNAL"},
+    "forecast_wind_direction": {"display_name": "Wind Direction", "description": "Angle of wind", "category": "Derived Forecast", "unit": "°", "reason_code": "WIND_DIRECTION_SIGNAL"}
+}

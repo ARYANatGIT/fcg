@@ -1,0 +1,21 @@
+# Environments
+.env
+.env.*.local
+.venv/
+venv/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Node
+node_modules/
+.next/
+
+# Data & Models (Keep out of git)
+data/raw/
+data/interim/
+data/processed/*.parquet
+data/processed/*.csv
+models/*.pkl

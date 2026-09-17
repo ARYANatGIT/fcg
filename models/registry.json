@@ -1,0 +1,12 @@
+{
+  "active_model": "lightgbm_v1.0",
+  "models": [
+    {
+      "version": "1.0",
+      "model_type": "LightGBM + Isotonic Calibration",
+      "training_period": "2024-01-01 to 2025-12-31",
+      "data_mode": "synthetic",
+      "features_count": 25
+    }
+  ]
+}

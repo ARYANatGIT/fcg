@@ -1,0 +1,44 @@
+{
+    "split_proportions": {
+        "train": 0.7,
+        "val": 0.15,
+        "test": 0.15
+    },
+    "random_seed": 42,
+    "split_dates": {
+        "train_end": "2026-01-03 00:00:00",
+        "val_end": "2026-01-04 00:00:00"
+    },
+    "row_counts": {
+        "train": 27000,
+        "val": 9000,
+        "test": 9000
+    },
+    "features": [
+        "latitude",
+        "longitude",
+        "lead_day",
+        "forecast_temperature",
+        "forecast_rainfall",
+        "forecast_wind_u",
+        "forecast_wind_v",
+        "forecast_pressure",
+        "forecast_humidity",
+        "forecast_wind_speed",
+        "init_month",
+        "init_day_of_year",
+        "init_day_sin",
+        "init_day_cos",
+        "lead_day_squared",
+        "forecast_wind_direction",
+        "forecast_temp_humidity_interact",
+        "forecast_wind_pressure_interact",
+        "historical_error_lag1"
+    ],
+    "target": "bust",
+    "class_balance": {
+        "train_bust_pct": 9.9,
+        "val_bust_pct": 10.18,
+        "test_bust_pct": 10.13
+    }
+}

@@ -1,0 +1,7 @@
+{
+  "status": "Pipeline architected. Awaiting bulk download execution.",
+  "number_of_forecast_records_downloaded": 0,
+  "number_of_verification_records": 0,
+  "matched_records": 0,
+  "data_mode": "synthetic"
+}
