@@ -27,3 +27,4 @@
 1. **Model Retraining Cycle:** LightGBM models should be retrained seasonally (pre-monsoon, monsoon, post-monsoon, winter) to capture seasonal regime shifts.
 2. **Verification Latency:** Incorporate IMD automatic weather station (AWS) observations alongside ERA5/satellite reanalysis once quality-controlled data becomes available (typically $T+24\text{h}$ to $T+48\text{h}$).
 3. **Threshold Tuning:** The 90th percentile threshold for bust labeling should be reviewed by MoES/NCMRWF operational meteorologists for specific severe weather phenomena (tropical cyclones, western disturbances, active/break monsoon spells).
+

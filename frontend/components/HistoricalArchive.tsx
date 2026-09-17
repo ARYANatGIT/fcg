@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Archive, Search, Filter, AlertTriangle, CheckCircle, ExternalLink, Calendar } from "lucide-react";
+import { Archive, Search, Filter, AlertTriangle, CheckCircle, ExternalLink, Calendar, MapPin, Gauge } from "lucide-react";
 
 const HISTORICAL_CASES = [
   {
@@ -20,7 +20,7 @@ const HISTORICAL_CASES = [
     success: true,
     nwpModel: "NCUM Global (12km)",
     synopticSummary:
-      "A mesoscale convective vortex formed over the Konkan coast. Global NWP under-represented the localized convergence line, leading to a massive 200mm+ rainfall miss at Day 5.",
+      "A mesoscale convective vortex formed along the Konkan coast. Global NWP under-represented localized low-level convergence, leading to a massive 200mm+ rainfall miss at Day 5.",
   },
   {
     id: "case-02",
@@ -38,7 +38,7 @@ const HISTORICAL_CASES = [
     success: true,
     nwpModel: "Global GFS 0.25°",
     synopticSummary:
-      "NWP forecast cycles diverged by 280km between 00Z and 12Z runs. Landfall was accelerated by 14 hours compared to Day 6 guidance.",
+      "Consecutive forecast cycles diverged by 280km between 00Z and 12Z runs. Cyclone landfall was accelerated by 14 hours compared to Day 6 deterministic guidance.",
   },
   {
     id: "case-03",
@@ -118,108 +118,107 @@ export default function HistoricalArchive() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="border-b border-[#23252a] pb-4">
-        <h2 className="text-[18px] font-[510] text-[#ffffff] flex items-center gap-2 tracking-[-0.012em]">
-          <Archive size={18} className="text-[#e4f222]" /> Historical NWP Forecast Bust Archive &amp; Case Studies
+      <div className="border-b border-[#232732] pb-5">
+        <h2 className="text-[20px] font-[600] text-[#ffffff] flex items-center gap-2.5 tracking-[-0.025em]">
+          <Archive size={22} className="text-[#e4f222]" /> Severe Historical NWP Forecast Bust Archive
         </h2>
-        <p className="text-[13px] text-[#8a8f98] mt-1">
-          Documented severe forecast failures over India. Demonstrating how ForecastGuard AI successfully flags uncertainty ahead of time.
+        <p className="text-[14px] text-[#94a3b8] mt-1.5 leading-relaxed">
+          Catalog of validated historical medium-range forecast failure events across India, documenting synoptic root causes, verification metrics, and ForecastGuard AI early-warning detection.
         </p>
       </div>
 
-      {/* Filter / Search Bar */}
-      <div className="linear-card flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-4 py-3">
+      {/* Search & Filter Bar */}
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
+        {/* Search */}
         <div className="relative flex-1 max-w-md">
-          <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#8a8f98]" />
+          <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#94a3b8]" />
           <input
             type="text"
-            placeholder="Search by city, event, or state..."
+            placeholder="Search by station, state, or meteorological event..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full bg-[#161718] border border-[#23252a] rounded-[6px] pl-10 pr-4 py-2 text-[13px] text-[#ffffff] placeholder-[#62666d] focus:outline-none focus:border-[#e4f222]/50 font-sans"
+            className="w-full h-11 bg-[#151820] border border-[#232732] rounded-[8px] pl-10 pr-4 text-[14px] text-[#ffffff] placeholder-[#64748b] focus:outline-none focus:border-[#e4f222]"
           />
         </div>
 
-        <div className="flex items-center gap-2 text-[13px] font-linear-mono">
-          <span className="text-[#8a8f98]">Lead Range:</span>
-          <select
-            value={leadFilter}
-            onChange={(e) => setLeadFilter(e.target.value)}
-            className="bg-[#161718] border border-[#23252a] text-[#ffffff] rounded-[6px] px-3 py-1.5 focus:outline-none text-[13px]"
-          >
-            <option value="all">All Lead Days (1–10)</option>
-            <option value="d1-3">Short Range (D1–D3)</option>
-            <option value="d4-6">Medium Range (D4–D6)</option>
-            <option value="d7-10">Extended Range (D7–D10)</option>
-          </select>
+        {/* Lead Filter Pills */}
+        <div className="flex items-center gap-1.5 bg-[#151820] p-1.5 rounded-[8px] border border-[#232732]">
+          <span className="text-[12px] font-linear-mono text-[#94a3b8] px-2 uppercase font-semibold">Lead Time:</span>
+          {[
+            { id: "all", label: "All Days" },
+            { id: "d1-3", label: "D1–D3" },
+            { id: "d4-6", label: "D4–D6" },
+            { id: "d7-10", label: "D7–D10" },
+          ].map((f) => (
+            <button
+              key={f.id}
+              onClick={() => setLeadFilter(f.id)}
+              className={`h-8 px-3 text-[13px] font-linear-mono rounded-[6px] transition cursor-pointer ${
+                leadFilter === f.id
+                  ? "bg-[#232732] text-[#ffffff] font-bold"
+                  : "text-[#94a3b8] hover:text-[#ffffff]"
+              }`}
+            >
+              {f.label}
+            </button>
+          ))}
         </div>
       </div>
 
-      {/* Case Studies Grid */}
+      {/* Case Cards Grid */}
       <div className="space-y-4">
         {filteredCases.map((c) => (
           <div
             key={c.id}
-            className="linear-card hover:border-[#383b3f] transition space-y-4"
+            className="linear-card space-y-4 hover:border-[#384256] transition"
           >
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-[#23252a] pb-3">
-              <div>
-                <div className="flex items-center gap-2.5">
-                  <span className="text-[16px] font-[510] text-[#ffffff] tracking-tight">
-                    {c.station}, {c.state}
-                  </span>
-                  <span className="linear-badge font-linear-mono text-[11px] text-[#8a8f98] flex items-center gap-1">
-                    <Calendar size={11} /> {c.date}
-                  </span>
-                  <span className="linear-badge font-linear-mono text-[11px] text-[#e4f222]">
-                    Lead Day {c.leadDay}
-                  </span>
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 border-b border-[#232732] pb-3.5">
+              <div className="flex items-center gap-3">
+                <span className="linear-badge font-linear-mono text-[12px] bg-[#232732] text-white font-semibold">
+                  {c.id.toUpperCase()}
+                </span>
+                <div>
+                  <h3 className="text-[17px] font-[600] text-[#ffffff]">
+                    {c.event}
+                  </h3>
+                  <div className="flex items-center gap-3 text-[13px] font-linear-mono text-[#94a3b8] mt-0.5">
+                    <span className="flex items-center gap-1"><MapPin size={13} className="text-[#e4f222]" /> {c.station}, {c.state}</span>
+                    <span className="flex items-center gap-1"><Calendar size={13} className="text-[#38bdf8]" /> {c.date}</span>
+                    <span>Lead: Day {c.leadDay}</span>
+                  </div>
                 </div>
-                <h4 className="text-[14px] text-[#02b8cc] font-medium mt-0.5">
-                  {c.event}
-                </h4>
               </div>
 
-              <div className="flex items-center gap-2">
-                <span className="linear-badge font-linear-mono text-[12px] bg-[#27a644]/15 text-[#27a644] border-[#27a644]/40 flex items-center gap-1.5 py-1 px-2.5">
-                  <CheckCircle size={13} />
-                  AI Flagged: {c.modelPredictedRisk} Bust Risk
+              <div className="flex items-center gap-3">
+                <span className="linear-badge font-linear-mono text-[12px] px-3 py-1 bg-[#ef4444]/15 text-[#ef4444] border-[#ef4444]/50 font-bold">
+                  {c.predictedStatus} ({c.modelPredictedRisk})
                 </span>
               </div>
             </div>
 
             {/* Metrics Comparison Grid */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-[12px] font-linear-mono">
-              <div className="bg-[#161718] p-2.5 rounded-[6px] border border-[#23252a]">
-                <span className="text-[#8a8f98] block text-[10px] uppercase">NWP Forecast</span>
-                <span className="text-[#ffffff] text-[13px] font-medium">
-                  {c.forecastRain || c.forecastTemp}
-                </span>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
+              <div className="bg-[#12151c] p-3 rounded-[8px] border border-[#232732]">
+                <span className="text-[12px] font-linear-mono text-[#94a3b8] uppercase block mb-0.5">NWP Predicted</span>
+                <span className="text-[15px] font-bold font-linear-mono text-[#38bdf8]">{c.forecastRain}</span>
               </div>
-              <div className="bg-[#161718] p-2.5 rounded-[6px] border border-[#23252a]">
-                <span className="text-[#8a8f98] block text-[10px] uppercase">Observed / Verification</span>
-                <span className="text-[#eb5757] text-[13px] font-medium">
-                  {c.observedRain || c.observedTemp}
-                </span>
+              <div className="bg-[#12151c] p-3 rounded-[8px] border border-[#232732]">
+                <span className="text-[12px] font-linear-mono text-[#94a3b8] uppercase block mb-0.5">Actual Observed</span>
+                <span className="text-[15px] font-bold font-linear-mono text-[#ef4444]">{c.observedRain}</span>
               </div>
-              <div className="bg-[#161718] p-2.5 rounded-[6px] border border-[#23252a]">
-                <span className="text-[#8a8f98] block text-[10px] uppercase">Forecast Error Score</span>
-                <span className="text-[#eb5757] text-[13px] font-medium">
-                  {c.errorScore} (Threshold: {c.bustThreshold})
-                </span>
+              <div className="bg-[#12151c] p-3 rounded-[8px] border border-[#232732]">
+                <span className="text-[12px] font-linear-mono text-[#94a3b8] uppercase block mb-0.5">Calculated Error Score</span>
+                <span className="text-[15px] font-bold font-linear-mono text-[#f59e0b]">{c.errorScore}</span>
               </div>
-              <div className="bg-[#161718] p-2.5 rounded-[6px] border border-[#23252a]">
-                <span className="text-[#8a8f98] block text-[10px] uppercase">Model Source</span>
-                <span className="text-[#ffffff] text-[13px] font-medium">
-                  {c.nwpModel}
-                </span>
+              <div className="bg-[#12151c] p-3 rounded-[8px] border border-[#232732]">
+                <span className="text-[12px] font-linear-mono text-[#94a3b8] uppercase block mb-0.5">Bust Threshold (90th %)</span>
+                <span className="text-[15px] font-bold font-linear-mono text-[#cbd5e1]">{c.bustThreshold}</span>
               </div>
             </div>
 
-            {/* Synoptic Post-Mortem */}
-            <p className="text-[13px] text-[#d0d6e0] leading-relaxed bg-[#161718]/60 p-3 rounded-[6px] border border-[#23252a]/80">
-              <strong className="text-[#ffffff] font-medium">Meteorological Post-Mortem: </strong>
-              {c.synopticSummary}
+            {/* Synoptic Summary */}
+            <p className="text-[14px] text-[#94a3b8] leading-relaxed bg-[#151820] p-3.5 rounded-[8px] border border-[#232732]">
+              <strong className="text-[#ffffff]">Meteorological Post-Mortem:</strong> {c.synopticSummary}
             </p>
           </div>
         ))}

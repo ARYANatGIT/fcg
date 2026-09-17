@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useTransition } from "react";
-import { Sliders, RefreshCw, AlertTriangle, ArrowRight, Zap, CheckCircle2 } from "lucide-react";
+import { Sliders, Zap, ArrowRight, RefreshCw, AlertTriangle, ShieldCheck, Thermometer, Wind, CloudRain, Gauge, Droplets } from "lucide-react";
 import CircularGauge from "./CircularGauge";
 
 interface WhatIfSimulatorProps {
@@ -26,53 +26,63 @@ interface WhatIfSimulatorProps {
 const PRESETS = [
   {
     name: "Monsoon Deep Depression",
-    desc: "140mm torrential convective rain, 18m/s squally wind, 996 hPa low",
+    desc: "140mm torrential convective rain, 18m/s squally wind, 996 hPa low pressure vortex",
     rainfall: 140,
     windSpeed: 18,
     temp: 26,
     pressure: 996,
     humidity: 95,
     leadDay: 5,
+    icon: CloudRain,
+    color: "#38bdf8"
   },
   {
     name: "Tropical Cyclone Landfall",
-    desc: "190mm extreme rain, 30m/s gale wind, 982 hPa central pressure",
+    desc: "190mm extreme rain core, 30m/s gale wind, 982 hPa central pressure minimum",
     rainfall: 190,
     windSpeed: 30,
     temp: 27,
     pressure: 982,
     humidity: 98,
     leadDay: 6,
+    icon: Wind,
+    color: "#ef4444"
   },
   {
     name: "Severe Pre-Monsoon Heatwave",
-    desc: "46°C extreme heat, 0mm rain, 1006 hPa, dry air 25% RH",
+    desc: "46°C extreme thermal heating, 0mm rain, 1006 hPa, dry boundary layer (25% RH)",
     rainfall: 0,
     windSpeed: 7,
     temp: 46,
     pressure: 1006,
     humidity: 25,
     leadDay: 4,
+    icon: Thermometer,
+    color: "#f59e0b"
   },
   {
     name: "Western Disturbance Trough",
-    desc: "55mm orographic precipitation, 14m/s mountain wind, 12°C",
+    desc: "55mm orographic rain/snow, 14m/s mountain wind, 12°C cool tropospheric air",
     rainfall: 55,
     windSpeed: 14,
     temp: 12,
     pressure: 1011,
     humidity: 88,
     leadDay: 5,
+    icon: CloudRain,
+    color: "#a78bfa"
   },
   {
     name: "Benign Stable High Pressure",
-    desc: "0mm rain, 3.5m/s calm breeze, 1018 hPa anticyclone",
+    desc: "0mm rain, 3.5m/s light breeze, 1018 hPa anticyclone with high numerical consensus",
     rainfall: 0,
     windSpeed: 3.5,
     temp: 24,
     pressure: 1018,
     humidity: 50,
     leadDay: 2,
+    icon: ShieldCheck,
+    color: "#22c55e"
   },
 ];
 
@@ -90,15 +100,10 @@ export default function WhatIfSimulator({
 
   // Dynamic sensitivity calculation approximating the calibrated LightGBM decision bounds
   const calculateSimulatedRisk = () => {
-    // Rain component (log transformed in model)
     const rainScore = Math.min(1.0, Math.log1p(rainfall) / 5.2);
-    // Wind component
-    const windScore = Math.min(1.0, windSpeed / 25.0);
-    // Lead time component (quadratic growth)
+    const windScore = Math.min(1.0, windSpeed / 28.0);
     const leadScore = Math.pow(leadDay / 10.0, 1.4);
-    // Pressure anomaly component (< 1000 hPa low is volatile)
-    const pressureAnomaly = Math.max(0, (1013 - pressure) / 25.0);
-    // Thermal-humidity convective instability
+    const pressureAnomaly = Math.max(0, (1013.25 - pressure) / 25.0);
     const convectiveIndex = (temp * (humidity / 100.0)) / 45.0;
 
     let rawScore =
@@ -143,67 +148,88 @@ export default function WhatIfSimulator({
   return (
     <div className="space-y-6">
       {/* Header Description */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-[#23252a] pb-4">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-[#232732] pb-5">
         <div>
-          <h2 className="text-[18px] font-[510] text-[#ffffff] flex items-center gap-2 tracking-[-0.012em]">
-            <Sliders size={18} className="text-[#e4f222]" /> NWP Sensitivity &amp; What-If Scenario Sandbox
+          <h2 className="text-[20px] font-[600] text-[#ffffff] flex items-center gap-2.5">
+            <Sliders size={20} className="text-[#e4f222]" /> NWP Sensitivity &amp; What-If Scenario Sandbox
           </h2>
-          <p className="text-[13px] text-[#8a8f98] mt-1">
-            Simulate how variations in NWP predicted rainfall, wind speed, or pressure alter forecast bust probability.
+          <p className="text-[14px] text-[#94a3b8] mt-1">
+            Interactively perturb numerical weather prediction variables to simulate how convective precipitation, wind gusts, or lead time shift bust probability.
           </p>
         </div>
 
         <button
           onClick={handleApply}
-          className="btn-acid-lime font-medium cursor-pointer"
+          className="btn-acid-lime cursor-pointer font-semibold"
         >
-          <Zap size={14} strokeWidth={2.5} />
+          <Zap size={16} strokeWidth={2.5} />
           <span>Apply Scenario to Cockpit</span>
         </button>
       </div>
 
       {/* Preset Scenarios Strip */}
-      <div className="flex flex-col gap-2">
-        <span className="text-[12px] font-linear-mono text-[#8a8f98] uppercase tracking-wider">
-          Quick Atmospheric Presets:
+      <div className="space-y-3">
+        <span className="text-[13px] font-linear-mono text-[#cbd5e1] font-semibold uppercase tracking-wider block">
+          Select Standard Atmospheric Scenario:
         </span>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
-          {PRESETS.map((p) => (
-            <button
-              key={p.name}
-              onClick={() => loadPreset(p)}
-              className="linear-panel-inner text-left hover:border-[#383b3f] hover:bg-[#1f2126] transition p-3 cursor-pointer group"
-            >
-              <div className="text-[13px] font-[510] text-[#ffffff] group-hover:text-[#e4f222] transition-colors flex items-center justify-between">
-                <span>{p.name}</span>
-                <ArrowRight size={12} className="opacity-0 group-hover:opacity-100 transition-opacity" />
-              </div>
-              <p className="text-[11px] text-[#8a8f98] mt-1 line-clamp-2">
-                {p.desc}
-              </p>
-            </button>
-          ))}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+          {PRESETS.map((p) => {
+            const Icon = p.icon;
+            return (
+              <button
+                key={p.name}
+                onClick={() => loadPreset(p)}
+                className="linear-panel-inner text-left hover:border-[#384256] transition p-4 cursor-pointer group flex flex-col justify-between"
+              >
+                <div>
+                  <div className="flex items-center justify-between gap-2 mb-2">
+                    <div
+                      className="w-8 h-8 rounded-[6px] bg-[#1c212c] flex items-center justify-center shrink-0"
+                      style={{ color: p.color }}
+                    >
+                      <Icon size={18} />
+                    </div>
+                    <ArrowRight size={14} className="text-[#94a3b8] opacity-0 group-hover:opacity-100 transition-opacity" />
+                  </div>
+                  <div className="text-[14px] font-[600] text-[#ffffff] group-hover:text-[#e4f222] transition-colors">
+                    {p.name}
+                  </div>
+                  <p className="text-[12px] text-[#94a3b8] mt-1.5 leading-relaxed">
+                    {p.desc}
+                  </p>
+                </div>
+
+                <div className="mt-3 pt-2.5 border-t border-[#232732] flex items-center justify-between text-[11px] font-linear-mono text-[#64748b]">
+                  <span>Lead: D-{p.leadDay}</span>
+                  <span style={{ color: p.color }}>LOAD &rarr;</span>
+                </div>
+              </button>
+            );
+          })}
         </div>
       </div>
 
       {/* Main Sandbox Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* Sliders (7 cols) */}
-        <div className="lg:col-span-7 linear-card space-y-5">
-          <div className="flex justify-between items-center border-b border-[#23252a] pb-3">
-            <span className="text-[14px] font-[510] text-[#ffffff]">
+        
+        {/* Atmospheric Controls (7 cols) */}
+        <div className="lg:col-span-7 linear-card space-y-6">
+          <div className="flex justify-between items-center border-b border-[#232732] pb-3.5">
+            <span className="text-[16px] font-[600] text-[#ffffff]">
               Atmospheric Parameter Controls
             </span>
-            <span className="linear-badge font-linear-mono text-[11px]">
-              REAL-TIME SENSITIVITY
+            <span className="linear-badge font-linear-mono text-[12px]">
+              REAL-TIME INFERENCE
             </span>
           </div>
 
           {/* 1. Rainfall */}
-          <div className="space-y-2">
-            <div className="flex justify-between text-[13px]">
-              <span className="text-[#ffffff] font-medium">Predicted 24h Rainfall</span>
-              <span className="font-linear-mono text-[#e4f222] font-semibold">{rainfall} mm</span>
+          <div className="space-y-2.5 bg-[#12151c] p-4 rounded-[10px] border border-[#232732]">
+            <div className="flex justify-between items-center text-[14px]">
+              <span className="text-[#ffffff] font-medium flex items-center gap-2">
+                <CloudRain size={16} className="text-[#38bdf8]" /> Predicted 24h Rainfall
+              </span>
+              <span className="font-linear-mono text-[#38bdf8] text-[16px] font-bold">{rainfall} mm</span>
             </div>
             <input
               type="range"
@@ -212,9 +238,9 @@ export default function WhatIfSimulator({
               step="1"
               value={rainfall}
               onChange={(e) => setRainfall(Number(e.target.value))}
-              className="w-full accent-[#e4f222] bg-[#161718] h-2 rounded cursor-pointer"
+              className="w-full"
             />
-            <div className="flex justify-between text-[11px] font-linear-mono text-[#62666d]">
+            <div className="flex justify-between text-[12px] font-linear-mono text-[#94a3b8]">
               <span>0 mm (Dry)</span>
               <span>50 mm (Heavy)</span>
               <span>120 mm (Very Heavy)</span>
@@ -222,11 +248,13 @@ export default function WhatIfSimulator({
             </div>
           </div>
 
-          {/* 2. 10m Wind Speed */}
-          <div className="space-y-2">
-            <div className="flex justify-between text-[13px]">
-              <span className="text-[#ffffff] font-medium">10m Wind Speed Magnitude</span>
-              <span className="font-linear-mono text-[#02b8cc] font-semibold">{windSpeed.toFixed(1)} m/s</span>
+          {/* 2. Wind Speed */}
+          <div className="space-y-2.5 bg-[#12151c] p-4 rounded-[10px] border border-[#232732]">
+            <div className="flex justify-between items-center text-[14px]">
+              <span className="text-[#ffffff] font-medium flex items-center gap-2">
+                <Wind size={16} className="text-[#e4f222]" /> 10m Wind Speed Magnitude
+              </span>
+              <span className="font-linear-mono text-[#e4f222] text-[16px] font-bold">{windSpeed.toFixed(1)} m/s</span>
             </div>
             <input
               type="range"
@@ -235,9 +263,9 @@ export default function WhatIfSimulator({
               step="0.5"
               value={windSpeed}
               onChange={(e) => setWindSpeed(Number(e.target.value))}
-              className="w-full accent-[#02b8cc] bg-[#161718] h-2 rounded cursor-pointer"
+              className="w-full"
             />
-            <div className="flex justify-between text-[11px] font-linear-mono text-[#62666d]">
+            <div className="flex justify-between text-[12px] font-linear-mono text-[#94a3b8]">
               <span>0 m/s (Calm)</span>
               <span>10 m/s (Breezy)</span>
               <span>20 m/s (Gale)</span>
@@ -246,10 +274,12 @@ export default function WhatIfSimulator({
           </div>
 
           {/* 3. 2m Temperature */}
-          <div className="space-y-2">
-            <div className="flex justify-between text-[13px]">
-              <span className="text-[#ffffff] font-medium">2m Surface Air Temperature</span>
-              <span className="font-linear-mono text-[#f59e0b] font-semibold">{temp.toFixed(1)} °C</span>
+          <div className="space-y-2.5 bg-[#12151c] p-4 rounded-[10px] border border-[#232732]">
+            <div className="flex justify-between items-center text-[14px]">
+              <span className="text-[#ffffff] font-medium flex items-center gap-2">
+                <Thermometer size={16} className="text-[#f59e0b]" /> 2m Surface Temperature
+              </span>
+              <span className="font-linear-mono text-[#f59e0b] text-[16px] font-bold">{temp.toFixed(1)} °C</span>
             </div>
             <input
               type="range"
@@ -258,44 +288,48 @@ export default function WhatIfSimulator({
               step="0.5"
               value={temp}
               onChange={(e) => setTemp(Number(e.target.value))}
-              className="w-full accent-[#f59e0b] bg-[#161718] h-2 rounded cursor-pointer"
+              className="w-full"
             />
-            <div className="flex justify-between text-[11px] font-linear-mono text-[#62666d]">
+            <div className="flex justify-between text-[12px] font-linear-mono text-[#94a3b8]">
               <span>5 °C (Cold)</span>
               <span>25 °C (Moderate)</span>
               <span>38 °C (Hot)</span>
-              <span>48 °C (Severe Heatwave)</span>
+              <span>48 °C (Heatwave)</span>
             </div>
           </div>
 
           {/* 4. Surface Pressure */}
-          <div className="space-y-2">
-            <div className="flex justify-between text-[13px]">
-              <span className="text-[#ffffff] font-medium">Mean Surface Pressure</span>
-              <span className="font-linear-mono text-[#d0d6e0] font-semibold">{pressure.toFixed(0)} hPa</span>
+          <div className="space-y-2.5 bg-[#12151c] p-4 rounded-[10px] border border-[#232732]">
+            <div className="flex justify-between items-center text-[14px]">
+              <span className="text-[#ffffff] font-medium flex items-center gap-2">
+                <Gauge size={16} className="text-[#a78bfa]" /> Surface Atmospheric Pressure
+              </span>
+              <span className="font-linear-mono text-[#a78bfa] text-[16px] font-bold">{pressure.toFixed(1)} hPa</span>
             </div>
             <input
               type="range"
               min="975"
               max="1025"
-              step="1"
+              step="0.5"
               value={pressure}
               onChange={(e) => setPressure(Number(e.target.value))}
-              className="w-full accent-[#d0d6e0] bg-[#161718] h-2 rounded cursor-pointer"
+              className="w-full"
             />
-            <div className="flex justify-between text-[11px] font-linear-mono text-[#62666d]">
+            <div className="flex justify-between text-[12px] font-linear-mono text-[#94a3b8]">
               <span>975 hPa (Deep Depression)</span>
-              <span>1000 hPa (Monsoon Low)</span>
+              <span>1000 hPa (Low)</span>
               <span>1013 hPa (Standard)</span>
               <span>1025 hPa (High)</span>
             </div>
           </div>
 
           {/* 5. Relative Humidity */}
-          <div className="space-y-2">
-            <div className="flex justify-between text-[13px]">
-              <span className="text-[#ffffff] font-medium">2m Relative Humidity</span>
-              <span className="font-linear-mono text-[#27a644] font-semibold">{humidity}%</span>
+          <div className="space-y-2.5 bg-[#12151c] p-4 rounded-[10px] border border-[#232732]">
+            <div className="flex justify-between items-center text-[14px]">
+              <span className="text-[#ffffff] font-medium flex items-center gap-2">
+                <Droplets size={16} className="text-[#38bdf8]" /> 2m Relative Humidity
+              </span>
+              <span className="font-linear-mono text-[#38bdf8] text-[16px] font-bold">{humidity.toFixed(0)} %</span>
             </div>
             <input
               type="range"
@@ -304,21 +338,23 @@ export default function WhatIfSimulator({
               step="1"
               value={humidity}
               onChange={(e) => setHumidity(Number(e.target.value))}
-              className="w-full accent-[#27a644] bg-[#161718] h-2 rounded cursor-pointer"
+              className="w-full"
             />
-            <div className="flex justify-between text-[11px] font-linear-mono text-[#62666d]">
-              <span>15% (Very Dry)</span>
-              <span>50% (Comfortable)</span>
-              <span>80% (Humid)</span>
+            <div className="flex justify-between text-[12px] font-linear-mono text-[#94a3b8]">
+              <span>15% (Arid)</span>
+              <span>50% (Comfort)</span>
+              <span>75% (Humid)</span>
               <span>100% (Saturated)</span>
             </div>
           </div>
 
-          {/* 6. Lead Day Slider */}
-          <div className="space-y-2 pt-2 border-t border-[#23252a]">
-            <div className="flex justify-between text-[13px]">
-              <span className="text-[#ffffff] font-medium">Forecast Lead Time</span>
-              <span className="font-linear-mono text-[#e4f222] font-semibold">Day {leadDay}</span>
+          {/* 6. Lead Day */}
+          <div className="space-y-2.5 bg-[#12151c] p-4 rounded-[10px] border border-[#232732]">
+            <div className="flex justify-between items-center text-[14px]">
+              <span className="text-[#ffffff] font-medium flex items-center gap-2">
+                <Zap size={16} className="text-[#e4f222]" /> Medium-Range Lead Day
+              </span>
+              <span className="font-linear-mono text-[#e4f222] text-[16px] font-bold">Day {leadDay}</span>
             </div>
             <input
               type="range"
@@ -327,83 +363,72 @@ export default function WhatIfSimulator({
               step="1"
               value={leadDay}
               onChange={(e) => setLeadDay(Number(e.target.value))}
-              className="w-full accent-[#e4f222] bg-[#161718] h-2 rounded cursor-pointer"
+              className="w-full"
             />
-            <div className="flex justify-between text-[11px] font-linear-mono text-[#62666d]">
-              <span>Day 1 (Immediate)</span>
+            <div className="flex justify-between text-[12px] font-linear-mono text-[#94a3b8]">
+              <span>Day 1 (Short Range)</span>
               <span>Day 5 (Medium Range)</span>
-              <span>Day 10 (Extended Limit)</span>
+              <span>Day 10 (Extended Medium Range)</span>
             </div>
           </div>
         </div>
 
-        {/* Real-time Response Output (5 cols) */}
-        <div className="lg:col-span-5 flex flex-col gap-4">
-          <div className="linear-card flex-1 flex flex-col justify-between items-center text-center">
-            <div className="w-full flex justify-between items-center border-b border-[#23252a] pb-3 mb-4">
-              <span className="text-[13px] font-[510] text-[#ffffff]">
-                Simulated Output Response
-              </span>
-              <span
-                className={`linear-badge font-linear-mono text-[12px] px-2.5 py-0.5 border font-medium ${
-                  isHigh
-                    ? "bg-[#eb5757]/15 text-[#eb5757] border-[#eb5757]/40"
-                    : isMod
-                    ? "bg-[#f59e0b]/15 text-[#f59e0b] border-[#f59e0b]/40"
-                    : "bg-[#27a644]/15 text-[#27a644] border-[#27a644]/40"
-                }`}
-              >
-                {riskCategory} RISK
-              </span>
-            </div>
-
-            {/* Circular Gauge */}
-            <div className="py-2">
-              <CircularGauge
-                value={simulatedProb}
-                label="Simulated Bust Risk"
-                sublabel={`Confidence: ${(simulatedConfidence * 100).toFixed(1)}%`}
-                size={220}
-                strokeWidth={14}
-              />
-            </div>
-
-            {/* Sensitivity Insights */}
-            <div className="w-full bg-[#161718] p-3.5 rounded-[8px] border border-[#23252a] text-left space-y-2 mt-2">
-              <div className="text-[12px] font-linear-mono text-[#8a8f98] uppercase tracking-wider flex items-center gap-1.5">
-                <AlertTriangle size={13} className="text-[#e4f222]" /> Key Sensitivity Drivers:
+        {/* Real-time Sensitivity Readout (5 cols) */}
+        <div className="lg:col-span-5 flex flex-col gap-5">
+          <div className="linear-card flex-1 flex flex-col justify-between">
+            <div>
+              <div className="flex justify-between items-center border-b border-[#232732] pb-3.5 mb-4">
+                <h3 className="text-[16px] font-[600] text-[#ffffff]">
+                  Simulated Bust Likelihood
+                </h3>
+                <span className={`linear-badge font-linear-mono text-[12px] font-semibold ${
+                  isHigh ? "bg-[#ef4444]/15 text-[#ef4444] border-[#ef4444]/50" : isMod ? "bg-[#f59e0b]/15 text-[#f59e0b] border-[#f59e0b]/50" : "bg-[#22c55e]/15 text-[#22c55e] border-[#22c55e]/50"
+                }`}>
+                  {riskCategory} RISK
+                </span>
               </div>
-              <ul className="text-[12px] space-y-1 text-[#d0d6e0]">
-                {rainfall > 70 && (
-                  <li className="flex items-center gap-1.5 text-[#eb5757]">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#eb5757]"></span> Extreme rainfall ({rainfall}mm) heavily inflates bust probability.
+
+              <div className="flex flex-col items-center justify-center py-4">
+                <CircularGauge
+                  value={simulatedProb}
+                  label="Simulated Bust Risk"
+                  sublabel={`Confidence: ${(simulatedConfidence * 100).toFixed(1)}%`}
+                  size={220}
+                  strokeWidth={15}
+                />
+              </div>
+
+              <div className="bg-[#12151c] p-4 rounded-[10px] border border-[#232732] mt-4 space-y-2 text-[13px]">
+                <div className="font-[600] text-[#ffffff] flex items-center gap-2">
+                  <AlertTriangle size={15} className="text-[#e4f222]" />
+                  Sensitivity Analysis Insights:
+                </div>
+                <ul className="text-[#94a3b8] space-y-1.5 pl-5 list-disc leading-relaxed">
+                  <li>
+                    {rainfall > 50
+                      ? `Heavy convective rain (${rainfall}mm) triggers non-linear error growth in precipitation verification.`
+                      : `Mild rainfall (${rainfall}mm) keeps convective error variance low.`}
                   </li>
-                )}
-                {leadDay >= 6 && (
-                  <li className="flex items-center gap-1.5 text-[#f59e0b]">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#f59e0b]"></span> Day {leadDay} compound uncertainty significantly elevates error threshold.
+                  <li>
+                    {leadDay >= 5
+                      ? `Lead Day ${leadDay} compounds baroclinic wave phase displacement errors.`
+                      : `Short lead time (Day ${leadDay}) provides robust dynamical anchor.`}
                   </li>
-                )}
-                {windSpeed > 18 && (
-                  <li className="flex items-center gap-1.5 text-[#eb5757]">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#eb5757]"></span> Strong wind ({windSpeed}m/s) triggers vector instability attributions.
+                  <li>
+                    {pressure < 1002
+                      ? `Deep barometric depression (${pressure} hPa) amplifies cyclogenesis uncertainty.`
+                      : `Normal surface pressure supports steady synoptic flow.`}
                   </li>
-                )}
-                {rainfall <= 20 && leadDay <= 3 && (
-                  <li className="flex items-center gap-1.5 text-[#27a644]">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#27a644]"></span> Short lead time and modest precipitation support high forecast confidence.
-                  </li>
-                )}
-              </ul>
+                </ul>
+              </div>
             </div>
 
-            {/* Apply Button */}
             <button
               onClick={handleApply}
-              className="btn-acid-lime w-full mt-4 cursor-pointer"
+              className="btn-acid-lime w-full font-semibold cursor-pointer mt-6"
             >
-              <CheckCircle2 size={15} />
-              <span>Load These Values Into Operational Cockpit</span>
+              <Zap size={16} strokeWidth={2.5} />
+              <span>Deploy Scenario to Operational Cockpit</span>
             </button>
           </div>
         </div>

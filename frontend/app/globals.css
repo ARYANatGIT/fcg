@@ -3,51 +3,35 @@
 @tailwind utilities;
 
 :root {
-  /* Linear Colors */
+  /* Linear Command Center Color Tokens */
   --color-void: #08090a;
-  --color-carbon: #0f1011;
-  --color-obsidian: #161718;
-  --color-graphite: #23252a;
-  --color-smoke: #383b3f;
-  --color-ash: #62666d;
-  --color-fog: #8a8f98;
-  --color-mist: #d0d6e0;
-  --color-bone: #e5e5e6;
+  --color-carbon: #0e1014;
+  --color-obsidian: #151820;
+  --color-graphite: #232732;
+  --color-smoke: #333948;
+  --color-ash: #64748b;
+  --color-fog: #94a3b8;
+  --color-mist: #cbd5e1;
+  --color-bone: #f1f5f9;
   --color-paper: #ffffff;
   --color-acid-lime: #e4f222;
-  --color-pulse-green: #27a644;
-  --color-coral-red: #eb5757;
-  --color-signal-teal: #02b8cc;
+  --color-pulse-green: #22c55e;
+  --color-coral-red: #ef4444;
+  --color-signal-amber: #f59e0b;
+  --color-signal-teal: #06b6d4;
+  --color-sky-blue: #38bdf8;
   --color-iris-violet: #6366f1;
-  --color-lavender: #8b5cf6;
 
   /* Typography */
-  --font-inter-variable: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  --font-berkeley-mono: 'JetBrains Mono', 'SF Mono', Menlo, Monaco, Consolas, monospace;
+  --font-inter-variable: var(--font-inter, 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif);
+  --font-berkeley-mono: var(--font-mono, 'JetBrains Mono', 'SF Mono', Menlo, Monaco, Consolas, monospace);
 
   /* Shadows */
-  --shadow-sm: rgba(0, 0, 0, 0.4) 0px 2px 4px 0px;
-  --shadow-subtle: rgb(35, 37, 42) 0px 0px 0px 1px inset;
-  --shadow-xl: rgba(8, 9, 10, 0.6) 0px 4px 32px 0px;
-}
-
-@theme {
-  --color-void: #08090a;
-  --color-carbon: #0f1011;
-  --color-obsidian: #161718;
-  --color-graphite: #23252a;
-  --color-smoke: #383b3f;
-  --color-ash: #62666d;
-  --color-fog: #8a8f98;
-  --color-mist: #d0d6e0;
-  --color-bone: #e5e5e6;
-  --color-paper: #ffffff;
-  --color-acid-lime: #e4f222;
-  --color-pulse-green: #27a644;
-  --color-coral-red: #eb5757;
-  --color-signal-teal: #02b8cc;
-  --color-iris-violet: #6366f1;
-  --color-lavender: #8b5cf6;
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.5), 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-subtle: inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+  --shadow-card: 0 4px 20px -2px rgba(0, 0, 0, 0.5), 0 2px 6px -1px rgba(0, 0, 0, 0.3);
+  --shadow-glow-lime: 0 0 20px -3px rgba(228, 242, 34, 0.25);
+  --shadow-glow-red: 0 0 24px -2px rgba(239, 68, 68, 0.3);
 }
 
 body {
@@ -55,45 +39,59 @@ body {
   color: var(--color-mist);
   font-family: var(--font-inter-variable);
   font-feature-settings: "cv01" on, "ss03" on, "zero" on;
-  letter-spacing: -0.011em;
+  letter-spacing: -0.012em;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* Linear precision card surface */
+/* Linear Card Surfaces */
 .linear-card {
-  background-color: var(--color-carbon);
+  background: linear-gradient(180deg, #11141a 0%, #0c0e12 100%);
   border: 1px solid var(--color-graphite);
   border-radius: 12px;
-  padding: 20px;
-  box-shadow: var(--shadow-sm);
+  padding: 22px;
+  box-shadow: var(--shadow-card);
   position: relative;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.linear-card:hover {
+  border-color: #2e3544;
 }
 
 .linear-card-elevated {
   background-color: var(--color-obsidian);
   border: 1px solid var(--color-graphite);
   border-radius: 12px;
-  padding: 20px;
+  padding: 22px;
+  box-shadow: var(--shadow-card);
 }
 
 .linear-panel-inner {
-  background-color: var(--color-obsidian);
+  background-color: #12151c;
   border: 1px solid var(--color-graphite);
-  border-radius: 6px;
-  padding: 14px;
+  border-radius: 8px;
+  padding: 16px;
+  transition: all 0.2s ease;
 }
 
-/* Linear primary action button (Acid Lime) */
+.linear-panel-inner:hover {
+  border-color: var(--color-smoke);
+  background-color: #161a23;
+}
+
+/* Buttons - Sized Comfortably (min 42px height for primary) */
 .btn-acid-lime {
   background-color: var(--color-acid-lime);
-  color: var(--color-void);
-  border-radius: 6px;
-  padding: 9px 16px;
-  font-weight: 510;
+  color: #08090a;
+  border-radius: 8px;
+  min-height: 42px;
+  padding: 10px 18px;
+  font-weight: 600;
   font-size: 14px;
   letter-spacing: -0.011em;
-  transition: all 0.15s ease;
-  box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.4);
+  transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4), 0 0 12px -2px rgba(228, 242, 34, 0.3);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -101,54 +99,80 @@ body {
 }
 
 .btn-acid-lime:hover {
-  filter: brightness(1.06);
-  transform: translateY(-0.5px);
+  filter: brightness(1.08);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px -2px rgba(228, 242, 34, 0.45);
 }
 
 .btn-acid-lime:active {
   transform: translateY(0.5px);
+  filter: brightness(0.96);
 }
 
-/* Linear ghost button */
 .btn-ghost {
-  background: transparent;
+  background: rgba(255, 255, 255, 0.03);
   border: 1px solid var(--color-graphite);
   color: var(--color-mist);
-  border-radius: 6px;
-  padding: 8px 14px;
+  border-radius: 8px;
+  min-height: 42px;
+  padding: 9px 16px;
   font-size: 14px;
-  font-weight: 400;
+  font-weight: 500;
   transition: all 0.15s ease;
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
 }
 
 .btn-ghost:hover {
-  background: rgba(255, 255, 255, 0.04);
+  background: rgba(255, 255, 255, 0.07);
   border-color: var(--color-smoke);
   color: var(--color-paper);
 }
 
-/* Linear badge */
+/* 10-Day Scrubber Button */
+.scrubber-btn {
+  min-height: 46px;
+  min-width: 52px;
+  padding: 6px 10px;
+  font-size: 14px;
+  font-family: var(--font-berkeley-mono);
+  font-weight: 600;
+  border-radius: 8px;
+  transition: all 0.15s ease;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+}
+
+/* Badges with Legible Type */
 .linear-badge {
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.06);
   border: 1px solid var(--color-graphite);
   color: var(--color-fog);
-  border-radius: 4px;
-  padding: 3px 8px;
+  border-radius: 6px;
+  padding: 4px 10px;
   font-size: 12px;
-  font-weight: 400;
-  letter-spacing: -0.010em;
+  font-weight: 500;
+  letter-spacing: -0.005em;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
 }
 
 .linear-pill {
-  background: rgba(255, 255, 255, 0.03);
+  background: rgba(255, 255, 255, 0.04);
   border: 1px solid var(--color-graphite);
   border-radius: 9999px;
-  padding: 4px 12px;
-  font-size: 12px;
+  padding: 5px 14px;
+  font-size: 13px;
   color: var(--color-fog);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 }
 
 /* Monospace font class */
@@ -157,18 +181,61 @@ body {
   font-feature-settings: "cv01" on, "ss03" on;
 }
 
+/* Precision Range Slider */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 8px;
+  background: #1c212b;
+  border-radius: 4px;
+  border: 1px solid #28303f;
+  outline: none;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #ffffff;
+  border: 3px solid #08090a;
+  cursor: pointer;
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.8), 0 0 0 2px var(--color-acid-lime);
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+}
+
+input[type="range"]::-webkit-slider-thumb:hover {
+  transform: scale(1.15);
+  box-shadow: 0 0 12px rgba(228, 242, 34, 0.6), 0 0 0 3px var(--color-acid-lime);
+}
+
 /* Clean dark scrollbars */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 8px;
+  height: 8px;
 }
 ::-webkit-scrollbar-track {
   background: var(--color-void);
 }
 ::-webkit-scrollbar-thumb {
   background: var(--color-graphite);
-  border-radius: 3px;
+  border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
   background: var(--color-smoke);
+}
+
+/* Pulsing Red Glow for Severe Alerts */
+@keyframes red-beacon {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 8px rgba(239, 68, 68, 0);
+  }
+}
+
+.animate-beacon {
+  animation: red-beacon 2s infinite;
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { X, Copy, Check, Download, FileText, AlertTriangle } from "lucide-react";
+import { X, Copy, Check, Download, FileText, AlertTriangle, ShieldCheck, Code } from "lucide-react";
 
 interface AdvisoryModalProps {
   isOpen: boolean;
@@ -35,6 +35,7 @@ export default function AdvisoryModal({
   revisions,
 }: AdvisoryModalProps) {
   const [copied, setCopied] = useState(false);
+  const [exportedJson, setExportedJson] = useState(false);
 
   if (!isOpen) return null;
 
@@ -99,8 +100,10 @@ ${
 }
 
 ================================================================================
-* DISCLAIMER: Research prototype advisory for operational decision-support only.
-Official severe weather bulletins are issued exclusively by statutory authorities.
+STATUTORY DISCLAIMER:
+ForecastGuard AI is an operational AI/ML decision-support prototype developed
+under MoES / NCMRWF Problem Statement 26079. Forecast bust warnings do not
+supersede official statutory weather bulletins issued by IMD/MoES.
 ================================================================================`;
 
   const handleCopy = () => {
@@ -109,70 +112,106 @@ Official severe weather bulletins are issued exclusively by statutory authoritie
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const handleDownload = () => {
-    const blob = new Blob([advisoryText], { type: "text/plain" });
+  const handleDownloadTxt = () => {
+    const blob = new Blob([advisoryText], { type: "text/plain;charset=utf-8" });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `NCMRWF_Bust_Advisory_${station.name}_Day${leadDay}.txt`;
-    a.click();
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `MoES_ForecastGuard_Advisory_${station.name}_D${leadDay}.txt`;
+    link.click();
     URL.revokeObjectURL(url);
   };
 
+  const handleDownloadJson = () => {
+    const payload = {
+      agency: "MoES / NCMRWF",
+      system: "ForecastGuard AI",
+      problem_statement: 26079,
+      station,
+      lead_day: leadDay,
+      bust_probability: bustProbability,
+      forecast_confidence: confidence,
+      risk_category: riskCategory,
+      shap_attributions: shapReasons,
+      revisions: revisions,
+      timestamp: new Date().toISOString(),
+    };
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `MoES_ForecastGuard_Advisory_${station.name}_D${leadDay}.json`;
+    link.click();
+    URL.revokeObjectURL(url);
+    setExportedJson(true);
+    setTimeout(() => setExportedJson(false), 2000);
+  };
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#08090a]/80 backdrop-blur-md animate-in fade-in duration-200">
-      <div className="linear-card w-full max-w-3xl max-h-[90vh] flex flex-col p-6 shadow-2xl border border-[#383b3f]">
-        {/* Modal Header */}
-        <div className="flex justify-between items-center border-b border-[#23252a] pb-4 mb-4">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-[6px] bg-[#161718] border border-[#23252a] flex items-center justify-center text-[#e4f222]">
-              <FileText size={18} />
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md p-4">
+      <div className="bg-[#0c0e12] border border-[#232732] rounded-[14px] w-full max-w-3xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
+        {/* Header */}
+        <div className="p-5 border-b border-[#232732] flex justify-between items-center bg-[#151820]">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-[8px] bg-[#1c212c] border border-[#232732] flex items-center justify-center text-[#e4f222]">
+              <FileText size={20} />
             </div>
             <div>
-              <h3 className="text-[17px] font-[510] text-[#ffffff] tracking-tight">
+              <h2 className="text-[17px] font-[600] text-[#ffffff]">
                 Operational Forecast Bust Advisory Bulletin
-              </h3>
-              <span className="text-[12px] font-linear-mono text-[#8a8f98]">
-                MoES / NCMRWF Decision-Support Protocol
+              </h2>
+              <span className="text-[12px] font-linear-mono text-[#94a3b8]">
+                MoES / NCMRWF Format · PS-26079
               </span>
             </div>
           </div>
 
           <button
             onClick={onClose}
-            className="w-8 h-8 rounded-[6px] bg-[#161718] border border-[#23252a] text-[#8a8f98] hover:text-[#ffffff] flex items-center justify-center transition cursor-pointer"
-            aria-label="Close Modal"
+            className="w-9 h-9 rounded-[8px] text-[#94a3b8] hover:text-[#ffffff] hover:bg-[#232732] flex items-center justify-center transition cursor-pointer"
+            aria-label="Close Advisory Modal"
           >
-            <X size={16} />
+            <X size={18} />
           </button>
         </div>
 
-        {/* Advisory Text Box */}
-        <div className="flex-1 overflow-y-auto bg-[#08090a] p-4 rounded-[8px] border border-[#23252a] font-linear-mono text-[12px] text-[#d0d6e0] leading-relaxed select-text">
-          <pre className="whitespace-pre-wrap font-inherit">{advisoryText}</pre>
+        {/* Advisory Body */}
+        <div className="p-6 overflow-y-auto flex-1 bg-[#08090a]">
+          <pre className="text-[13px] font-linear-mono text-[#cbd5e1] leading-relaxed whitespace-pre-wrap selection:bg-[#e4f222] selection:text-[#08090a]">
+            {advisoryText}
+          </pre>
         </div>
 
-        {/* Modal Footer Controls */}
-        <div className="flex flex-col sm:flex-row justify-between items-center gap-3 pt-4 border-t border-[#23252a] mt-4">
-          <div className="text-[12px] text-[#62666d] italic">
-            Ready for dissemination in forecaster shift briefings.
+        {/* Footer Actions */}
+        <div className="p-4 border-t border-[#232732] flex flex-wrap justify-between items-center bg-[#151820] gap-3">
+          <div className="text-[12px] font-linear-mono text-[#94a3b8] flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-[#22c55e]"></span>
+            <span>READY FOR DISPATCH TO RMCs</span>
           </div>
 
           <div className="flex items-center gap-2.5">
             <button
               onClick={handleCopy}
-              className="btn-ghost text-[13px] cursor-pointer"
+              className="btn-ghost text-[13px] min-h-[40px] cursor-pointer"
             >
-              {copied ? <Check size={14} className="text-[#27a644]" /> : <Copy size={14} />}
-              <span>{copied ? "Copied Bulletin" : "Copy to Clipboard"}</span>
+              {copied ? <Check size={16} className="text-[#22c55e]" /> : <Copy size={16} />}
+              <span>{copied ? "Copied to Clipboard!" : "Copy Bulletin"}</span>
             </button>
 
             <button
-              onClick={handleDownload}
-              className="btn-acid-lime text-[13px] cursor-pointer"
+              onClick={handleDownloadJson}
+              className="btn-ghost text-[13px] min-h-[40px] cursor-pointer"
             >
-              <Download size={14} strokeWidth={2.5} />
-              <span>Download Bulletin (.txt)</span>
+              <Code size={16} />
+              <span>{exportedJson ? "Exported JSON!" : "Export JSON"}</span>
+            </button>
+
+            <button
+              onClick={handleDownloadTxt}
+              className="btn-acid-lime text-[13px] min-h-[40px] cursor-pointer"
+            >
+              <Download size={16} />
+              <span>Download (.txt)</span>
             </button>
           </div>
         </div>

@@ -126,3 +126,4 @@ flowchart TD
 - **Map:** Dynamic dark-matter base map with colored station markers representing model-estimated bust risk.
 - **Charts:** Interactive Lead Day uncertainty curve (Day 1 to 10) and SHAP feature attributions.
 - **Demonstration Preset:** One-click Waranga Day 5 case loader for operational evaluation.
+
