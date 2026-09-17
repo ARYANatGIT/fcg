@@ -1,110 +1,107 @@
-import pandas as pd
-import numpy as np
+"""
+ForecastGuard AI — CLI Entrypoint for Synthetic Meteorological Data Generation
+Problem Statement ID: 26079 | Ministry of Earth Sciences (MoES) / NCMRWF
+"""
+
+import argparse
 import logging
-from datetime import datetime, timedelta
+import sys
 from pathlib import Path
-from typing import Tuple
+from datetime import datetime
+import pandas as pd
 
-# Configure logging
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
+# Ensure root directory is on Python path
+ROOT_DIR = Path(__file__).resolve().parent.parent
+if str(ROOT_DIR) not in sys.path:
+    sys.path.insert(0, str(ROOT_DIR))
 
-# Configuration constants
-LAT_MIN, LAT_MAX = 8.0, 37.0
-LON_MIN, LON_MAX = 68.0, 97.0
-RESOLUTION = 1.0
-NUM_INIT_DATES = 5
-LEAD_DAYS = 10
-START_DATE = datetime(2026, 1, 1)
+from ml.data.synthetic_generator import (
+    generate_meteorological_dataset,
+    export_dataset,
+    SYNTHETIC_LABEL,
+    DEFAULT_RESOLUTION,
+    DEFAULT_NUM_CYCLES,
+    MAX_LEAD_DAYS,
+)
 
-def generate_grid(lat_min: float, lat_max: float, lon_min: float, lon_max: float, res: float) -> pd.DataFrame:
-    """Generates a geographical grid DataFrame."""
-    lats = np.arange(lat_min, lat_max + res, res)
-    lons = np.arange(lon_min, lon_max + res, res)
-    
-    # Create a meshgrid
-    lat_grid, lon_grid = np.meshgrid(lats, lons)
-    return pd.DataFrame({
-        'latitude': lat_grid.flatten(),
-        'longitude': lon_grid.flatten()
-    })
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+)
+logger = logging.getLogger("generate_demo_data")
 
-def generate_synthetic_weather(df: pd.DataFrame, lead_day: int) -> pd.DataFrame:
-    """
-    Generates synthetic forecasts and observations. 
-    Errors grow with lead_day and specific weather conditions.
-    """
-    n = len(df)
-    
-    # Base synthetic 'true' climate patterns (randomized for demonstration)
-    base_temp = np.random.uniform(10, 40, n)
-    base_rain = np.random.exponential(5, n) # Most days little rain, some days heavy
-    base_wind_u = np.random.normal(0, 10, n)
-    base_wind_v = np.random.normal(0, 10, n)
-    base_pressure = np.random.normal(1010, 5, n)
-    base_humidity = np.random.uniform(20, 100, n)
-    
-    # Base error grows with lead day
-    error_scale = 1.0 + (lead_day * 0.5)
-    
-    # Create challenging scenarios: high rain or rapid pressure change increases error
-    difficulty_multiplier = np.where(base_rain > 15, 2.0, 1.0)
-    difficulty_multiplier = np.where(base_pressure < 1000, difficulty_multiplier * 1.5, difficulty_multiplier)
-    
-    total_error_scale = error_scale * difficulty_multiplier
-    
-    # Generate Forecasts (Base + some model bias/noise)
-    df['forecast_temperature'] = base_temp + np.random.normal(0, 1.5 * total_error_scale, n)
-    df['forecast_rainfall'] = np.clip(base_rain + np.random.normal(0, 2.0 * total_error_scale, n), 0, None)
-    df['forecast_wind_u'] = base_wind_u + np.random.normal(0, 1.0 * total_error_scale, n)
-    df['forecast_wind_v'] = base_wind_v + np.random.normal(0, 1.0 * total_error_scale, n)
-    df['forecast_pressure'] = base_pressure + np.random.normal(0, 1.0 * total_error_scale, n)
-    df['forecast_humidity'] = np.clip(base_humidity + np.random.normal(0, 3.0 * total_error_scale, n), 0, 100)
-
-    # Generate Observations (Base + very small instrument noise)
-    df['observed_temperature'] = base_temp + np.random.normal(0, 0.2, n)
-    df['observed_rainfall'] = np.clip(base_rain + np.random.normal(0, 0.5, n), 0, None)
-    df['observed_wind_u'] = base_wind_u + np.random.normal(0, 0.5, n)
-    df['observed_wind_v'] = base_wind_v + np.random.normal(0, 0.5, n)
-    df['observed_pressure'] = base_pressure + np.random.normal(0, 0.5, n)
-    df['observed_humidity'] = np.clip(base_humidity + np.random.normal(0, 1.0, n), 0, 100)
-    
-    return df
 
 def create_dataset() -> pd.DataFrame:
-    """Orchestrates the generation of the full dataset."""
-    logging.warning("GENERATING SYNTHETIC DEMONSTRATION DATA — NOT REAL WEATHER DATA")
-    grid_df = generate_grid(LAT_MIN, LAT_MAX, LON_MIN, LON_MAX, RESOLUTION)
-    
-    all_data = []
-    
-    for day_offset in range(NUM_INIT_DATES):
-        init_time = START_DATE + timedelta(days=day_offset)
-        
-        for lead_day in range(1, LEAD_DAYS + 1):
-            valid_time = init_time + timedelta(days=lead_day)
-            
-            # Copy grid for this time slice
-            slice_df = grid_df.copy()
-            slice_df['forecast_initialization_time'] = init_time
-            slice_df['forecast_valid_time'] = valid_time
-            slice_df['lead_day'] = lead_day
-            
-            # Populate weather variables
-            slice_df = generate_synthetic_weather(slice_df, lead_day)
-            all_data.append(slice_df)
-            
-    final_df = pd.concat(all_data, ignore_index=True)
-    return final_df
+    """
+    Backwards-compatible interface for pytest fixtures and legacy invocations.
+    Generates standard demonstration dataset across India domain (Lat 8-37N, Lon 68-97E).
+    """
+    return generate_meteorological_dataset(
+        resolution=DEFAULT_RESOLUTION,
+        num_init_dates=DEFAULT_NUM_CYCLES,
+        max_lead_days=MAX_LEAD_DAYS,
+    )
+
+
+def main():
+    parser = argparse.ArgumentParser(
+        description="Generate synthetic meteorological demonstration dataset for ForecastGuard AI."
+    )
+    parser.add_argument(
+        "--resolution",
+        type=float,
+        default=DEFAULT_RESOLUTION,
+        help="Spatial grid resolution in degrees (default: 1.0; operational: 0.5)",
+    )
+    parser.add_argument(
+        "--num-cycles",
+        type=int,
+        default=DEFAULT_NUM_CYCLES,
+        help="Number of forecast initialization cycles (default: 5)",
+    )
+    parser.add_argument(
+        "--max-lead-days",
+        type=int,
+        default=MAX_LEAD_DAYS,
+        help="Forecast lead day horizon (default: 10)",
+    )
+    parser.add_argument(
+        "--output-dir",
+        type=str,
+        default="data/synthetic",
+        help="Output directory for generated datasets",
+    )
+    parser.add_argument(
+        "--export-netcdf",
+        action="store_true",
+        help="Also export dataset as NetCDF4 (.nc) format",
+    )
+    args = parser.parse_args()
+
+    logger.info("Starting ForecastGuard AI synthetic weather data generation...")
+    dataset = generate_meteorological_dataset(
+        resolution=args.resolution,
+        num_init_dates=args.num_cycles,
+        max_lead_days=args.max_lead_days,
+    )
+
+    parquet_path, nc_path = export_dataset(
+        df=dataset,
+        output_dir=args.output_dir,
+        filename_prefix="weather_demo",
+        export_netcdf=args.export_netcdf,
+    )
+
+    print("\n" + "=" * 70)
+    print("FORECASTGUARD AI — DATA GENERATION COMPLETE")
+    print(f"Data Label: {SYNTHETIC_LABEL}")
+    print(f"Total Grid Cells Generated: {len(dataset):,}")
+    print(f"Lead Days Covered: 1 to {args.max_lead_days}")
+    print(f"Parquet Artifact: {parquet_path}")
+    if nc_path:
+        print(f"NetCDF4 Artifact: {nc_path}")
+    print("=" * 70 + "\n")
+
 
 if __name__ == "__main__":
-    output_dir = Path("data/synthetic")
-    output_dir.mkdir(parents=True, exist_ok=True)
-    
-    dataset = create_dataset()
-    output_path = output_dir / "weather_demo.parquet"
-    
-    # Save as Parquet
-    dataset.to_parquet(output_path, index=False)
-    
-    logging.info(f"Generated {len(dataset)} rows of synthetic data.")
-    logging.info(f"Saved dataset to {output_path}")
+    main()

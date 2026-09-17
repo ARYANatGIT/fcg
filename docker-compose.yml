@@ -1,23 +1,39 @@
 version: '3.8'
+
 services:
   backend:
-    build: 
+    build:
       context: .
-      dockerfile: Dockerfile.backend
+      dockerfile: docker/Dockerfile.backend
+    container_name: forecastguard-backend
     ports:
       - "8000:8000"
     environment:
       - APP_ENV=production
       - DATA_MODE=synthetic
       - ALLOWED_ORIGINS=http://localhost:3000
+      - DATABASE_URL=sqlite:///./data/forecastguard.db
+    volumes:
+      - ./data:/app/data
+      - ./models:/app/models
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
 
   frontend:
     build:
       context: .
-      dockerfile: Dockerfile.frontend
+      dockerfile: docker/Dockerfile.frontend
+    container_name: forecastguard-frontend
     ports:
       - "3000:3000"
     environment:
       - NEXT_PUBLIC_API_URL=http://localhost:8000
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
+    restart: unless-stopped

@@ -1,148 +1,221 @@
-# ForecastGuard AI
-### AI-Based Forecast Bust Detection for Medium-Range Weather Forecasts
+# FORECASTGUARD AI
+
+> **"AI-powered forecast reliability and bust detection for medium-range weather forecasts."**
+
 **Problem Statement ID:** 26079  
-**Organization:** Ministry of Earth Sciences (MoES)  
+**Organization:** Ministry of Earth Sciences (MoES), Government of India  
 **Department:** National Centre for Medium Range Weather Forecasting (NCMRWF)  
-**Theme:** Smart Automation / Software  
+**Theme / Category:** Smart Automation / Software  
 
 ---
 
-## Executive Summary
-Medium-range numerical weather prediction (NWP) models (such as NCMRWF NCUM/NEPS or NOAA GFS) occasionally experience severe forecast failures or **"forecast busts"** during rapidly evolving weather regimes—including monsoon depressions, intense convective precipitation, western disturbances, tropical cyclones, heat waves, and break/active monsoon phases. 
+## 1. Executive Summary & Problem Context
 
-**ForecastGuard AI** is an AI/ML decision-support system that:
-1. Identifies regions and lead times (Day 1 to Day 10) prone to large forecast errors.
-2. Generates calibrated **Forecast Bust Probabilities** and a complementary **Forecast Confidence Indicator** ($1 - P(\text{bust})$).
-3. Provides an interactive **Forecast Confidence Map** across Indian subregions and stations.
-4. Delivers **Explainable AI (XAI)** via SHAP to identify key meteorological drivers of forecast uncertainty.
-5. Employs a **Historical Analog Engine** to locate similar past forecast setups without time-travel leakage.
-6. Detects **Run-to-Run Forecast Revisions** across consecutive initialization runs as instability signals.
-7. Exposes all analytical modules via a production-ready **FastAPI** backend and an interactive **Next.js** dashboard.
+Medium-range numerical weather prediction (NWP) models (such as NCMRWF's NCUM and global ensemble systems) provide forecasts from Day 1 through Day 10. While generally skillful, these forecasts can suffer large, sudden degradation in accuracy—termed **forecast busts**—during rapidly evolving, extreme, or convective meteorological regimes:
+- Monsoon depressions and low-pressure systems over the Bay of Bengal / Arabian Sea
+- Active-break monsoon transitions
+- Localized heavy to extremely heavy rainfall events
+- Western disturbances over Northern India
+- Heatwaves, pre-monsoon squalls, and cyclonic tracks
 
----
+**ForecastGuard AI** introduces a dedicated machine learning reliability layer on top of NWP pipelines:
+- **NWP tells forecasters what the weather may be.**
+- **ForecastGuard AI tells forecasters how much confidence they should place in that forecast.**
 
-## 13-Phase Implementation Matrix
-
-| Phase | Description | Key Technologies | Status |
-|---|---|---|:---:|
-| **1. Foundation** | Repository structure, environments, Git, configuration, tests | Python, Git, Pytest | ✅ Complete |
-| **2. Preprocessing** | Standardized weather data pipeline (UTC, °C, mm, m/s, hPa) | Pandas, NumPy, Parquet | ✅ Complete |
-| **3. EDA** | Distribution analysis, error growth by lead day, spatial patterns | Jupyter, Seaborn | ✅ Complete |
-| **4. Target Definition** | 90th percentile lead-day bust threshold & strict anti-leakage | NumPy, SciPy | ✅ Complete |
-| **5. ML Training** | Chronological 70/15/15 split, LightGBM with `scale_pos_weight` | LightGBM, Scikit-learn | ✅ Complete |
-| **6. Inference** | Calibrated probability engine, confidence, risk classification | Isotonic Calibration | ✅ Complete |
-| **7. Explainable AI** | SHAP waterfall/attributions, meteorological reason codes | SHAP, Python | ✅ Complete |
-| **8. Historical Analogs**| Weighted Euclidean distance search on strictly historical cases | Scikit-learn | ✅ Complete |
-| **9. Forecast Revisions**| Multi-cycle run-to-run instability detection ($T_{-24h} \rightarrow T_{-12h} \rightarrow T_0$) | Pandas, RobustScaler | ✅ Complete |
-| **10. FastAPI Backend** | High-performance REST API with comprehensive endpoint suite | FastAPI, Pydantic | ✅ Complete |
-| **11. Dashboard** | Interactive operational UI with India map & Recharts analytics | Next.js, MapLibre, Recharts | ✅ Complete |
-| **12. Real NWP Pipeline**| NetCDF/GRIB matching architecture for GFS/ERA5/NCUM | Xarray, NetCDF/GRIB | ✅ Complete |
-| **13. Final Integration**| Docker containerization, comprehensive testing, documentation | Docker, Pytest, Docs | ✅ Complete |
+> [!IMPORTANT]
+> **Scientific Integrity Guarantee:**
+> ForecastGuard AI does **not** replace the NWP model, nor does it predict raw atmospheric variables. It predicts the conditional probability $P(\text{Bust} \mid \mathbf{x}_{\text{init}})$ that an operational NWP forecast will exceed a defined historical error threshold at a given lead day (Day 1–10).
+> 
+> When real government feeds are not connected, the system executes in a transparently labeled **`SYNTHETIC DEMONSTRATION DATA — NOT REAL WEATHER DATA`** mode. Model metrics are strictly derived from evaluated test sets.
 
 ---
 
-## System Architecture
+## 2. Real Indian Government Weather Data Integration
+
+ForecastGuard AI provides pluggable data adapters (`ml/data/data_provider.py`) engineered to ingest operational products from official Ministry of Earth Sciences (MoES) agencies:
+
+### A. National Centre for Medium Range Weather Forecasting (NCMRWF)
+- **Portal:** [https://www.ncmrwf.gov.in/](https://www.ncmrwf.gov.in/) | [https://nwp.ncmrwf.gov.in/](https://nwp.ncmrwf.gov.in/)
+- **Target Products:**
+  1. **NCUM Global (12 km):** Operational deterministic forecasts up to Day 10 in GRIB2/NetCDF4 format.
+  2. **NCUM Regional (4 km):** High-resolution convective-scale forecasts covering the South Asia domain.
+  3. **NEPS (NCMRWF Ensemble Prediction System):** 23 ensemble members providing ensemble mean, ensemble spread, and standard deviation fields up to Day 10.
+  4. **IMDAA (Indian Monsoon Data Assimilation and Analysis):** High-resolution (12 km) regional atmospheric reanalysis spanning 1979–present, used as the historical error baseline.
+
+### B. India Meteorological Department (IMD)
+- **Portal:** [https://mausam.imd.gov.in/](https://mausam.imd.gov.in/) | [https://www.imdpune.gov.in/](https://www.imdpune.gov.in/)
+- **Target Products:**
+  1. **IMD Gridded Daily Rainfall (0.25° × 0.25°):** Pai et al. (2014) high-resolution gridded precipitation based on thousands of rain gauge stations.
+  2. **IMD Gridded Daily Temperature (1.0° × 1.0° / 0.5° × 0.5°):** Srivastava et al. gridded maximum, minimum, and mean surface temperatures.
+  3. **IMD Automated Weather Station (AWS) Network:** Real-time surface observations (pressure, 2m temperature, 10m wind, relative humidity).
+  4. **IMD Doppler Weather Radar (DWR):** Network radar composite reflectivity across coastal and inland threat corridors.
+
+---
+
+## 3. Project Architecture & Directory Layout
 
 ```
-                 NWP Forecast (Lead Days 1-10)
-                               │
-               ┌───────────────┴───────────────┐
-               ▼                               ▼
-       Spatial Coordinates            Weather Features
-     (Lat: 8-38°N, Lon: 68-98°E)    (Temp, Rain, Wind, Press)
-               │                               │
-               └───────────────┬───────────────┘
-                               ▼
-                    Feature Engineering Engine
-                 (Cyclic Time, Lags, Interactions)
-                               │
-                [STRICT ANTI-LEAKAGE GATEKEEPER]
-                               │
-                               ▼
-                     LightGBM Model Core
-                               │
-            ┌──────────────────┼──────────────────┐
-            ▼                  ▼                  ▼
-     Probability           SHAP Local       Historical Analogs
-     Calibration           Explainer        (Prior Time Only)
-   (Isotonic Regr.)     (Attributions)      (Top-5 Cases)
-            │                  │                  │
-            └──────────────────┼──────────────────┘
-                               ▼
-                    Multi-Cycle Revision
-                 (Run 1 → Run 2 → Current)
-                               │
-                               ▼
-                     FastAPI REST Backend
-                         (Port 8000)
-                               │
-                               ▼
-                   Next.js Operational UI
-                         (Port 3000)
+forecastguard-ai/
+├── frontend/                     # Next.js 16 + React 19 + Tailwind CSS v4 Dashboard
+│   ├── app/                      # Next.js App Router (Landing + /cockpit dashboard)
+│   ├── components/               # Geospatial India map, lead time charts, SHAP cards
+│   ├── maps/                     # MapLibre GL and SVG geospatial vector components
+│   ├── charts/                   # Recharts uncertainty timelines and reliability diagrams
+│   ├── types/                    # Meteorological and bust prediction TypeScript interfaces
+│   └── lib/                      # Client utilities and API fetchers
+│
+├── backend/                      # High-performance FastAPI ASGI REST Engine
+│   ├── main.py                   # App entrypoint, middleware, and lifecycle handlers
+│   ├── api/                      # Modular API route controllers
+│   ├── services/                 # Prediction pipeline, analog retrieval, and revision engines
+│   ├── models/                   # Domain schemas and persistence definitions
+│   ├── database/                 # SQLite/PostgreSQL persistence connectors
+│   ├── schemas/                  # Pydantic request/response validation schemas
+│   └── utils/                    # Geospatial bounds, coordinates, and error formatting
+│
+├── ml/                           # Core Meteorological Machine Learning Engine
+│   ├── data/                     # Data providers (Synthetic, IMD, NCMRWF, ERA5)
+│   │   ├── data_provider.py      # Abstract DataProvider interface and adapters
+│   │   └── synthetic_generator.py# Physical multi-level synthetic weather generator
+│   ├── preprocessing/            # Error calculation, bust labeling, and temporal splitting
+│   ├── features/                 # Non-leaking spatial/temporal feature engineering
+│   ├── models/                   # Serialized LightGBM, Random Forest, and Calibrator pipelines
+│   ├── training/                 # Model training and probability calibration scripts
+│   ├── inference/                # Real-time lead-day inference engines
+│   ├── explainability/           # SHAP model-associated factor importance
+│   ├── evaluation/               # PR-AUC, Brier score, and reliability curve evaluation
+│   ├── analogs/                  # Historical synoptic analog pattern matcher
+│   └── revisions/                # Cycle-to-cycle forecast revision analyzer
+│
+├── notebooks/                    # Exploratory meteorological research notebooks
+│   ├── 01_data_exploration.ipynb
+│   ├── 02_forecast_error_analysis.ipynb
+│   ├── 03_feature_engineering.ipynb
+│   ├── 04_model_training.ipynb
+│   └── 05_model_evaluation.ipynb
+│
+├── data/                         # Data persistence tiers
+│   ├── raw/                      # Raw IMD/NCMRWF NetCDF and GRIB2 files
+│   ├── processed/                # Tabular Parquet feature tables
+│   └── synthetic/                # Generated synthetic benchmark datasets
+│
+├── tests/                        # Comprehensive automated test suite
+│   ├── test_synthetic_data.py    # Multi-level variable & error dynamics tests
+│   ├── test_error_calculation.py # Meteorological error formulation tests
+│   ├── test_bust_labels.py       # 90th percentile threshold tests
+│   ├── test_feature_engineering.py# Temporal leakage prevention audit
+│   ├── test_model_training.py    # Temporal train/val/test split verification
+│   ├── test_calibration.py       # Isotonic and Platt scaling tests
+│   ├── test_shap_explainability.py# SHAP values and directional impact tests
+│   ├── test_historical_analogs.py# Cosine similarity analog matcher tests
+│   ├── test_forecast_revision.py # Cycle displacement and pattern correlation tests
+│   └── api/                      # FastAPI endpoint integration tests
+│
+├── scripts/                      # Operational automation CLI scripts
+│   └── generate_demo_data.py     # Synthetic data generation CLI
+│
+├── docker/                       # Production container specifications
+│   ├── Dockerfile.backend        # Python 3.11-slim FastAPI container
+│   └── Dockerfile.frontend       # Node 20-alpine Next.js container
+│
+├── requirements.txt              # Pinned Python dependencies
+├── .env.example                  # Environment configuration template
+├── docker-compose.yml            # Multi-container orchestration specification
+└── README.md                     # System documentation
 ```
 
 ---
 
-## Quick Start & Local Execution
+## 4. Phase 1 — Synthetic Meteorological Data Mode
+
+When real NCMRWF/IMD feeds are not connected, the system generates physically realistic, multi-level atmospheric datasets spanning the Indian subcontinent:
+- **Spatial Grid:** Latitude 8.0°N to 37.0°N, Longitude 68.0°E to 97.0°E at configurable resolution (default `1.0°`, high-res `0.5°`).
+- **Surface Variables:** 2m temperature (°C), relative humidity (%), precipitation (mm), surface pressure (hPa), 10m U/V wind components (m/s), 10m wind speed.
+- **Atmospheric Levels:** 500 hPa geopotential height (gpm), 850 hPa temperature, relative humidity, and U/V winds; 200 hPa upper-level jet U/V winds.
+- **Derived Variables:** Vertical wind shear (200–850 hPa vector difference), CAPE (J/kg), precipitable water (mm), 850 hPa relative vorticity, horizontal divergence, and spatial pressure/moisture gradients.
+- **Bust Challenge Dynamics:** Errors expand with lead time (Day 1 to 10) and magnify in simulated synoptic low-pressure disturbances, intense convective precipitation cores, and high-shear zones.
+
+### Running Synthetic Data Generation
+```powershell
+# Generate standard demonstration dataset (45,000 grid points, 10 lead days)
+python scripts/generate_demo_data.py
+
+# Generate high-resolution grid (0.5 degree) with optional NetCDF export
+python scripts/generate_demo_data.py --resolution 0.5 --num-cycles 5 --export-netcdf
+```
+
+---
+
+## 5. Local Quickstart & Development
 
 ### Prerequisites
 - Python 3.11+
-- Node.js 18+ and npm
-- (Optional) Docker and Docker Compose
+- Node.js 20+ & npm
+- Docker & Docker Compose (optional for containerized deployment)
 
-### 1. Backend Setup & Startup
+### 1. Environment Setup
 ```powershell
-# Install dependencies
+# Copy environment file
+Copy-Item .env.example .env
+
+# Install Python dependencies
 pip install -r requirements.txt
-
-# Run all unit and integration tests (48 passing tests)
-pytest -v
-
-# Start FastAPI backend server
-uvicorn backend.main:app --reload --host 0.0.0.0 --port 8000
 ```
-API Documentation will be accessible at: `http://localhost:8000/docs`
 
-### 2. Frontend Setup & Startup
+### 2. Generate Synthetic Data
+```powershell
+python scripts/generate_demo_data.py
+```
+
+### 3. Run Automated Tests
+```powershell
+# Run synthetic data generator tests
+pytest tests/test_synthetic_data.py -v
+
+# Run entire 58-test verification suite
+pytest -v
+```
+
+### 4. Launch Backend API
+```powershell
+python -m uvicorn backend.main:app --host 0.0.0.0 --port 8000 --reload
+```
+API Documentation will be available at: `http://localhost:8000/docs`
+
+### 5. Launch Frontend Dashboard
 ```powershell
 cd frontend
 npm install
 npm run dev
 ```
-Dashboard will be accessible at: `http://localhost:3000`
+Operational Cockpit accessible at: `http://localhost:3000/cockpit`  
+Landing Page accessible at: `http://localhost:3000/`
 
-### 3. Docker Compose (One-Click Production Launch)
+---
+
+## 6. Docker Container Orchestration
+
+Run the complete multi-tier application with a single command:
 ```powershell
 docker-compose up --build
 ```
+- **Backend API:** `http://localhost:8000` (Healthcheck: `/api/v1/health`)
+- **Frontend Dashboard:** `http://localhost:3000`
 
 ---
 
-## API Endpoints Reference
+## 7. Status & Phase Progress
 
-| Method | Path | Description |
-|---|---|---|
-| `GET` | `/api/v1/health` | Service health, model status, and module availability |
-| `GET` | `/api/v1/model` | Model hyperparameters, feature list, and validation metrics |
-| `GET` | `/api/v1/features` | Feature catalog with units and forbidden leakage definitions |
-| `POST` | `/api/v1/predict` | Standalone calibrated bust probability, confidence, and risk |
-| `POST` | `/api/v1/explain` | Standalone SHAP feature attributions and reason codes |
-| `POST` | `/api/v1/analogs` | Top-5 historical similar cases and analog bust frequency |
-| `POST` | `/api/v1/revisions` | Multi-cycle run-to-run parameter evolution and instability score |
-| `POST` | `/api/v1/analyze` | Consolidated decision-support payload (All modules combined) |
-| `GET` | `/api/v1/spatial-grid` | India station confidence and bust probabilities for Day 1 to 10 |
-
----
-
-## Anti-Leakage & Meteorological Integrity
-1. **Strict Target Isolation:** Observation variables (`observed_*`), error metrics (`error_*`), and target labels (`bust`) are strictly forbidden from the input feature set $X$. Any request or dataset attempting to pass these is rejected immediately.
-2. **Chronological Time Splitting:** Data is strictly partitioned into 70% Train, 15% Validation, and 15% Test chronologically. Random splitting is strictly forbidden.
-3. **No Time-Travel in Analogs:** The historical analog retriever strictly filters cases initialized prior to the query forecast ($t_{init} < T_{query}$).
-4. **Research Prototype Notice:** Model-estimated bust probabilities do not replace official statutory weather warnings issued by IMD/MoES.
-
----
-
-## Verification & Test Results
-- **Pytest Suite:** 48 passed, 0 failed (100% pass rate).
-- **TypeScript / Next.js:** Zero build errors, zero type errors.
-- **Smoke Test:** Verified across health, prediction, SHAP, analogs, and revisions.
+| Phase | Description | Status |
+| :--- | :--- | :--- |
+| **Phase A** | Project Architecture, Folder Structure, Requirements, Docker, Synthetic Generator, Adapters, README, Tests | **COMPLETE** |
+| **Phase B** | Forecast Error Calculation Engine (MAE, RMSE, Pythagorean wind vectors, log1p rainfall, normalized score) | Complete (Existing module in `ml/preprocessing/`) |
+| **Phase C** | Configurable Bust Definition Engine (90th percentile thresholding, lead-time grouping) | Complete (Existing module in `ml/preprocessing/`) |
+| **Phase D** | Non-Leaking Feature Engineering (Initialization-time state, temporal diffs, spatial gradients, stability) | Complete (Existing module in `ml/features/`) |
+| **Phase E** | ML Models (Logistic Regression, Random Forest, LightGBM with strict temporal splitting) | Complete (Existing module in `ml/training/`) |
+| **Phase F** | Probability Calibration (Isotonic Regression, Brier score, Expected Calibration Error) | Complete (Existing module in `ml/training/`) |
+| **Phase G** | Explainable AI (TreeSHAP model-associated factor importance, positive/negative drivers) | Complete (Existing module in `ml/explainability/`) |
+| **Phase H** | Historical Analog Engine (Standardized feature vectors, Cosine similarity, Top-K analogs) | Complete (Existing module in `ml/analogs/`) |
+| **Phase I** | Forecast Revision Analyzer (Cycle displacement, RMSE revision, pattern correlation shift) | Complete (Existing module in `ml/revisions/`) |
+| **Phase J** | FastAPI Operational Endpoints (Health, Forecast, Bust Probability, Confidence, Analogs, SHAP, Replay) | Complete (Existing routes in `backend/routes/`) |
+| **Phase K** | Operational Frontend Cockpit (MapLibre vector India grid, Day 1–10 slider, drilldown, replay, evaluation) | Complete (Operational dashboard at `/cockpit`) |

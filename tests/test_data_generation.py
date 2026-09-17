@@ -1,8 +1,3 @@
-"""
-test_data_generation.py
-Tests the integrity and physical bounds of our synthetic dataset.
-"""
-
 import pytest
 import pandas as pd
 from pathlib import Path
