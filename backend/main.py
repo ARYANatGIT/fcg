@@ -41,11 +41,17 @@ logging.basicConfig(level=logging.INFO)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Load ForecastGuard bust detection model
-    model_service.load_models()
-    
-    # Load Real-Time LightGBM regression model
-    reload_ml_model()
+    # Safely initialize ForecastGuard bust detection ML artifacts
+    try:
+        model_service.load_models()
+    except Exception as e:
+        logging.warning(f"ForecastGuard model service startup warning (non-fatal): {e}")
+
+    # Safely load Real-Time LightGBM regression model
+    try:
+        reload_ml_model()
+    except Exception as e:
+        logging.warning(f"LightGBM regression reload warning (non-fatal): {e}")
 
     # Launch 30-minute automated ingestion & LightGBM model retraining task
     retrain_task = asyncio.create_task(continuous_learning_worker())

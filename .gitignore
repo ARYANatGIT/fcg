@@ -13,9 +13,6 @@ __pycache__/
 node_modules/
 .next/
 
-# Data & Models (Keep out of git)
+# Data & Models
 data/raw/
 data/interim/
-data/processed/*.parquet
-data/processed/*.csv
-models/*.pkl
