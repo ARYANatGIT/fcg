@@ -1,0 +1,28 @@
+services:
+  - type: web
+    name: forecastguard-api
+    env: python
+    plan: standard
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn backend.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
+      - key: OPENWEATHER_API_KEY
+        value: bb7bff7cbcebf1e0990e0dcadaef7af1
+
+  - type: web
+    name: forecastguard-web
+    env: node
+    rootDir: frontend
+    plan: standard
+    buildCommand: npm install && npm run build
+    startCommand: npm run start
+    envVars:
+      - key: NODE_VERSION
+        value: 20.11.0
+      - key: NEXT_PUBLIC_CARTO_API_KEY
+        value: cb1_3qnh_1_8e89ac90b8868a8c23bf7986
+      - key: NEXT_PUBLIC_WINDY_API_KEY
+        value: VrzEVkW0Mx3LAN3AJWNTS2zXOeTWlpkv
+

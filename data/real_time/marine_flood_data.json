@@ -66,5 +66,73 @@
     "wave_period_s": 6.5,
     "river_discharge_m3s": 29.55,
     "_id": "b6abbc8a-0915-44ec-944d-96b890d9c6ff"
+  },
+  {
+    "city": "Mumbai",
+    "timestamp": "2026-09-17T20:50:13.350584+00:00",
+    "is_coastal": true,
+    "wave_height_m": 0.98,
+    "wave_direction_deg": 249.0,
+    "wave_period_s": 7.35,
+    "_id": "536a2aae-4713-41dd-87d2-314ad57bb7ed"
+  },
+  {
+    "city": "Surat",
+    "timestamp": "2026-09-17T20:50:32.195417+00:00",
+    "is_coastal": true,
+    "wave_height_m": 0.58,
+    "wave_direction_deg": 229.0,
+    "wave_period_s": 6.35,
+    "river_discharge_m3s": 3.57,
+    "_id": "a5ef47e1-b887-4214-9633-4bd9d9910aee"
+  },
+  {
+    "city": "Chennai",
+    "timestamp": "2026-09-17T20:51:01.643941+00:00",
+    "is_coastal": true,
+    "wave_height_m": 0.7,
+    "wave_direction_deg": 153.0,
+    "wave_period_s": 7.25,
+    "_id": "354b4f44-7cdc-421b-867d-51f557a72ef0"
+  },
+  {
+    "city": "Kochi",
+    "timestamp": "2026-09-17T20:51:12.747733+00:00",
+    "is_coastal": true,
+    "wave_height_m": 0.98,
+    "wave_direction_deg": 228.0,
+    "wave_period_s": 10.0,
+    "river_discharge_m3s": 7.41,
+    "_id": "2f7eb798-2a46-4341-9446-3841b2345028"
+  },
+  {
+    "city": "Thiruvananthapuram",
+    "timestamp": "2026-09-17T20:51:18.578718+00:00",
+    "is_coastal": true,
+    "wave_height_m": 1.18,
+    "wave_direction_deg": 200.0,
+    "wave_period_s": 10.65,
+    "river_discharge_m3s": 1.48,
+    "_id": "539aa069-0a36-4f56-98f7-7ca156d4f45b"
+  },
+  {
+    "city": "Visakhapatnam",
+    "timestamp": "2026-09-17T20:51:24.561370+00:00",
+    "is_coastal": true,
+    "wave_height_m": 0.82,
+    "wave_direction_deg": 167.0,
+    "wave_period_s": 11.5,
+    "river_discharge_m3s": 7.93,
+    "_id": "734eee5e-a284-4bf4-bd81-46b5dca92a86"
+  },
+  {
+    "city": "Kolkata",
+    "timestamp": "2026-09-17T20:51:30.682112+00:00",
+    "is_coastal": true,
+    "wave_height_m": 1.2,
+    "wave_direction_deg": 240.0,
+    "wave_period_s": 6.5,
+    "river_discharge_m3s": 29.55,
+    "_id": "f0a0b548-3920-4a54-b507-f835b1d19f59"
   }
 ]

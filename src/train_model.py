@@ -1,9 +1,3 @@
-"""
-ForecastGuard AI — Machine Learning Training Pipeline (Phase 2)
-Connects to MongoDB, queries 'real_time_data', preprocesses features with rolling statistics,
-scales features, trains a LightGBM regressor, and serializes the pipeline using joblib.
-"""
-
 import sys
 import logging
 from pathlib import Path
@@ -22,6 +16,7 @@ if str(ROOT_DIR) not in sys.path:
     sys.path.insert(0, str(ROOT_DIR))
 
 from src.db import get_real_time_collection
+from src.multi_source_ingestion import INDIAN_CITIES
 
 logging.basicConfig(
     level=logging.INFO,
@@ -34,15 +29,32 @@ MODEL_OUTPUT_PATH = MODEL_OUTPUT_DIR / "lgbm_regression.joblib"
 
 
 def load_data_from_mongodb() -> pd.DataFrame:
-    """Queries the real_time_data MongoDB collection and returns a DataFrame."""
+    """Queries the real_time_data MongoDB collection and returns a DataFrame across all monitored cities."""
     collection = get_real_time_collection()
-    records = collection.find()
-    
+    projection = {
+        "city": 1,
+        "station": 1,
+        "timestamp": 1,
+        "observed_time": 1,
+        "temperature_2m": 1,
+        "relative_humidity_2m": 1,
+        "surface_pressure": 1,
+        "wind_speed_10m": 1,
+        "_id": 0,
+    }
+    logger.info("Streaming documents from MongoDB collection 'real_time_data'...")
+    cursor = collection.find({}, projection).batch_size(1000)
+    records = []
+    for doc in cursor:
+        records.append(doc)
+        if len(records) % 5000 == 0:
+            logger.info(f"Loaded {len(records)} records...")
+
     if not records:
         raise ValueError("No records found in MongoDB collection 'real_time_data'. Run src/data_ingestion.py first.")
-    
+
     df = pd.DataFrame(records)
-    logger.info(f"Loaded {len(df)} raw records from MongoDB collection 'real_time_data'.")
+    logger.info(f"Loaded total {len(df)} raw records from MongoDB collection 'real_time_data'.")
     return df
 
 
@@ -71,16 +83,23 @@ def preprocess_data(df: pd.DataFrame):
     # Handle missing values via forward/backward fill
     df[base_features] = df[base_features].ffill().bfill()
 
-    # Feature Engineering: 3-point rolling averages and volatility
-    df["rolling_temp_mean_3"] = df["temperature_2m"].rolling(window=3, min_periods=1).mean()
-    df["rolling_temp_std_3"] = df["temperature_2m"].rolling(window=3, min_periods=1).std().fillna(0.0)
-    df["rolling_pressure_mean_3"] = df["surface_pressure"].rolling(window=3, min_periods=1).mean()
-    df["rolling_humidity_mean_3"] = df["relative_humidity_2m"].rolling(window=3, min_periods=1).mean()
+    # Feature Engineering: 3-point rolling averages and volatility per station/city
+    group_col = "city" if "city" in df.columns else ("station" if "station" in df.columns else None)
+    if group_col:
+        df["rolling_temp_mean_3"] = df.groupby(group_col)["temperature_2m"].transform(lambda s: s.rolling(window=3, min_periods=1).mean())
+        df["rolling_temp_std_3"] = df.groupby(group_col)["temperature_2m"].transform(lambda s: s.rolling(window=3, min_periods=1).std().fillna(0.0))
+        df["rolling_pressure_mean_3"] = df.groupby(group_col)["surface_pressure"].transform(lambda s: s.rolling(window=3, min_periods=1).mean())
+        df["rolling_humidity_mean_3"] = df.groupby(group_col)["relative_humidity_2m"].transform(lambda s: s.rolling(window=3, min_periods=1).mean())
+        # Target variable: Next-hour/next-period temperature within same city
+        df["target_temp_next"] = df.groupby(group_col)["temperature_2m"].shift(-1)
+    else:
+        df["rolling_temp_mean_3"] = df["temperature_2m"].rolling(window=3, min_periods=1).mean()
+        df["rolling_temp_std_3"] = df["temperature_2m"].rolling(window=3, min_periods=1).std().fillna(0.0)
+        df["rolling_pressure_mean_3"] = df["surface_pressure"].rolling(window=3, min_periods=1).mean()
+        df["rolling_humidity_mean_3"] = df["relative_humidity_2m"].rolling(window=3, min_periods=1).mean()
+        df["target_temp_next"] = df["temperature_2m"].shift(-1)
 
-    # Target variable: Next-hour/next-period temperature
-    df["target_temp_next"] = df["temperature_2m"].shift(-1)
-
-    # Drop the terminal record without future target
+    # Drop terminal records without future target
     clean_df = df.dropna(subset=["target_temp_next"]).copy()
 
     feature_cols = [

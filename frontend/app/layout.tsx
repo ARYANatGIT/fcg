@@ -14,8 +14,8 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata = {
-  title: "ForecastGuard AI — MoES / NCMRWF Forecast Bust Detection",
-  description: "AI-Based Medium-Range Weather Forecast Bust Detection & Confidence Platform (Problem Statement 26079)",
+  title: "ForecastGuard — Medium-Range Forecast Bust Detection Platform",
+  description: "AI-Based Medium-Range Weather Forecast Bust Detection & Confidence Platform",
 };
 
 export default function RootLayout({

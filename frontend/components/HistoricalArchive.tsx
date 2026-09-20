@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Archive, Search, Filter, AlertTriangle, CheckCircle, ExternalLink, Calendar, MapPin, Gauge } from "lucide-react";
 
 const HISTORICAL_CASES = [
@@ -99,51 +99,102 @@ const HISTORICAL_CASES = [
 ];
 
 export default function HistoricalArchive() {
+  const [cases, setCases] = useState<any[]>(HISTORICAL_CASES);
   const [searchTerm, setSearchTerm] = useState("");
   const [leadFilter, setLeadFilter] = useState("all");
+  const [stateFilter, setStateFilter] = useState("all");
+  const [loading, setLoading] = useState(false);
 
-  const filteredCases = HISTORICAL_CASES.filter((c) => {
+  useEffect(() => {
+    setLoading(true);
+    fetch("/api/historical_busts")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data?.cases && Array.isArray(data.cases) && data.cases.length > 0) {
+          setCases(data.cases);
+        }
+      })
+      .catch((err) => console.warn("Failed to load historical busts from MongoDB:", err))
+      .finally(() => setLoading(false));
+  }, []);
+
+  const filteredCases = cases.filter((c) => {
     const matchesSearch =
       c.station.toLowerCase().includes(searchTerm.toLowerCase()) ||
       c.event.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      c.state.toLowerCase().includes(searchTerm.toLowerCase());
+      c.state.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (c.synopticSummary && c.synopticSummary.toLowerCase().includes(searchTerm.toLowerCase()));
     const matchesLead =
       leadFilter === "all" ||
       (leadFilter === "d1-3" && c.leadDay <= 3) ||
       (leadFilter === "d4-6" && c.leadDay >= 4 && c.leadDay <= 6) ||
       (leadFilter === "d7-10" && c.leadDay >= 7);
-    return matchesSearch && matchesLead;
+    const matchesState = stateFilter === "all" || c.state.toLowerCase() === stateFilter.toLowerCase();
+    return matchesSearch && matchesLead && matchesState;
   });
 
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="border-b border-[#232732] pb-5">
-        <h2 className="text-[20px] font-[600] text-[#ffffff] flex items-center gap-2.5 tracking-[-0.025em]">
-          <Archive size={22} className="text-[#e4f222]" /> Severe Historical NWP Forecast Bust Archive
-        </h2>
-        <p className="text-[14px] text-[#94a3b8] mt-1.5 leading-relaxed">
-          Catalog of validated historical medium-range forecast failure events across India, documenting synoptic root causes, verification metrics, and ForecastGuard AI early-warning detection.
-        </p>
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#232732] pb-5">
+        <div>
+          <div className="flex items-center gap-2.5 mb-1.5">
+            <Archive size={22} className="text-[#e4f222]" />
+            <h2 className="text-xl font-bold text-white tracking-wide">
+              Severe Historical NWP Forecast Bust Archive (2020–2025)
+            </h2>
+            <span className="px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
+              {cases.length} BENCHMARKED CASES
+            </span>
+          </div>
+          <p className="text-sm text-white/60 leading-relaxed">
+            Comprehensive catalog of validated historical medium-range forecast failure events across India, documenting synoptic root causes, verification metrics, and ForecastGuard early-warning detection.
+          </p>
+        </div>
       </div>
 
       {/* Search & Filter Bar */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-12 gap-3">
         {/* Search */}
-        <div className="relative flex-1 max-w-md">
-          <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#94a3b8]" />
+        <div className="sm:col-span-6 relative">
+          <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/40" />
           <input
             type="text"
-            placeholder="Search by station, state, or meteorological event..."
+            placeholder="Search by station, state, cyclone, or synoptic event..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full h-11 bg-[#151820] border border-[#232732] rounded-[8px] pl-10 pr-4 text-[14px] text-[#ffffff] placeholder-[#64748b] focus:outline-none focus:border-[#e4f222]"
+            className="w-full h-11 bg-[#0e1424]/90 border border-white/10 rounded-xl pl-10 pr-4 text-xs font-medium text-white placeholder-white/40 focus:outline-none focus:border-cyan-400"
           />
         </div>
 
+        {/* State Filter */}
+        <div className="sm:col-span-3">
+          <select
+            value={stateFilter}
+            onChange={(e) => setStateFilter(e.target.value)}
+            className="w-full h-11 px-3 bg-[#0e1424]/90 border border-white/10 rounded-xl text-xs font-medium text-white focus:outline-none focus:border-cyan-400 cursor-pointer"
+          >
+            <option value="all">All States / Subdivisions</option>
+            <option value="Maharashtra">Maharashtra</option>
+            <option value="West Bengal">West Bengal</option>
+            <option value="Delhi NCT">Delhi NCT</option>
+            <option value="Tamil Nadu">Tamil Nadu</option>
+            <option value="Gujarat">Gujarat</option>
+            <option value="Odisha">Odisha</option>
+            <option value="Jammu & Kashmir">Jammu & Kashmir</option>
+            <option value="Himachal Pradesh">Himachal Pradesh</option>
+            <option value="Uttarakhand">Uttarakhand</option>
+            <option value="Karnataka">Karnataka</option>
+            <option value="Andhra Pradesh">Andhra Pradesh</option>
+            <option value="Rajasthan">Rajasthan</option>
+            <option value="Assam">Assam</option>
+            <option value="Kerala">Kerala</option>
+            <option value="Bihar">Bihar</option>
+          </select>
+        </div>
+
         {/* Lead Filter Pills */}
-        <div className="flex items-center gap-1.5 bg-[#151820] p-1.5 rounded-[8px] border border-[#232732]">
-          <span className="text-[12px] font-linear-mono text-[#94a3b8] px-2 uppercase font-semibold">Lead Time:</span>
+        <div className="sm:col-span-3 flex items-center gap-1 bg-[#0e1424]/90 p-1.5 rounded-xl border border-white/10">
           {[
             { id: "all", label: "All Days" },
             { id: "d1-3", label: "D1–D3" },
@@ -153,10 +204,10 @@ export default function HistoricalArchive() {
             <button
               key={f.id}
               onClick={() => setLeadFilter(f.id)}
-              className={`h-8 px-3 text-[13px] font-linear-mono rounded-[6px] transition cursor-pointer ${
+              className={`flex-1 h-8 text-xs font-mono font-semibold rounded-lg transition-all cursor-pointer ${
                 leadFilter === f.id
-                  ? "bg-[#232732] text-[#ffffff] font-bold"
-                  : "text-[#94a3b8] hover:text-[#ffffff]"
+                  ? "bg-cyan-500 text-black font-bold shadow-md shadow-cyan-500/20"
+                  : "text-white/60 hover:text-white"
               }`}
             >
               {f.label}

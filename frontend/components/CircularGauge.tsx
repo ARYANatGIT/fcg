@@ -92,25 +92,25 @@ export default function CircularGauge({
         </svg>
 
         {/* Center Digital Display */}
-        <div className="absolute inset-0 flex flex-col items-center justify-center pt-3">
+        <div className="absolute inset-0 flex flex-col items-center justify-center pt-2">
           <div className="flex items-baseline gap-0.5">
             <span
-              className="text-[46px] font-[600] font-sans tracking-[-0.035em] leading-none"
+              className="text-[42px] font-[700] font-sans tracking-[-0.035em] leading-none"
               style={{ color: gaugeColor }}
             >
               {percentage.toFixed(1)}
             </span>
-            <span className="text-[20px] font-[500] font-linear-mono text-[#94a3b8]">
+            <span className="text-[18px] font-[600] font-linear-mono text-[#94a3b8]">
               %
             </span>
           </div>
 
-          <span className="text-[13px] font-linear-mono text-[#cbd5e1] font-medium tracking-wide uppercase mt-1.5">
+          <span className="text-[12px] font-linear-mono text-[#cbd5e1] font-semibold tracking-wide uppercase mt-1">
             {label}
           </span>
 
           <span
-            className="text-[12px] font-linear-mono font-semibold px-2 py-0.5 rounded-full border mt-1"
+            className="text-[11px] font-linear-mono font-bold px-2.5 py-0.5 rounded-full border mt-1.5"
             style={{
               color: gaugeColor,
               borderColor: `${gaugeColor}40`,
@@ -119,14 +119,19 @@ export default function CircularGauge({
           >
             {threatLabel}
           </span>
-
-          {sublabel && (
-            <span className="text-[12px] font-linear-mono text-[#94a3b8] mt-1 font-medium">
-              {sublabel}
-            </span>
-          )}
         </div>
       </div>
+
+      {/* Dedicated Model Confidence Pill - Rendered Cleanly Below Gauge to Prevent Any Text Overlap */}
+      {sublabel && (
+        <div className="mt-2.5 flex items-center gap-2 bg-[#151820] px-3.5 py-1.5 rounded-full border border-[#232732] shadow-sm">
+          <span className="w-2 h-2 rounded-full bg-[#38bdf8] animate-pulse" />
+          <span className="text-[13px] font-linear-mono text-[#e2e8f0] font-semibold tracking-wide">
+            {sublabel}
+          </span>
+        </div>
+      )}
     </div>
   );
 }
+

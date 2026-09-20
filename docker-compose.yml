@@ -30,7 +30,8 @@ services:
       - DATA_MODE=synthetic
       - ALLOWED_ORIGINS=http://localhost:3000
       - DATABASE_URL=sqlite:///./data/forecastguard.db
-      - MONGO_URI=mongodb://mongodb:27017/forecastguard
+      - MONGO_URI=mongodb+srv://shresthengineer:tiimEkHomTAAjeSJ@clusterz1.nlqtygt.mongodb.net/26079
+      - MONGO_DB_NAME=26079
     volumes:
       - ./data:/app/data
       - ./models:/app/models

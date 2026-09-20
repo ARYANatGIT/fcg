@@ -1,4 +1,39 @@
 @import "tailwindcss";
+@import "leaflet/dist/leaflet.css";
+
+/* Leaflet Container Strict Containment - Prevents Map from Floating */
+.leaflet-container {
+  width: 100% !important;
+  height: 100% !important;
+  position: relative !important;
+  overflow: hidden !important;
+  background: #07090d !important;
+  z-index: 1 !important;
+}
+
+.leaflet-pane {
+  z-index: 2 !important;
+}
+
+.leaflet-tile-pane {
+  z-index: 2 !important;
+}
+
+.leaflet-overlay-pane {
+  z-index: 3 !important;
+}
+
+.leaflet-marker-pane {
+  z-index: 4 !important;
+}
+
+.leaflet-tooltip-pane {
+  z-index: 5 !important;
+}
+
+.leaflet-popup-pane {
+  z-index: 6 !important;
+}
 
 :root {
   /* Linear Command Center Color Tokens */
@@ -283,4 +318,124 @@ input[type="range"]::-webkit-slider-thumb:hover {
 
 .animate-beacon {
   animation: red-beacon 2s infinite;
+}
+
+/* ========================================================
+   LIGHT MODE THEME ENGINE - High Contrast & Clean Hierarchy
+   ======================================================== */
+html.light-mode {
+  --color-void: #f8fafc;
+  --color-carbon: #f1f5f9;
+  --color-obsidian: #ffffff;
+  --color-graphite: #e2e8f0;
+  --color-smoke: #cbd5e1;
+  --color-ash: #64748b;
+  --color-fog: #475569;
+  --color-mist: #1e293b;
+  --color-bone: #0f172a;
+  --color-paper: #090d16;
+}
+
+html.light-mode body {
+  background-color: #f8fafc !important;
+  color: #0f172a !important;
+}
+
+html.light-mode .linear-card {
+  background-color: #ffffff !important;
+  border-color: #e2e8f0 !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05) !important;
+  color: #0f172a !important;
+}
+
+html.light-mode aside {
+  background-color: #ffffff !important;
+  border-color: #e2e8f0 !important;
+  box-shadow: 2px 0 12px rgba(0, 0, 0, 0.04) !important;
+}
+
+html.light-mode aside h1,
+html.light-mode header h1 {
+  color: #0f172a !important;
+}
+
+html.light-mode header {
+  background-color: #ffffff !important;
+  border-color: #e2e8f0 !important;
+}
+
+/* Scoped surface backgrounds in light mode */
+html.light-mode .bg-\[\#08090a\],
+html.light-mode .bg-\[\#0c0e12\],
+html.light-mode .bg-\[\#090b0f\],
+html.light-mode .bg-\[\#06080c\],
+html.light-mode .bg-\[\#07090d\] {
+  background-color: #f8fafc !important;
+  color: #0f172a !important;
+}
+
+html.light-mode .bg-\[\#12151c\],
+html.light-mode .bg-\[\#151820\],
+html.light-mode .bg-\[\#11141a\],
+html.light-mode .bg-\[\#0c1017\],
+html.light-mode .bg-\[\#0e1014\] {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+  border-color: #e2e8f0 !important;
+}
+
+/* Border overrides */
+html.light-mode .border-\[\#232732\],
+html.light-mode .border-\[\#1e2533\],
+html.light-mode .border-\[\#1e2738\],
+html.light-mode .border-\[\#232f42\] {
+  border-color: #e2e8f0 !important;
+}
+
+/* Light mode text readability */
+html.light-mode h1,
+html.light-mode h2,
+html.light-mode h3,
+html.light-mode h4 {
+  color: #0f172a !important;
+}
+
+html.light-mode p {
+  color: #475569 !important;
+}
+
+html.light-mode .linear-badge {
+  background-color: #f1f5f9 !important;
+  border-color: #cbd5e1 !important;
+  color: #334155 !important;
+}
+
+html.light-mode .scrubber-btn {
+  background-color: #f1f5f9 !important;
+  border-color: #cbd5e1 !important;
+  color: #334155 !important;
+}
+
+html.light-mode .scrubber-btn:hover {
+  background-color: #e2e8f0 !important;
+  color: #0f172a !important;
+}
+
+html.light-mode select,
+html.light-mode input[type="text"],
+html.light-mode input[type="number"] {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+  border-color: #cbd5e1 !important;
+}
+
+html.light-mode option {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+}
+
+html.light-mode footer {
+  background-color: #ffffff !important;
+  border-color: #e2e8f0 !important;
+  color: #64748b !important;
 }

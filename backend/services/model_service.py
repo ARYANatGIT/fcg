@@ -45,6 +45,13 @@ class ModelService:
             logger.error(f"Failed to load models: {e}")
             raise RuntimeError("CRITICAL: ML models failed to load.") from e
 
+    def predict(self, features: dict, lead_day: int = 5, latitude: float = None, longitude: float = None) -> dict:
+        """Evaluates calibrated forecast bust prediction using the primary LightGBM predictor."""
+        if self.predictor is None:
+            self.load_models()
+        df = pd.DataFrame([features])
+        return self.predictor.predict(df)
+
     def get_revisions(self, lat: float, lon: float, valid_time: str, current_features: dict = None) -> dict:
         """Retrieves or calculates run-to-run forecast revisions for the target."""
         if self.revisions_df is not None and len(self.revisions_df) > 0:

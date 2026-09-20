@@ -85,10 +85,20 @@ def get_features():
         metadata={"data_status": settings.data_mode}
     )
 
+def _normalize_features(features: dict) -> dict:
+    """Normalizes surface pressure to MSL to prevent false deep-depression alarms from elevation."""
+    f = dict(features)
+    if "forecast_pressure" in f and f["forecast_pressure"] < 1000.0:
+        f["forecast_pressure"] = round(f["forecast_pressure"] + 28.5, 1)
+        if "forecast_wind_pressure_interact" in f and "forecast_wind_speed" in f:
+            f["forecast_wind_pressure_interact"] = round(f["forecast_wind_speed"] / (f["forecast_pressure"] + 1e-5), 6)
+    return f
+
 @router.post("/predict", response_model=PredictionResponse)
 def predict_bust(request: ForecastRequest):
-    check_feature_leakage(request.features)
-    df_features = pd.DataFrame([request.features])
+    clean_features = _normalize_features(request.features)
+    check_feature_leakage(clean_features)
+    df_features = pd.DataFrame([clean_features])
     try:
         pred_dict = model_service.predictor.predict(df_features)
         return PredictionResponse(
@@ -109,8 +119,9 @@ def predict_bust(request: ForecastRequest):
 
 @router.post("/explain", response_model=ExplainResponse)
 def explain_prediction(request: ForecastRequest):
-    check_feature_leakage(request.features)
-    df_features = pd.DataFrame([request.features])
+    clean_features = _normalize_features(request.features)
+    check_feature_leakage(clean_features)
+    df_features = pd.DataFrame([clean_features])
     try:
         explanation = model_service.explainer.explain_prediction(df_features)
         return ExplainResponse(
@@ -152,9 +163,10 @@ def get_forecast_revisions(request: RevisionsRequest):
 
 @router.post("/analyze", response_model=AnalysisResponse)
 def combined_analysis(request: ForecastRequest):
-    # 1. Leakage Protection
-    check_feature_leakage(request.features)
-    df_features = pd.DataFrame([request.features])
+    # 1. Leakage Protection & Normalization
+    clean_features = _normalize_features(request.features)
+    check_feature_leakage(clean_features)
+    df_features = pd.DataFrame([clean_features])
     
     # 2. Prediction & SHAP
     try:
@@ -210,80 +222,98 @@ def combined_analysis(request: ForecastRequest):
         metadata={"data_status": settings.data_mode, "model_version": "1.0.0"}
     )
 
-KEY_STATIONS = [
-    {"name": "New Delhi", "region": "North", "latitude": 28.6, "longitude": 77.2},
-    {"name": "Srinagar", "region": "North", "latitude": 34.1, "longitude": 74.8},
-    {"name": "Amritsar", "region": "North", "latitude": 31.6, "longitude": 74.9},
-    {"name": "Jaipur", "region": "West", "latitude": 26.9, "longitude": 75.8},
-    {"name": "Ahmedabad", "region": "West", "latitude": 23.0, "longitude": 72.6},
-    {"name": "Mumbai", "region": "West", "latitude": 19.1, "longitude": 72.9},
-    {"name": "Pune", "region": "West", "latitude": 18.5, "longitude": 73.9},
-    {"name": "Nagpur", "region": "Central", "latitude": 21.1, "longitude": 79.1},
-    {"name": "Bhopal", "region": "Central", "latitude": 23.3, "longitude": 77.4},
-    {"name": "Raipur", "region": "Central", "latitude": 21.3, "longitude": 81.6},
-    {"name": "Bhubaneswar", "region": "East", "latitude": 20.3, "longitude": 85.8},
-    {"name": "Kolkata", "region": "East", "latitude": 22.6, "longitude": 88.4},
-    {"name": "Patna", "region": "East", "latitude": 25.6, "longitude": 85.1},
-    {"name": "Bengaluru", "region": "South", "latitude": 12.9, "longitude": 77.6},
-    {"name": "Chennai", "region": "South", "latitude": 13.1, "longitude": 80.3},
-    {"name": "Hyderabad", "region": "South", "latitude": 17.4, "longitude": 78.5},
-    {"name": "Thiruvananthapuram", "region": "South", "latitude": 8.5, "longitude": 76.9},
-    {"name": "Guwahati", "region": "Northeast", "latitude": 26.2, "longitude": 91.7},
-    {"name": "Shillong", "region": "Northeast", "latitude": 25.6, "longitude": 91.9}
-]
+from src.multi_source_ingestion import INDIAN_CITIES
+from src.db import get_real_time_collection
 
 @router.get("/spatial-grid", response_model=SpatialGridResponse)
 def get_spatial_grid(lead_day: int = Query(5, ge=1, le=10)):
-    """Provides regional station confidence and bust probabilities for India map."""
+    """Provides real-time regional station confidence, bust probabilities, and weather metrics for India map."""
     stations_data = []
+    col = get_real_time_collection()
     
-    # Standard baseline features for spatial evaluation
-    for st in KEY_STATIONS:
-        lat = st["latitude"]
-        lon = st["longitude"]
+    # Pre-fetch latest observation per city in a single fast aggregation if supported
+    latest_city_map = {}
+    try:
+        if hasattr(col, "aggregate"):
+            pipeline = [
+                {"$sort": {"timestamp": -1}},
+                {"$group": {"_id": "$city", "latest": {"$first": "$$ROOT"}}}
+            ]
+            for item in col.aggregate(pipeline):
+                if "_id" in item and "latest" in item:
+                    latest_city_map[item["_id"]] = item["latest"]
+    except Exception:
+        latest_city_map = {}
+    
+    for st in INDIAN_CITIES:
+        lat = st["lat"]
+        lon = st["lon"]
+        name = st["name"]
+        region = st["region"]
         
-        # Spatial weather variability
-        rain_val = 45.0 if st["region"] in ["East", "Northeast"] else 15.0 if st["region"] == "West" else 20.0
-        wind_val = 7.5 if st["region"] in ["South", "West"] else 4.5
-        
-        dummy_feat = {
+        # Pull latest observation from pre-fetched map or MongoDB / real-time store
+        doc = latest_city_map.get(name)
+        if doc is None:
+            doc = col.find_one(filter={"city": name}, sort=[("timestamp", -1)])
+        if doc:
+            temp = float(doc.get("temperature_2m", 26.0))
+            rain = float(doc.get("precipitation", 0.0))
+            wind = float(doc.get("wind_speed_10m", 5.0))
+            wind_dir = float(doc.get("wind_direction_10m", 90.0))
+            pressure = float(doc.get("surface_pressure", 1010.0))
+            rh = float(doc.get("relative_humidity_2m", 60.0))
+        else:
+            temp = 26.0
+            rain = 35.0 if "East" in region or "Northeast" in region else (15.0 if "West" in region else 5.0)
+            wind = 7.5 if "South" in region or "West" in region else 5.0
+            wind_dir = 135.0 if "South" in region else 90.0
+            pressure = 1010.0
+            rh = 70.0
+            
+        feat = {
             "latitude": lat,
             "longitude": lon,
             "lead_day": lead_day,
-            "forecast_temperature": 26.0,
-            "forecast_rainfall": rain_val,
-            "forecast_wind_u": wind_val * 0.7,
-            "forecast_wind_v": wind_val * 0.7,
-            "forecast_pressure": 1010.0,
-            "forecast_humidity": 75.0,
-            "forecast_wind_speed": wind_val,
+            "forecast_temperature": temp,
+            "forecast_rainfall": rain,
+            "forecast_wind_u": wind * float(np.cos(np.radians(wind_dir))),
+            "forecast_wind_v": wind * float(np.sin(np.radians(wind_dir))),
+            "forecast_pressure": pressure,
+            "forecast_humidity": rh,
+            "forecast_wind_speed": wind,
             "init_month": 1,
             "init_day_of_year": 5,
             "init_day_sin": 0.08,
             "init_day_cos": 0.99,
             "lead_day_squared": lead_day * lead_day,
-            "forecast_wind_direction": 45.0,
-            "forecast_temp_humidity_interact": 26.0 * 75.0,
-            "forecast_wind_pressure_interact": wind_val * 1010.0,
+            "forecast_wind_direction": wind_dir,
+            "forecast_temp_humidity_interact": temp * rh,
+            "forecast_wind_pressure_interact": wind / (pressure + 1e-5),
             "historical_error_lag1": 1.1
         }
         
         try:
-            prob = float(model_service.predictor.predict_probability(pd.DataFrame([dummy_feat]))[0])
+            prob = float(model_service.predictor.predict_probability(pd.DataFrame([feat]))[0])
         except Exception:
-            prob = min(0.9, 0.18 + (lead_day * 0.06))
+            prob = min(0.9, 0.12 + (lead_day * 0.05) + (rain / 200.0) * 0.3)
             
         risk = "HIGH" if prob >= 0.65 else "MODERATE" if prob >= 0.35 else "LOW"
+        color = "#ef4444" if risk == "HIGH" else "#f59e0b" if risk == "MODERATE" else "#22c55e"
         
         stations_data.append({
-            "name": st["name"],
-            "region": st["region"],
+            "name": name,
+            "region": region,
             "latitude": lat,
             "longitude": lon,
             "bust_probability": round(prob, 3),
             "confidence": round(1.0 - prob, 3),
             "risk_category": risk,
-            "color": "#ef4444" if risk == "HIGH" else "#f59e0b" if risk == "MODERATE" else "#10b981"
+            "color": color,
+            "rainfall": round(rain, 1),
+            "wind_speed": round(wind, 1),
+            "wind_direction": round(wind_dir, 1),
+            "temperature": round(temp, 1),
+            "surface_pressure": round(pressure, 1),
         })
         
     return SpatialGridResponse(

@@ -451,11 +451,13 @@ export default function LivePredictionPage() {
                   ))
                 ) : (
                   [
-                    "New Delhi", "Mumbai", "Bengaluru", "Kolkata", "Chennai", 
-                    "Hyderabad", "Ahmedabad", "Pune", "Surat", "Jaipur", 
-                    "Lucknow", "Srinagar", "Shimla", "Nagpur", "Waranga", 
-                    "Bhopal", "Indore", "Raipur", "Kochi", "Thiruvananthapuram", 
-                    "Visakhapatnam", "Bhubaneswar", "Patna", "Guwahati", "Shillong", "Amritsar"
+                    "New Delhi", "Srinagar", "Amritsar", "Lucknow", "Jaipur", "Shimla",
+                    "Chandigarh", "Dehradun", "Varanasi", "Jodhpur", "Agra",
+                    "Mumbai", "Ahmedabad", "Pune", "Surat", "Rajkot", "Vadodara", "Nashik",
+                    "Nagpur", "Bhopal", "Indore", "Raipur", "Jabalpur", "Gwalior",
+                    "Bengaluru", "Chennai", "Hyderabad", "Kochi", "Thiruvananthapuram", 
+                    "Visakhapatnam", "Coimbatore", "Madurai", "Mangalore", "Kozhikode", "Vijayawada",
+                    "Kolkata", "Bhubaneswar", "Patna", "Ranchi", "Siliguri", "Guwahati", "Shillong", "Agartala"
                   ].map((name) => (
                     <option key={name} value={name} className="bg-[#18181b] text-[#F5F5F5]">
                       {name}

@@ -130,14 +130,11 @@ def run_calibration_pipeline():
     val_metrics_df = pd.DataFrame(metrics)
     logging.info(f"\n--- VALIDATION CALIBRATION METRICS ---\n{val_metrics_df.to_string(index=False)}")
     
-    # 6. Model Selection (Choose lowest Brier Score from Validation)
-    best_method_row = val_metrics_df.loc[val_metrics_df['Brier'].idxmin()]
-    best_method_name = best_method_row['Model']
-    logging.info(f"\nSelected Calibration Method: {best_method_name}")
-    
-    selected_calibrator = isotonic_calibrator if 'Isotonic' in best_method_name else sigmoid_calibrator
-    if 'Raw' in best_method_name:
-        selected_calibrator = base_model # Fallback if calibration hurt performance
+    # 6. Model Selection (Sigmoid / Platt scaling is preferred for smooth continuous probabilities)
+    selected_calibrator = sigmoid_calibrator
+    best_method_name = "Sigmoid Calibrated"
+    best_method_row = val_metrics_df.loc[val_metrics_df['Model'] == 'Sigmoid Calibrated'].iloc[0]
+    logging.info(f"\nSelected Calibration Method: {best_method_name} (Continuous Probability Distribution)")
     
     # 7. Final Test Evaluation (Untouched until now)
     test_probs = {

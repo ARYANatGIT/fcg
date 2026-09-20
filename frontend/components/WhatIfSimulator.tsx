@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useTransition } from "react";
+import React, { useState, useEffect, useTransition } from "react";
 import { Sliders, Zap, ArrowRight, RefreshCw, AlertTriangle, ShieldCheck, Thermometer, Wind, CloudRain, Gauge, Droplets } from "lucide-react";
 import CircularGauge from "./CircularGauge";
 
@@ -86,39 +86,107 @@ const PRESETS = [
   },
 ];
 
+const PRESET_ICON_MAP: Record<string, any> = {
+  monsoon: CloudRain,
+  cyclone: Wind,
+  heatwave: Thermometer,
+  western_disturbance: CloudRain,
+  stable: ShieldCheck,
+  convective: Zap,
+  fog: Wind,
+};
+
 export default function WhatIfSimulator({
   initialFeatures,
   onApplyScenario,
 }: WhatIfSimulatorProps) {
+  const [presets, setPresets] = useState<any[]>(PRESETS);
   const [rainfall, setRainfall] = useState(initialFeatures.rainfall);
   const [windSpeed, setWindSpeed] = useState(initialFeatures.windSpeed);
   const [temp, setTemp] = useState(initialFeatures.temp);
   const [pressure, setPressure] = useState(initialFeatures.pressure);
   const [humidity, setHumidity] = useState(initialFeatures.humidity);
   const [leadDay, setLeadDay] = useState(initialFeatures.leadDay);
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveSuccess, setSaveSuccess] = useState(false);
   const [, startTransition] = useTransition();
+
+  // Load scenarios from MongoDB
+  useEffect(() => {
+    fetch("/api/whatif_scenarios")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data?.scenarios && Array.isArray(data.scenarios) && data.scenarios.length > 0) {
+          setPresets(data.scenarios);
+        }
+      })
+      .catch((err) => console.warn("Failed to load whatif scenarios from MongoDB:", err));
+  }, []);
+
+  // Save custom scenario to MongoDB
+  const handleSaveScenario = async () => {
+    try {
+      setIsSaving(true);
+      const name = prompt("Enter a name for this custom atmospheric scenario:", `Custom Scenario ${presets.length + 1}`);
+      if (!name) {
+        setIsSaving(false);
+        return;
+      }
+      const desc = prompt("Enter a brief description of the scenario:", `${rainfall}mm rain, ${windSpeed}m/s wind, ${temp}°C, ${pressure}hPa at D-${leadDay}`);
+
+      const res = await fetch("/api/whatif_scenarios", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name,
+          desc: desc || "User-defined atmospheric perturbation scenario",
+          rainfall,
+          windSpeed,
+          temp,
+          pressure,
+          humidity,
+          leadDay,
+          category: "custom",
+          color: "#38bdf8",
+        }),
+      });
+
+      if (res.ok) {
+        const json = await res.json();
+        if (json?.scenario) {
+          setPresets((prev) => [json.scenario, ...prev]);
+          setSaveSuccess(true);
+          setTimeout(() => setSaveSuccess(false), 3000);
+        }
+      }
+    } catch (err) {
+      console.warn("Failed to save scenario:", err);
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   // Dynamic sensitivity calculation approximating the calibrated LightGBM decision bounds
   const calculateSimulatedRisk = () => {
-    const rainScore = Math.min(1.0, Math.log1p(rainfall) / 5.2);
-    const windScore = Math.min(1.0, windSpeed / 28.0);
-    const leadScore = Math.pow(leadDay / 10.0, 1.4);
-    const pressureAnomaly = Math.max(0, (1013.25 - pressure) / 25.0);
-    const convectiveIndex = (temp * (humidity / 100.0)) / 45.0;
+    const rainScore = Math.min(1.0, rainfall / 120.0);
+    const windScore = Math.min(1.0, Math.max(0, (windSpeed - 5) / 25.0));
+    const leadScore = Math.pow(leadDay / 10.0, 1.6);
+    const pressureAnomaly = Math.max(0, (1013.25 - pressure) / 30.0);
+    const convectiveIndex = Math.max(0, ((temp * (humidity / 100.0)) - 12.0) / 30.0);
 
     let rawScore =
-      0.12 +
-      rainScore * 0.35 +
-      leadScore * 0.28 +
-      windScore * 0.16 +
+      0.05 +
+      rainScore * 0.45 +
+      leadScore * 0.18 +
+      windScore * 0.14 +
       pressureAnomaly * 0.12 +
-      convectiveIndex * 0.08;
+      convectiveIndex * 0.06;
 
-    return Math.min(0.96, Math.max(0.04, rawScore));
+    return Math.min(0.95, Math.max(0.04, Number(rawScore.toFixed(3))));
   };
 
   const simulatedProb = calculateSimulatedRisk();
-  const simulatedConfidence = 1.0 - simulatedProb;
+  const simulatedConfidence = Number((1.0 - simulatedProb).toFixed(3));
   const isHigh = simulatedProb >= 0.65;
   const isMod = simulatedProb >= 0.35 && simulatedProb < 0.65;
   const riskCategory = isHigh ? "HIGH" : isMod ? "MODERATE" : "LOW";
@@ -158,50 +226,63 @@ export default function WhatIfSimulator({
           </p>
         </div>
 
-        <button
-          onClick={handleApply}
-          className="btn-acid-lime cursor-pointer font-semibold"
-        >
-          <Zap size={16} strokeWidth={2.5} />
-          <span>Apply Scenario to Cockpit</span>
-        </button>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={handleSaveScenario}
+            disabled={isSaving}
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-white/15 bg-white/5 hover:bg-white/10 text-white text-xs font-semibold transition cursor-pointer"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${isSaving ? "animate-spin text-cyan-400" : ""}`} />
+            <span>{saveSuccess ? "Saved Successfully!" : "Save Current Scenario"}</span>
+          </button>
+
+          <button
+            onClick={handleApply}
+            className="btn-acid-lime cursor-pointer font-semibold flex items-center gap-2"
+          >
+            <Zap size={16} strokeWidth={2.5} />
+            <span>Apply Scenario to Overview</span>
+          </button>
+        </div>
       </div>
 
       {/* Preset Scenarios Strip */}
       <div className="space-y-3">
-        <span className="text-[13px] font-linear-mono text-[#cbd5e1] font-semibold uppercase tracking-wider block">
-          Select Standard Atmospheric Scenario:
-        </span>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-          {PRESETS.map((p) => {
-            const Icon = p.icon;
+        <div className="flex items-center justify-between">
+          <span className="text-xs font-mono text-white/80 font-bold uppercase tracking-wider block">
+            Select Atmospheric Scenario ({presets.length} Saved Scenarios):
+          </span>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {presets.map((p) => {
+            const Icon = typeof p.icon === "string" ? (PRESET_ICON_MAP[p.category] || CloudRain) : (p.icon || PRESET_ICON_MAP[p.category] || CloudRain);
             return (
               <button
                 key={p.name}
                 onClick={() => loadPreset(p)}
-                className="linear-panel-inner text-left hover:border-[#384256] transition p-4 cursor-pointer group flex flex-col justify-between"
+                className="linear-panel-inner text-left hover:border-cyan-500/40 transition p-4 cursor-pointer group flex flex-col justify-between rounded-xl bg-[#0e1424]/80 border border-white/10"
               >
                 <div>
                   <div className="flex items-center justify-between gap-2 mb-2">
                     <div
-                      className="w-8 h-8 rounded-[6px] bg-[#1c212c] flex items-center justify-center shrink-0"
-                      style={{ color: p.color }}
+                      className="w-9 h-9 rounded-lg bg-[#1c212c] flex items-center justify-center shrink-0"
+                      style={{ color: p.color || "#38bdf8" }}
                     >
                       <Icon size={18} />
                     </div>
-                    <ArrowRight size={14} className="text-[#94a3b8] opacity-0 group-hover:opacity-100 transition-opacity" />
+                    <ArrowRight size={14} className="text-white/40 group-hover:text-cyan-400 group-hover:translate-x-0.5 transition-all" />
                   </div>
-                  <div className="text-[14px] font-[600] text-[#ffffff] group-hover:text-[#e4f222] transition-colors">
+                  <div className="text-sm font-bold text-white group-hover:text-cyan-300 transition-colors">
                     {p.name}
                   </div>
-                  <p className="text-[12px] text-[#94a3b8] mt-1.5 leading-relaxed">
+                  <p className="text-xs text-white/60 mt-1.5 leading-relaxed line-clamp-2">
                     {p.desc}
                   </p>
                 </div>
 
-                <div className="mt-3 pt-2.5 border-t border-[#232732] flex items-center justify-between text-[11px] font-linear-mono text-[#64748b]">
+                <div className="mt-3 pt-2.5 border-t border-white/10 flex items-center justify-between text-xs font-mono text-white/50">
                   <span>Lead: D-{p.leadDay}</span>
-                  <span style={{ color: p.color }}>LOAD &rarr;</span>
+                  <span style={{ color: p.color || "#38bdf8" }} className="font-bold">LOAD &rarr;</span>
                 </div>
               </button>
             );
@@ -428,7 +509,7 @@ export default function WhatIfSimulator({
               className="btn-acid-lime w-full font-semibold cursor-pointer mt-6"
             >
               <Zap size={16} strokeWidth={2.5} />
-              <span>Deploy Scenario to Operational Cockpit</span>
+              <span>Deploy Scenario to Live Overview</span>
             </button>
           </div>
         </div>

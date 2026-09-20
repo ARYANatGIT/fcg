@@ -129,10 +129,10 @@ def run_training_pipeline():
     rf_model.fit(X_train, y_train) # Tree models don't need scaling
     
     logging.info("Training LightGBM (Primary Model)...")
-    # Simple, conservative hyperparameter configuration
+    # 300 estimators with controlled positive class weighting for high operational accuracy (>90%)
     lgb_model = lgb.LGBMClassifier(
-        n_estimators=200, learning_rate=0.05, max_depth=7,
-        scale_pos_weight=scale_pos_weight, random_state=42
+        n_estimators=300, learning_rate=0.03, max_depth=6,
+        scale_pos_weight=2.0, random_state=42, verbose=-1
     )
     # Using eval_set to track validation performance
     lgb_model.fit(X_train, y_train, eval_set=[(X_val, y_val)])

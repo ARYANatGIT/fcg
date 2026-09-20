@@ -26,12 +26,12 @@
         "class_weight": null,
         "colsample_bytree": 1.0,
         "importance_type": "split",
-        "learning_rate": 0.05,
-        "max_depth": 7,
+        "learning_rate": 0.03,
+        "max_depth": 6,
         "min_child_samples": 20,
         "min_child_weight": 0.001,
         "min_split_gain": 0.0,
-        "n_estimators": 200,
+        "n_estimators": 300,
         "n_jobs": null,
         "num_leaves": 31,
         "objective": null,
@@ -41,31 +41,32 @@
         "subsample": 1.0,
         "subsample_for_bin": 200000,
         "subsample_freq": 0,
-        "scale_pos_weight": 9.104790419161677
+        "scale_pos_weight": 2.0,
+        "verbose": -1
     },
     "class_distribution": {
         "train_pos_pct": 9.9,
         "val_pos_pct": 10.18
     },
     "validation_metrics": {
-        "roc_auc": 0.7516926529086514,
-        "pr_auc": 0.3390335831131936,
-        "brier_score": 0.16425494305626118,
-        "log_loss": 0.5021823674169502,
-        "accuracy": 0.7718888888888888,
-        "precision": 0.23765574526995847,
-        "recall": 0.5622270742358079,
-        "f1": 0.3340901719104768
+        "roc_auc": 0.7566255734006903,
+        "pr_auc": 0.34796240950761503,
+        "brier_score": 0.08365377304117397,
+        "log_loss": 0.2971547552282022,
+        "accuracy": 0.9036666666666666,
+        "precision": 0.5830508474576271,
+        "recall": 0.18777292576419213,
+        "f1": 0.28406275805119735
     },
     "test_metrics": {
-        "roc_auc": 0.7393727929182502,
-        "pr_auc": 0.3248370369495204,
-        "brier_score": 0.16747074330847964,
-        "log_loss": 0.5107869058832112,
-        "accuracy": 0.7671111111111111,
-        "precision": 0.22541743970315398,
-        "recall": 0.5328947368421053,
-        "f1": 0.31681877444589307
+        "roc_auc": 0.7479960023079459,
+        "pr_auc": 0.3327813624433706,
+        "brier_score": 0.08497364880422002,
+        "log_loss": 0.30094592474927523,
+        "accuracy": 0.901,
+        "precision": 0.5342019543973942,
+        "recall": 0.17982456140350878,
+        "f1": 0.2690730106644791
     },
     "warning": "Synthetic Demonstration Model \u2014 Not Validated for Operational Weather Forecasting"
 }
