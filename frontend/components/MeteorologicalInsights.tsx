@@ -104,7 +104,8 @@ export default function MeteorologicalInsights() {
     try {
       let liveRes = await fetch(`/api/latest_prediction?station=${encodeURIComponent(cityName)}`).catch(() => null);
       if (!liveRes || !liveRes.ok) {
-        liveRes = await fetch(`http://localhost:8000/api/latest_prediction?station=${encodeURIComponent(cityName)}`).catch(() => null);
+        const backendUrl = process.env.NEXT_PUBLIC_API_URL || "https://forecastguard-api.onrender.com";
+        liveRes = await fetch(`${backendUrl}/api/latest_prediction?station=${encodeURIComponent(cityName)}`).catch(() => null);
       }
 
       const cityMeta = stationList.find(c => c.name.toLowerCase() === cityName.toLowerCase()) || 

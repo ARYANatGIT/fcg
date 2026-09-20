@@ -129,7 +129,8 @@ export default function WeatherNewsFeed() {
       setLoading(true);
       let res = await fetch("/api/weather_news").catch(() => null);
       if (!res || !res.ok) {
-        res = await fetch("http://localhost:8000/api/weather_news").catch(() => null);
+        const backendUrl = process.env.NEXT_PUBLIC_API_URL || "https://forecastguard-api.onrender.com";
+        res = await fetch(`${backendUrl}/api/weather_news`).catch(() => null);
       }
       if (res && res.ok) {
         const data = await res.json();

@@ -156,16 +156,21 @@ Click any quick prompt below or ask any question about stations, bust detection,
     setIsLoading(true);
 
     try {
+      const backendUrl = process.env.NEXT_PUBLIC_API_URL || "https://forecastguard-api.onrender.com";
+      const headers = { 
+        "Content-Type": "application/json",
+        "x-frontend-client": "forecastguard-web",
+      };
       let res = await fetch("/api/chat", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers,
         body: JSON.stringify({ query, session_id: sessionId }),
       }).catch(() => null);
 
       if (!res || !res.ok) {
-        res = await fetch("http://localhost:8000/api/chat", {
+        res = await fetch(`${backendUrl}/api/chat`, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers,
           body: JSON.stringify({ query, session_id: sessionId }),
         }).catch(() => null);
       }

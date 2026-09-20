@@ -125,6 +125,9 @@ async def security_and_auth_middleware(request: Request, call_next):
             "localhost:3000" in referer or
             "127.0.0.1:3000" in referer or
             "localhost:3000" in x_forwarded_host or
+            "onrender.com" in origin or
+            "onrender.com" in referer or
+            "onrender.com" in x_forwarded_host or
             request.headers.get("x-frontend-client") == "forecastguard-web"
         )
 

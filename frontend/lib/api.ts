@@ -1,11 +1,12 @@
 import { AnalysisResponse, SpatialGridResponse, StationData, ShapReason } from "./types";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+export const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://forecastguard-api.onrender.com";
 
-// HTTP Basic Authentication credentials for ForecastGuard Protected API (admin:forecastguard_secure_2026)
+// HTTP Authentication credentials for ForecastGuard Protected API
 export const AUTH_HEADERS: Record<string, string> = {
   "Authorization": "Basic " + (typeof btoa !== "undefined" ? btoa("admin:forecastguard_secure_2026") : Buffer.from("admin:forecastguard_secure_2026").toString("base64")),
   "Accept": "application/json",
+  "x-frontend-client": "forecastguard-web",
 };
 
 // Quick health check with timeout
