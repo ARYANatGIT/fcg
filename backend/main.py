@@ -80,8 +80,8 @@ import secrets
 import json
 from fastapi import Request, Response
 
-ADMIN_USER = "admin"
-ADMIN_PASS = "forecastguard_secure_2026"
+ADMIN_USER = os.getenv("ADMIN_USER", "admin")
+ADMIN_PASS = os.getenv("ADMIN_PASS", "forecastguard_secure_2026")
 
 @app.middleware("http")
 async def security_and_auth_middleware(request: Request, call_next):
@@ -186,6 +186,10 @@ def root():
         },
         "frontend": "http://localhost:3000"
     }
+
+@app.get("/api/health")
+def api_health():
+    return {"status": "healthy", "service": "ForecastGuard API", "version": "2.0.0"}
 
 # Operational ForecastGuard routes
 app.include_router(router, prefix="/api/v1")

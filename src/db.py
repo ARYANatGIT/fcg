@@ -20,9 +20,9 @@ logger = logging.getLogger("forecastguard.db")
 
 # Read MongoDB URI from environment.
 # Accepts cloud Atlas ('mongodb+srv://...'), local ('mongodb://localhost:27017'), or Docker.
-DEFAULT_MONGO_URI = "mongodb+srv://shresthengineer:tiimEkHomTAAjeSJ@clusterz1.nlqtygt.mongodb.net/26079"
+DEFAULT_MONGO_URI = "mongodb://localhost:27017/forecastguard"
 MONGO_URI = os.getenv("MONGO_URI", DEFAULT_MONGO_URI)
-DB_NAME = os.getenv("MONGO_DB_NAME", "26079")
+DB_NAME = os.getenv("MONGO_DB_NAME", "forecastguard")
 DATA_DIR = Path(os.getenv("DATA_STORE_DIR", "data/real_time"))
 DATA_DIR.mkdir(parents=True, exist_ok=True)
 

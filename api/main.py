@@ -140,8 +140,8 @@ import base64
 import secrets
 import re
 
-ADMIN_USER = "admin"
-ADMIN_PASS = "forecastguard_secure_2026"
+ADMIN_USER = os.getenv("ADMIN_USER", "admin")
+ADMIN_PASS = os.getenv("ADMIN_PASS", "forecastguard_secure_2026")
 
 def sanitize_input(val: Optional[str], max_len: int = 64) -> Optional[str]:
     """Sanitizes user string inputs to prevent NoSQL / command injection."""
@@ -1111,7 +1111,7 @@ def get_openweather_current(
     lat: Optional[float] = Query(None, description="Latitude"),
     lon: Optional[float] = Query(None, description="Longitude")
 ):
-    """Fetches real-time weather using OpenWeather API key bb7bff7cbcebf1e0990e0dcadaef7af1."""
+    """Fetches real-time weather using OpenWeather API."""
     from backend.services.openweather_service import openweather_service
     target_city = station or "New Delhi"
     city_meta = next((c for c in INDIAN_CITIES if c["name"].lower() == target_city.lower()), None)

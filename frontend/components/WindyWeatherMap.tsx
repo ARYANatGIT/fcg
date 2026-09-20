@@ -51,8 +51,7 @@ import {
 export type WindyOverlay = "wind" | "rain" | "temp" | "pressure" | "clouds" | "waves" | "thunder";
 export type NWPModel = "ecmwf" | "gfs" | "icon";
 export type AtmosphericLevel = "surface" | "850h" | "700h" | "500h" | "250h";
-
-const WINDY_API_KEY = process.env.NEXT_PUBLIC_WINDY_API_KEY || "VrzEVkW0Mx3LAN3AJWNTS2zXOeTWlpkv";
+const WINDY_API_KEY = process.env.NEXT_PUBLIC_WINDY_API_KEY || "";
 
 interface StationMeta {
   name: string;

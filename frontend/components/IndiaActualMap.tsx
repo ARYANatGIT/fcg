@@ -12,8 +12,7 @@ interface IndiaActualMapProps {
   leadDay: number;
   layerMode?: "bust_risk" | "rainfall_heatmap" | "temperature_heatmap" | "wind_vectors";
 }
-
-const CARTO_API_KEY = process.env.NEXT_PUBLIC_CARTO_API_KEY || "cb1_3qnh_1_8e89ac90b8868a8c23bf7986";
+const CARTO_API_KEY = process.env.NEXT_PUBLIC_CARTO_API_KEY || "";
 
 export default function IndiaActualMap({
   stations = [],

@@ -38,10 +38,10 @@ logging.basicConfig(
 )
 logger = logging.getLogger("multi_source_ingestion")
 
-# Multi-source API Keys loaded from environment with secure defaults
-GOOGLE_MAPS_KEY = os.getenv("GOOGLE_MAPS_API_KEY", "AIzaSyAEF1qpY_JKBSAtYlTXteRk_FOxKRM2r5s")
-OPENWEATHER_KEY = os.getenv("OPENWEATHER_API_KEY", "bb7bff7cbcebf1e0990e0dcadaef7af1")
-WINDY_KEY = os.getenv("WINDY_MAP_API_KEY", "VrzEVkW0Mx3LAN3AJWNTS2zXOeTWlpkv")
+# Multi-source API Keys loaded securely from environment variables
+GOOGLE_MAPS_KEY = os.getenv("GOOGLE_MAPS_API_KEY", "")
+OPENWEATHER_KEY = os.getenv("OPENWEATHER_API_KEY", "")
+WINDY_KEY = os.getenv("WINDY_MAP_API_KEY", "")
 
 def calibrate_elevation_google_maps(city: Dict[str, Any]) -> float:
     """Uses Google Maps Elevation API to accurately calibrate surface elevation for MSL pressure normalization."""

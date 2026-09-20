@@ -1,6 +1,6 @@
 """
 Windy Map Forecast API Service
-Integrates user's Windy Map Forecast API key (VrzEVkW0Mx3LAN3AJWNTS2zXOeTWlpkv)
+Integrates Windy Map Forecast API
 with ForecastGuard AI for multi-model verification, ECMWF IFS 9km data extraction,
 and real-time forecast bust probability calibration.
 """
