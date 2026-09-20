@@ -439,3 +439,16 @@ html.light-mode footer {
   border-color: #e2e8f0 !important;
   color: #64748b !important;
 }
+
+/* Hide Next.js development indicator logo in bottom corner */
+nextjs-portal,
+[data-nextjs-toast],
+[data-nextjs-dev-tools-button],
+#__next-build-watcher,
+div[data-next-badge],
+div:has(> svg[data-icon="nextjs"]) {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
