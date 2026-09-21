@@ -5,6 +5,7 @@ serves live predictions from MongoDB across all major Indian cities,
 provides real-time air quality, ECMWF ensemble bust spread, and coastal marine metrics.
 """
 
+import os
 import sys
 import logging
 from pathlib import Path
