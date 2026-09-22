@@ -13,7 +13,7 @@ export const AUTH_HEADERS: Record<string, string> = {
 export async function getHealth(): Promise<boolean> {
   try {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 1500);
+    const timeoutId = setTimeout(() => controller.abort(), 10000);
     const res = await fetch(`${API_URL}/api/v1/health`, { 
       headers: AUTH_HEADERS,
       signal: controller.signal 
@@ -239,7 +239,7 @@ export function generateLocalAnalysis(payload: any): AnalysisResponse {
 export async function analyzeForecast(payload: any): Promise<AnalysisResponse> {
   try {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 3500);
+    const timeoutId = setTimeout(() => controller.abort(), 15000);
     // Try Next.js proxy route first
     let res = await fetch("/api/v1/analyze", {
       method: "POST",
@@ -270,7 +270,7 @@ export async function analyzeForecast(payload: any): Promise<AnalysisResponse> {
 export async function getSpatialGrid(leadDay: number = 5): Promise<SpatialGridResponse> {
   try {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 3500);
+    const timeoutId = setTimeout(() => controller.abort(), 15000);
     let res = await fetch(`/api/v1/spatial-grid?lead_day=${leadDay}`, { 
       headers: AUTH_HEADERS,
       signal: controller.signal 

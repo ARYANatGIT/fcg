@@ -2,8 +2,8 @@ from fastapi import APIRouter, HTTPException, Query
 import pandas as pd
 import numpy as np
 import json
-from pathlib import Path
-from typing import Optional
+import time
+from typing import Optional, Dict, Any, List
 from backend.schemas.api_schemas import (
     ForecastRequest, PredictionResponse, AnalysisResponse,
     ExplainResponse, AnalogsRequest, AnalogsResponse,
@@ -225,36 +225,41 @@ def combined_analysis(request: ForecastRequest):
 from src.multi_source_ingestion import INDIAN_CITIES
 from src.db import get_real_time_collection
 
+# In-memory short-lived cache for spatial grid (TTL: 30 seconds)
+_spatial_cache: Dict[int, Dict[str, Any]] = {}
+_spatial_cache_ts: Dict[int, float] = {}
+
 @router.get("/spatial-grid", response_model=SpatialGridResponse)
 def get_spatial_grid(lead_day: int = Query(5, ge=1, le=10)):
-    """Provides real-time regional station confidence, bust probabilities, and weather metrics for India map."""
+    """Provides high-performance regional station confidence, bust probabilities, and weather metrics for India map."""
+    now_ts = time.time()
+    if lead_day in _spatial_cache and (now_ts - _spatial_cache_ts.get(lead_day, 0.0)) < 30.0:
+        return _spatial_cache[lead_day]
+
     stations_data = []
     col = get_real_time_collection()
     
-    # Pre-fetch latest observation per city in a single fast aggregation if supported
-    latest_city_map = {}
+    # Fast single batch fetch: read recent observations in ONE single roundtrip
+    latest_city_map: Dict[str, Any] = {}
     try:
-        if hasattr(col, "aggregate"):
-            pipeline = [
-                {"$sort": {"timestamp": -1}},
-                {"$group": {"_id": "$city", "latest": {"$first": "$$ROOT"}}}
-            ]
-            for item in col.aggregate(pipeline):
-                if "_id" in item and "latest" in item:
-                    latest_city_map[item["_id"]] = item["latest"]
+        recent_docs = list(col.find({}).sort("timestamp", -1).limit(200))
+        for doc in recent_docs:
+            city = doc.get("city")
+            if city and city not in latest_city_map:
+                latest_city_map[city] = doc
     except Exception:
         latest_city_map = {}
-    
+
+    city_features = []
+    metadata_list = []
+
     for st in INDIAN_CITIES:
         lat = st["lat"]
         lon = st["lon"]
         name = st["name"]
         region = st["region"]
         
-        # Pull latest observation from pre-fetched map or MongoDB / real-time store
         doc = latest_city_map.get(name)
-        if doc is None:
-            doc = col.find_one(filter={"city": name}, sort=[("timestamp", -1)])
         if doc:
             temp = float(doc.get("temperature_2m", 26.0))
             rain = float(doc.get("precipitation", 0.0))
@@ -291,32 +296,50 @@ def get_spatial_grid(lead_day: int = Query(5, ge=1, le=10)):
             "forecast_wind_pressure_interact": wind / (pressure + 1e-5),
             "historical_error_lag1": 1.1
         }
-        
-        try:
-            prob = float(model_service.predictor.predict_probability(pd.DataFrame([feat]))[0])
-        except Exception:
-            prob = min(0.9, 0.12 + (lead_day * 0.05) + (rain / 200.0) * 0.3)
-            
-        risk = "HIGH" if prob >= 0.65 else "MODERATE" if prob >= 0.35 else "LOW"
-        color = "#ef4444" if risk == "HIGH" else "#f59e0b" if risk == "MODERATE" else "#22c55e"
-        
-        stations_data.append({
+        city_features.append(feat)
+        metadata_list.append({
             "name": name,
             "region": region,
-            "latitude": lat,
-            "longitude": lon,
+            "lat": lat,
+            "lon": lon,
+            "temp": temp,
+            "rain": rain,
+            "wind": wind,
+            "wind_dir": wind_dir,
+            "pressure": pressure,
+        })
+        
+    # Vectorized batch prediction for all 43 cities simultaneously
+    try:
+        if model_service.predictor is not None:
+            batch_df = pd.DataFrame(city_features)
+            probs = model_service.predictor.predict_probability(batch_df)
+        else:
+            probs = [min(0.9, 0.12 + (lead_day * 0.05) + (m["rain"] / 200.0) * 0.3) for m in metadata_list]
+    except Exception:
+        probs = [min(0.9, 0.12 + (lead_day * 0.05) + (m["rain"] / 200.0) * 0.3) for m in metadata_list]
+
+    for i, meta in enumerate(metadata_list):
+        prob = float(probs[i])
+        risk = "HIGH" if prob >= 0.65 else "MODERATE" if prob >= 0.35 else "LOW"
+        color = "#ef4444" if risk == "HIGH" else "#f59e0b" if risk == "MODERATE" else "#22c55e"
+        stations_data.append({
+            "name": meta["name"],
+            "region": meta["region"],
+            "latitude": meta["lat"],
+            "longitude": meta["lon"],
             "bust_probability": round(prob, 3),
             "confidence": round(1.0 - prob, 3),
             "risk_category": risk,
             "color": color,
-            "rainfall": round(rain, 1),
-            "wind_speed": round(wind, 1),
-            "wind_direction": round(wind_dir, 1),
-            "temperature": round(temp, 1),
-            "surface_pressure": round(pressure, 1),
+            "rainfall": round(meta["rain"], 1),
+            "wind_speed": round(meta["wind"], 1),
+            "wind_direction": round(meta["wind_dir"], 1),
+            "temperature": round(meta["temp"], 1),
+            "surface_pressure": round(meta["pressure"], 1),
         })
         
-    return SpatialGridResponse(
+    response = SpatialGridResponse(
         data={
             "lead_day": lead_day,
             "total_stations": len(stations_data),
@@ -324,3 +347,6 @@ def get_spatial_grid(lead_day: int = Query(5, ge=1, le=10)):
         },
         metadata={"data_status": settings.data_mode}
     )
+    _spatial_cache[lead_day] = response
+    _spatial_cache_ts[lead_day] = now_ts
+    return response
