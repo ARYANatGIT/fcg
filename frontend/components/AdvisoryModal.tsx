@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { X, Copy, Check, Download, FileText, AlertTriangle, ShieldCheck, Code } from "lucide-react";
+import { X, Copy, Check, Download, FileText, Code } from "lucide-react";
 
 interface AdvisoryModalProps {
   isOpen: boolean;
@@ -146,19 +146,19 @@ Forecast bust warnings do not supersede official statutory weather bulletins iss
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md p-4">
-      <div className="bg-[#0c0e12] border border-[#232732] rounded-[14px] w-full max-w-3xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4 animate-in fade-in duration-150">
+      <div className="glass-feature border border-white/10 rounded-2xl w-full max-w-3xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
         {/* Header */}
-        <div className="p-5 border-b border-[#232732] flex justify-between items-center bg-[#151820]">
+        <div className="p-5 border-b border-white/10 flex justify-between items-center bg-white/[0.02]">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-[8px] bg-[#1c212c] border border-[#232732] flex items-center justify-center text-[#e4f222]">
-              <FileText size={20} />
+            <div className="w-10 h-10 rounded-full bg-white/[0.06] border border-white/10 flex items-center justify-center text-[#AEB796] shadow-sm">
+              <FileText size={18} />
             </div>
             <div>
-              <h2 className="text-[17px] font-[600] text-[#ffffff]">
+              <h2 className="text-[16px] font-bold text-[#E8E8E5] font-sans">
                 Operational Forecast Bust Advisory Bulletin
               </h2>
-              <span className="text-[12px] font-linear-mono text-[#94a3b8]">
+              <span className="text-xs font-mono-tech text-[#8B8B87]">
                 MoES / NCMRWF Operational Format
               </span>
             </div>
@@ -166,49 +166,49 @@ Forecast bust warnings do not supersede official statutory weather bulletins iss
 
           <button
             onClick={onClose}
-            className="w-9 h-9 rounded-[8px] text-[#94a3b8] hover:text-[#ffffff] hover:bg-[#232732] flex items-center justify-center transition cursor-pointer"
+            className="w-8 h-8 rounded-full text-[#8B8B87] hover:text-[#E8E8E5] hover:bg-white/[0.06] flex items-center justify-center transition cursor-pointer"
             aria-label="Close Advisory Modal"
           >
-            <X size={18} />
+            <X size={16} />
           </button>
         </div>
 
         {/* Advisory Body */}
-        <div className="p-6 overflow-y-auto flex-1 bg-[#08090a]">
-          <pre className="text-[13px] font-linear-mono text-[#cbd5e1] leading-relaxed whitespace-pre-wrap selection:bg-[#e4f222] selection:text-[#08090a]">
+        <div className="p-6 overflow-y-auto flex-1 bg-black/40">
+          <pre className="text-[12.5px] font-mono-tech text-[#D8D8D3] leading-relaxed whitespace-pre-wrap selection:bg-[#E8E8E4] selection:text-[#141414]">
             {advisoryText}
           </pre>
         </div>
 
         {/* Footer Actions */}
-        <div className="p-4 border-t border-[#232732] flex flex-wrap justify-between items-center bg-[#151820] gap-3">
-          <div className="text-[12px] font-linear-mono text-[#94a3b8] flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-[#22c55e]"></span>
+        <div className="p-4 border-t border-white/10 flex flex-wrap justify-between items-center bg-white/[0.02] gap-3">
+          <div className="text-xs font-mono-tech text-[#8B8B87] flex items-center gap-2">
+            <span className="status-dot-active" />
             <span>READY FOR DISPATCH TO RMCs</span>
           </div>
 
-          <div className="flex items-center gap-2.5">
+          <div className="flex items-center gap-2">
             <button
               onClick={handleCopy}
-              className="btn-ghost text-[13px] min-h-[40px] cursor-pointer"
+              className="px-3.5 py-1.5 rounded-full bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 text-[#E8E8E5] text-xs font-mono-tech flex items-center gap-1.5 transition cursor-pointer"
             >
-              {copied ? <Check size={16} className="text-[#22c55e]" /> : <Copy size={16} />}
-              <span>{copied ? "Copied to Clipboard!" : "Copy Bulletin"}</span>
+              {copied ? <Check size={14} className="text-[#AEB796]" /> : <Copy size={14} />}
+              <span>{copied ? "Copied" : "Copy"}</span>
             </button>
 
             <button
               onClick={handleDownloadJson}
-              className="btn-ghost text-[13px] min-h-[40px] cursor-pointer"
+              className="px-3.5 py-1.5 rounded-full bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 text-[#E8E8E5] text-xs font-mono-tech flex items-center gap-1.5 transition cursor-pointer"
             >
-              <Code size={16} />
-              <span>{exportedJson ? "Exported JSON!" : "Export JSON"}</span>
+              <Code size={14} />
+              <span>{exportedJson ? "Exported" : "JSON"}</span>
             </button>
 
             <button
               onClick={handleDownloadTxt}
-              className="btn-acid-lime text-[13px] min-h-[40px] cursor-pointer"
+              className="px-4 py-1.5 rounded-full bg-[#E8E8E4] text-[#141414] font-semibold border border-white text-xs font-mono-tech flex items-center gap-1.5 transition hover:bg-white cursor-pointer shadow-sm"
             >
-              <Download size={16} />
+              <Download size={14} />
               <span>Download (.txt)</span>
             </button>
           </div>

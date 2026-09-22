@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { CloudRain, Wind, Sun, Compass, AlertCircle, ArrowUpRight, Zap, CheckCircle2, ShieldAlert } from "lucide-react";
+import { CloudRain, Wind, Sun, Compass, AlertCircle, ArrowUpRight, ShieldAlert } from "lucide-react";
 
 interface SynopticRegimesProps {
   onSelectRegime: (regime: {
@@ -23,9 +23,8 @@ const REGIMES = [
     title: "Monsoon Deep Depression",
     season: "SW Monsoon (July – August)",
     icon: CloudRain,
-    iconColor: "#38bdf8",
     riskLevel: "HIGH BUST RISK (DAY 4+)",
-    riskBadgeColor: "bg-[#ef4444]/15 text-[#ef4444] border-[#ef4444]/50",
+    riskBadgeColor: "bg-red-500/10 text-red-400 border-red-500/30",
     regions: "Odisha, Chhattisgarh, MP, Vidarbha, Gujarat",
     synopticDescription:
       "Vorticity center moving WNW along the monsoon trough. Global NWP models frequently misjudge the southern flank heavy convective rain bands and track velocity beyond Day 3.",
@@ -42,9 +41,8 @@ const REGIMES = [
     title: "Tropical Cyclone (Bay of Bengal / Arabian Sea)",
     season: "Pre/Post Monsoon (May / Oct – Nov)",
     icon: Compass,
-    iconColor: "#ef4444",
     riskLevel: "CRITICAL REVISION SENSITIVITY",
-    riskBadgeColor: "bg-[#ef4444]/15 text-[#ef4444] border-[#ef4444]/50",
+    riskBadgeColor: "bg-red-500/10 text-red-400 border-red-500/30",
     regions: "Coastal Odisha, Andhra Pradesh, West Bengal, Gujarat",
     synopticDescription:
       "Intense cyclonic vortex over warm sea surface temperatures (>29°C). Medium-range NWP suffers from recurvature uncertainty and rapid intensification (RI) blindspots.",
@@ -61,9 +59,8 @@ const REGIMES = [
     title: "Western Disturbance (WD)",
     season: "Winter & Pre-Monsoon (Dec – March)",
     icon: Wind,
-    iconColor: "#a78bfa",
     riskLevel: "MODERATE TO HIGH BUST RISK",
-    riskBadgeColor: "bg-[#f59e0b]/15 text-[#f59e0b] border-[#f59e0b]/50",
+    riskBadgeColor: "bg-amber-500/10 text-amber-400 border-amber-500/30",
     regions: "Jammu & Kashmir, Himachal, Punjab, Haryana, W. UP",
     synopticDescription:
       "Upper-tropospheric westerly trough propagating from Mediterranean. Orographic uplift over Western Himalayas causes sharp localized snowfall/rain bursts.",
@@ -80,9 +77,8 @@ const REGIMES = [
     title: "Extreme Pre-Monsoon Heatwave",
     season: "Summer (April – June)",
     icon: Sun,
-    iconColor: "#f59e0b",
     riskLevel: "PERSISTENT TEMPERATURE BIAS",
-    riskBadgeColor: "bg-[#f59e0b]/15 text-[#f59e0b] border-[#f59e0b]/50",
+    riskBadgeColor: "bg-amber-500/10 text-amber-400 border-amber-500/30",
     regions: "Rajasthan, Delhi NCR, Vidarbha, Telangana",
     synopticDescription:
       "Anti-cyclonic sinking motion and dry northwesterly advection. NWP surface boundary layers often moisten excessively, leading to cold bias in maximum temperatures.",
@@ -99,9 +95,8 @@ const REGIMES = [
     title: "Active-Break Monsoon Transition",
     season: "Monsoon (July – August)",
     icon: AlertCircle,
-    iconColor: "#22c55e",
     riskLevel: "REGIME-SHIFT BUST RISK",
-    riskBadgeColor: "bg-[#ef4444]/15 text-[#ef4444] border-[#ef4444]/50",
+    riskBadgeColor: "bg-red-500/10 text-red-400 border-red-500/30",
     regions: "Central India, Foot of Himalayas, Northeast",
     synopticDescription:
       "Shifting of monsoon trough to Himalayan foothills. Central India rainfall abruptly ceases while foothills experience devastating flash floods.",
@@ -125,10 +120,8 @@ const ICON_MAP: Record<string, any> = {
 
 export default function SynopticRegimes({ onSelectRegime }: SynopticRegimesProps) {
   const [regimes, setRegimes] = React.useState<any[]>(REGIMES);
-  const [loading, setLoading] = React.useState<boolean>(false);
 
   React.useEffect(() => {
-    setLoading(true);
     fetch("/api/synoptic_regimes")
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
@@ -136,54 +129,53 @@ export default function SynopticRegimes({ onSelectRegime }: SynopticRegimesProps
           setRegimes(data.regimes);
         }
       })
-      .catch((err) => console.warn("Failed to load regimes from MongoDB:", err))
-      .finally(() => setLoading(false));
+      .catch(() => null);
   }, []);
 
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#232732] pb-5">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-5 rounded-2xl glass-feature border border-white/10">
         <div>
           <div className="flex items-center gap-2.5 mb-1.5">
-            <ShieldAlert size={22} className="text-[#e4f222]" />
-            <h2 className="text-xl font-bold text-white tracking-wide">
-              High-Risk Synoptic Meteorological Regimes (MoES / NCMRWF Operational Focus)
+            <div className="w-8 h-8 rounded-full bg-white/[0.06] border border-white/10 flex items-center justify-center text-[#E8E8E5]">
+              <ShieldAlert size={16} />
+            </div>
+            <h2 className="text-lg font-bold text-[#E8E8E5] tracking-wide font-sans">
+              High-Risk Synoptic Meteorological Regimes
             </h2>
-            <span className="px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
-              {regimes.length} REGIMES IN DATABASE
+            <span className="px-2.5 py-0.5 rounded-full text-[11px] font-mono-tech bg-white/[0.05] text-[#D8D8D3] border border-white/10">
+              {regimes.length} REGIMES
             </span>
           </div>
-          <p className="text-sm text-white/60 leading-relaxed">
-            Operational medium-range NWP guidance exhibits peak forecast bust frequency during these {regimes.length} synoptic patterns across India. Click any regime to immediately inject its atmospheric state into the Live Overview.
+          <p className="text-xs text-[#92928C] leading-relaxed max-w-3xl">
+            Operational medium-range NWP guidance exhibits peak forecast bust frequency during these synoptic patterns across India. Select any regime to evaluate its atmospheric state in the Live Cockpit.
           </p>
         </div>
       </div>
 
       {/* Grid of Regimes */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {regimes.map((r) => {
+        {regimes.map((r, idx) => {
           const IconComponent = typeof r.icon === "string" ? (ICON_MAP[r.icon] || CloudRain) : (r.icon || CloudRain);
           return (
             <div
               key={r.id}
-              className="linear-card flex flex-col justify-between hover:border-[#384256] transition group p-6 rounded-2xl bg-[#0e1424]/90 border border-white/10 shadow-lg"
+              className="detail-card flex flex-col justify-between p-6 rounded-2xl transition-all"
             >
               <div>
                 {/* Header */}
-                <div className="flex items-start justify-between gap-2 border-b border-[#232732] pb-4 mb-4">
+                <div className="flex items-start justify-between gap-2 border-b border-white/10 pb-4 mb-4">
                   <div className="flex items-center gap-3">
-                    <div
-                      className="w-11 h-11 rounded-xl bg-[#151820] border border-[#232732] flex items-center justify-center shrink-0"
-                      style={{ color: r.iconColor || "#38bdf8" }}
-                    >
-                      <IconComponent size={22} />
+                    <div className="w-10 h-10 rounded-full bg-white/[0.06] border border-white/10 flex items-center justify-center text-[#E8E8E5] shrink-0">
+                      <IconComponent size={18} />
                     </div>
                     <div>
-                      <h3 className="text-base font-bold text-white group-hover:text-[#e4f222] transition-colors leading-snug">
+                      <div className="noir-kicker mb-0.5">REGIME / {String(idx + 1).padStart(2, "0")}</div>
+                      <h3 className="text-base font-bold text-[#E8E8E5] leading-snug">
                         {r.title}
                       </h3>
-                      <span className="text-xs font-mono text-white/60 block mt-0.5 font-medium">
+                      <span className="text-[11px] text-[#92928C] block mt-0.5 font-mono-tech">
                         {r.season}
                       </span>
                     </div>
@@ -192,29 +184,29 @@ export default function SynopticRegimes({ onSelectRegime }: SynopticRegimesProps
 
                 {/* Threat Badge */}
                 <div className="mb-3.5">
-                  <span className={`px-3 py-1 rounded-full text-xs font-mono font-bold border tracking-wider ${r.riskBadgeColor || "bg-rose-500/15 text-rose-300 border-rose-500/40"}`}>
+                  <span className={`px-3 py-1 rounded-full text-[10px] font-mono-tech font-semibold border tracking-wider ${r.riskBadgeColor || "bg-red-500/10 text-red-400 border-red-500/30"}`}>
                     {r.riskLevel}
                   </span>
                 </div>
 
                 {/* Affected Regions */}
-                <div className="text-xs text-white/90 mb-3 font-medium">
-                  <strong className="text-white font-bold">Affected Zones:</strong> {r.regions}
+                <div className="text-xs text-[#D8D8D3] mb-3">
+                  <strong className="text-[#E8E8E5] font-semibold">Affected Zones:</strong> {r.regions}
                 </div>
 
                 {/* Description */}
-                <p className="text-xs text-white/70 leading-relaxed mb-4">
+                <p className="text-xs text-[#92928C] leading-relaxed mb-4">
                   {r.synopticDescription}
                 </p>
 
                 {/* Failure Modes Checklist */}
-                <div className="bg-[#080d18] p-4 rounded-xl border border-white/5 mb-5 space-y-2">
-                  <span className="text-xs font-mono text-cyan-300 font-bold uppercase tracking-wider block">
+                <div className="bg-white/[0.03] p-4 rounded-xl border border-white/10 mb-5 space-y-2">
+                  <span className="noir-kicker block">
                     Observed Model Failure Modes:
                   </span>
-                  <ul className="text-xs text-white/70 space-y-1.5 pl-4 list-disc leading-relaxed">
-                    {r.failureModes && r.failureModes.map((fm: string, idx: number) => (
-                      <li key={idx}>{fm}</li>
+                  <ul className="text-xs text-[#D8D8D3] space-y-1.5 pl-4 list-disc leading-relaxed">
+                    {r.failureModes && r.failureModes.map((fm: string, fIdx: number) => (
+                      <li key={fIdx}>{fm}</li>
                     ))}
                   </ul>
                 </div>
@@ -230,10 +222,10 @@ export default function SynopticRegimes({ onSelectRegime }: SynopticRegimesProps
                     ...r.parameters,
                   })
                 }
-                className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-xs font-bold text-white bg-white/5 hover:bg-[#e4f222]/15 hover:text-[#e4f222] hover:border-[#e4f222]/40 border border-white/10 transition-all cursor-pointer active:scale-95"
+                className="w-full flex items-center justify-between py-2.5 px-4 rounded-full text-xs font-mono-tech font-semibold text-[#E8E8E5] bg-white/[0.05] hover:bg-white/[0.12] border border-white/10 transition-all cursor-pointer active:scale-[0.99]"
               >
-                <span>Evaluate Profile in Overview</span>
-                <ArrowUpRight size={16} />
+                <span>Evaluate in Live Overview</span>
+                <ArrowUpRight size={14} />
               </button>
             </div>
           );

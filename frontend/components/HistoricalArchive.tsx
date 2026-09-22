@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Archive, Search, Filter, AlertTriangle, CheckCircle, ExternalLink, Calendar, MapPin, Gauge } from "lucide-react";
+import { Archive, Search, Calendar, MapPin } from "lucide-react";
 
 const HISTORICAL_CASES = [
   {
@@ -103,10 +103,8 @@ export default function HistoricalArchive() {
   const [searchTerm, setSearchTerm] = useState("");
   const [leadFilter, setLeadFilter] = useState("all");
   const [stateFilter, setStateFilter] = useState("all");
-  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    setLoading(true);
     fetch("/api/historical_busts")
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
@@ -114,8 +112,7 @@ export default function HistoricalArchive() {
           setCases(data.cases);
         }
       })
-      .catch((err) => console.warn("Failed to load historical busts from MongoDB:", err))
-      .finally(() => setLoading(false));
+      .catch(() => null);
   }, []);
 
   const filteredCases = cases.filter((c) => {
@@ -136,19 +133,21 @@ export default function HistoricalArchive() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#232732] pb-5">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-5 rounded-2xl glass-feature border border-white/10">
         <div>
           <div className="flex items-center gap-2.5 mb-1.5">
-            <Archive size={22} className="text-[#e4f222]" />
-            <h2 className="text-xl font-bold text-white tracking-wide">
-              Severe Historical NWP Forecast Bust Archive (2020–2025)
+            <div className="w-8 h-8 rounded-full bg-white/[0.06] border border-white/10 flex items-center justify-center text-[#E8E8E5]">
+              <Archive size={16} />
+            </div>
+            <h2 className="text-lg font-bold text-[#E8E8E5] tracking-wide font-sans">
+              Severe Historical NWP Forecast Bust Archive
             </h2>
-            <span className="px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
+            <span className="px-2.5 py-0.5 rounded-full text-[11px] font-mono-tech bg-white/[0.05] text-[#D8D8D3] border border-white/10">
               {cases.length} BENCHMARKED CASES
             </span>
           </div>
-          <p className="text-sm text-white/60 leading-relaxed">
-            Comprehensive catalog of validated historical medium-range forecast failure events across India, documenting synoptic root causes, verification metrics, and ForecastGuard early-warning detection.
+          <p className="text-xs text-[#92928C] leading-relaxed max-w-3xl">
+            Catalog of validated historical medium-range forecast failure events across India, documenting synoptic root causes, verification metrics, and ForecastGuard early-warning detection.
           </p>
         </div>
       </div>
@@ -157,13 +156,13 @@ export default function HistoricalArchive() {
       <div className="grid grid-cols-1 sm:grid-cols-12 gap-3">
         {/* Search */}
         <div className="sm:col-span-6 relative">
-          <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/40" />
+          <Search size={15} className="absolute left-4 top-1/2 -translate-y-1/2 text-[#8B8B87]" />
           <input
             type="text"
             placeholder="Search by station, state, cyclone, or synoptic event..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full h-11 bg-[#0e1424]/90 border border-white/10 rounded-xl pl-10 pr-4 text-xs font-medium text-white placeholder-white/40 focus:outline-none focus:border-cyan-400"
+            className="w-full h-10 bg-white/[0.04] border border-white/10 rounded-full pl-11 pr-4 text-xs font-mono-tech text-[#E8E8E5] placeholder-[#8B8B87] focus:outline-none focus:border-white/30 transition"
           />
         </div>
 
@@ -172,29 +171,29 @@ export default function HistoricalArchive() {
           <select
             value={stateFilter}
             onChange={(e) => setStateFilter(e.target.value)}
-            className="w-full h-11 px-3 bg-[#0e1424]/90 border border-white/10 rounded-xl text-xs font-medium text-white focus:outline-none focus:border-cyan-400 cursor-pointer"
+            className="w-full h-10 px-4 bg-white/[0.04] border border-white/10 rounded-full text-xs font-mono-tech text-[#E8E8E5] focus:outline-none focus:border-white/30 transition cursor-pointer"
           >
-            <option value="all">All States / Subdivisions</option>
-            <option value="Maharashtra">Maharashtra</option>
-            <option value="West Bengal">West Bengal</option>
-            <option value="Delhi NCT">Delhi NCT</option>
-            <option value="Tamil Nadu">Tamil Nadu</option>
-            <option value="Gujarat">Gujarat</option>
-            <option value="Odisha">Odisha</option>
-            <option value="Jammu & Kashmir">Jammu & Kashmir</option>
-            <option value="Himachal Pradesh">Himachal Pradesh</option>
-            <option value="Uttarakhand">Uttarakhand</option>
-            <option value="Karnataka">Karnataka</option>
-            <option value="Andhra Pradesh">Andhra Pradesh</option>
-            <option value="Rajasthan">Rajasthan</option>
-            <option value="Assam">Assam</option>
-            <option value="Kerala">Kerala</option>
-            <option value="Bihar">Bihar</option>
+            <option value="all" className="bg-[#121212] text-white">All States / Subdivisions</option>
+            <option value="Maharashtra" className="bg-[#121212] text-white">Maharashtra</option>
+            <option value="West Bengal" className="bg-[#121212] text-white">West Bengal</option>
+            <option value="Delhi NCT" className="bg-[#121212] text-white">Delhi NCT</option>
+            <option value="Tamil Nadu" className="bg-[#121212] text-white">Tamil Nadu</option>
+            <option value="Gujarat" className="bg-[#121212] text-white">Gujarat</option>
+            <option value="Odisha" className="bg-[#121212] text-white">Odisha</option>
+            <option value="Jammu & Kashmir" className="bg-[#121212] text-white">Jammu & Kashmir</option>
+            <option value="Himachal Pradesh" className="bg-[#121212] text-white">Himachal Pradesh</option>
+            <option value="Uttarakhand" className="bg-[#121212] text-white">Uttarakhand</option>
+            <option value="Karnataka" className="bg-[#121212] text-white">Karnataka</option>
+            <option value="Andhra Pradesh" className="bg-[#121212] text-white">Andhra Pradesh</option>
+            <option value="Rajasthan" className="bg-[#121212] text-white">Rajasthan</option>
+            <option value="Assam" className="bg-[#121212] text-white">Assam</option>
+            <option value="Kerala" className="bg-[#121212] text-white">Kerala</option>
+            <option value="Bihar" className="bg-[#121212] text-white">Bihar</option>
           </select>
         </div>
 
         {/* Lead Filter Pills */}
-        <div className="sm:col-span-3 flex items-center gap-1 bg-[#0e1424]/90 p-1.5 rounded-xl border border-white/10">
+        <div className="sm:col-span-3 flex items-center gap-1 bg-white/[0.03] p-1 rounded-full border border-white/10">
           {[
             { id: "all", label: "All Days" },
             { id: "d1-3", label: "D1–D3" },
@@ -204,10 +203,10 @@ export default function HistoricalArchive() {
             <button
               key={f.id}
               onClick={() => setLeadFilter(f.id)}
-              className={`flex-1 h-8 text-xs font-mono font-semibold rounded-lg transition-all cursor-pointer ${
+              className={`flex-1 h-8 text-[11px] font-mono-tech font-semibold rounded-full transition-all cursor-pointer ${
                 leadFilter === f.id
-                  ? "bg-cyan-500 text-black font-bold shadow-md shadow-cyan-500/20"
-                  : "text-white/60 hover:text-white"
+                  ? "is-active bg-[#E8E8E4] text-[#141414] font-bold shadow-sm"
+                  : "text-[#8B8B87] hover:text-[#E8E8E5]"
               }`}
             >
               {f.label}
@@ -218,30 +217,31 @@ export default function HistoricalArchive() {
 
       {/* Case Cards Grid */}
       <div className="space-y-4">
-        {filteredCases.map((c) => (
+        {filteredCases.map((c, idx) => (
           <div
             key={c.id}
-            className="linear-card space-y-4 hover:border-[#384256] transition"
+            className="detail-card space-y-4 p-5 rounded-2xl transition-all"
           >
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 border-b border-[#232732] pb-3.5">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 border-b border-white/10 pb-3.5">
               <div className="flex items-center gap-3">
-                <span className="linear-badge font-linear-mono text-[12px] bg-[#232732] text-white font-semibold">
+                <span className="px-2.5 py-0.5 rounded-full font-mono-tech text-[10px] bg-white/[0.06] text-[#D8D8D3] border border-white/10 font-bold">
                   {c.id.toUpperCase()}
                 </span>
                 <div>
-                  <h3 className="text-[17px] font-[600] text-[#ffffff]">
+                  <div className="noir-kicker mb-0.5">CASE BENCHMARK / {String(idx + 1).padStart(2, "0")}</div>
+                  <h3 className="text-base font-bold text-[#E8E8E5]">
                     {c.event}
                   </h3>
-                  <div className="flex items-center gap-3 text-[13px] font-linear-mono text-[#94a3b8] mt-0.5">
-                    <span className="flex items-center gap-1"><MapPin size={13} className="text-[#e4f222]" /> {c.station}, {c.state}</span>
-                    <span className="flex items-center gap-1"><Calendar size={13} className="text-[#38bdf8]" /> {c.date}</span>
+                  <div className="flex items-center gap-3 text-xs font-mono-tech text-[#8B8B87] mt-0.5">
+                    <span className="flex items-center gap-1"><MapPin size={12} className="text-[#AEB796]" /> {c.station}, {c.state}</span>
+                    <span className="flex items-center gap-1"><Calendar size={12} className="text-[#8B8B87]" /> {c.date}</span>
                     <span>Lead: Day {c.leadDay}</span>
                   </div>
                 </div>
               </div>
 
               <div className="flex items-center gap-3">
-                <span className="linear-badge font-linear-mono text-[12px] px-3 py-1 bg-[#ef4444]/15 text-[#ef4444] border-[#ef4444]/50 font-bold">
+                <span className="px-3 py-1 rounded-full font-mono-tech text-[11px] bg-red-500/10 text-red-400 border border-red-500/30 font-bold">
                   {c.predictedStatus} ({c.modelPredictedRisk})
                 </span>
               </div>
@@ -249,27 +249,27 @@ export default function HistoricalArchive() {
 
             {/* Metrics Comparison Grid */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
-              <div className="bg-[#12151c] p-3 rounded-[8px] border border-[#232732]">
-                <span className="text-[12px] font-linear-mono text-[#94a3b8] uppercase block mb-0.5">NWP Predicted</span>
-                <span className="text-[15px] font-bold font-linear-mono text-[#38bdf8]">{c.forecastRain}</span>
+              <div className="bg-white/[0.03] p-3 rounded-xl border border-white/10">
+                <span className="text-[10px] font-mono-tech text-[#8B8B87] uppercase block mb-0.5">NWP Predicted</span>
+                <span className="text-sm font-bold font-mono-tech text-[#D8D8D3]">{c.forecastRain}</span>
               </div>
-              <div className="bg-[#12151c] p-3 rounded-[8px] border border-[#232732]">
-                <span className="text-[12px] font-linear-mono text-[#94a3b8] uppercase block mb-0.5">Actual Observed</span>
-                <span className="text-[15px] font-bold font-linear-mono text-[#ef4444]">{c.observedRain}</span>
+              <div className="bg-white/[0.03] p-3 rounded-xl border border-white/10">
+                <span className="text-[10px] font-mono-tech text-[#8B8B87] uppercase block mb-0.5">Actual Observed</span>
+                <span className="text-sm font-bold font-mono-tech text-red-400">{c.observedRain}</span>
               </div>
-              <div className="bg-[#12151c] p-3 rounded-[8px] border border-[#232732]">
-                <span className="text-[12px] font-linear-mono text-[#94a3b8] uppercase block mb-0.5">Calculated Error Score</span>
-                <span className="text-[15px] font-bold font-linear-mono text-[#f59e0b]">{c.errorScore}</span>
+              <div className="bg-white/[0.03] p-3 rounded-xl border border-white/10">
+                <span className="text-[10px] font-mono-tech text-[#8B8B87] uppercase block mb-0.5">Error Score</span>
+                <span className="text-sm font-bold font-mono-tech text-[#E8E8E5]">{c.errorScore}</span>
               </div>
-              <div className="bg-[#12151c] p-3 rounded-[8px] border border-[#232732]">
-                <span className="text-[12px] font-linear-mono text-[#94a3b8] uppercase block mb-0.5">Bust Threshold (90th %)</span>
-                <span className="text-[15px] font-bold font-linear-mono text-[#cbd5e1]">{c.bustThreshold}</span>
+              <div className="bg-white/[0.03] p-3 rounded-xl border border-white/10">
+                <span className="text-[10px] font-mono-tech text-[#8B8B87] uppercase block mb-0.5">Bust Threshold (90th)</span>
+                <span className="text-sm font-bold font-mono-tech text-[#8B8B87]">{c.bustThreshold}</span>
               </div>
             </div>
 
             {/* Synoptic Summary */}
-            <p className="text-[14px] text-[#94a3b8] leading-relaxed bg-[#151820] p-3.5 rounded-[8px] border border-[#232732]">
-              <strong className="text-[#ffffff]">Meteorological Post-Mortem:</strong> {c.synopticSummary}
+            <p className="text-xs text-[#92928C] leading-relaxed bg-white/[0.02] p-3.5 rounded-xl border border-white/10 font-sans">
+              <strong className="text-[#E8E8E5] font-semibold">Meteorological Post-Mortem:</strong> {c.synopticSummary}
             </p>
           </div>
         ))}

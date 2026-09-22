@@ -217,11 +217,11 @@ export default function IndiaActualMap({
                 mouseover: (e: any) => {
                   const l = e.target;
                   l.setStyle({
-                    weight: 2.8,
-                    color: "#e4f222",
-                    opacity: 1.0,
-                    fillColor: "#e4f222",
-                    fillOpacity: 0.12,
+                    weight: 2.2,
+                    color: isLightMode ? "#171716" : "#E8E8E4",
+                    opacity: 0.9,
+                    fillColor: isLightMode ? "#171716" : "#FFFFFF",
+                    fillOpacity: 0.08,
                     dashArray: "",
                   });
                   if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
@@ -336,7 +336,7 @@ export default function IndiaActualMap({
         const color = isHigh ? "#ef4444" : isMod ? "#f59e0b" : "#22c55e";
 
         // Continuous expanding radar ripple animation originating exactly from dot center
-        const pulseColor = isSelected ? "#e4f222" : color;
+        const pulseColor = isSelected ? (isLightMode ? "#171716" : "#E8E8E4") : color;
         const rippleIcon = L.divIcon({
           className: "radar-beacon-div",
           html: `
@@ -360,7 +360,7 @@ export default function IndiaActualMap({
                 width: 32px;
                 height: 32px;
                 border-radius: 50%;
-                border: 1.8px solid #e4f222;
+                border: 1.8px solid ${isLightMode ? "#171716" : "#E8E8E4"};
                 animation: map-radar-pulse 2.2s cubic-bezier(0.1, 0.4, 0.7, 1) infinite 0.75s;
                 pointer-events: none;
               "></span>` : ''}
@@ -378,8 +378,8 @@ export default function IndiaActualMap({
         // Primary Station Dot (CircleMarker)
         const dot = L.circleMarker([st.latitude, st.longitude], {
           radius: isSelected ? 7 : 4.5,
-          fillColor: isSelected ? "#e4f222" : color,
-          color: isSelected ? "#ffffff" : isLightMode ? "#1e293b" : "#070b14",
+          fillColor: isSelected ? (isLightMode ? "#171716" : "#FFFFFF") : color,
+          color: isSelected ? (isLightMode ? "#FFFFFF" : "#141414") : isLightMode ? "#1e293b" : "#070b14",
           weight: isSelected ? 2.5 : 1.2,
           fillOpacity: 1,
         });
@@ -408,49 +408,49 @@ export default function IndiaActualMap({
   return (
     <div className={`relative w-full h-[620px] rounded-2xl overflow-hidden border select-none flex flex-col transition-colors ${
       isLightMode 
-        ? "bg-[#f8fafc] border-[#cbd5e1] shadow-md" 
-        : "bg-[#07090d] border-[#1e2533] shadow-2xl"
+        ? "bg-[#F4F4F2] border-black/10 shadow-md" 
+        : "bg-[#080808] border-white/10 shadow-2xl"
     }`}>
-      {/* Top Map Toolbar (Cleaned: No J&K highlighted text) */}
+      {/* Top Map Toolbar */}
       <div className="absolute top-3 left-3 right-3 z-[1000] flex flex-wrap items-center justify-between gap-2 pointer-events-none">
         {/* Left: Cartographic Attribution Badge */}
-        <div className={`pointer-events-auto flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs font-linear-mono shadow-xl backdrop-blur-md transition-colors ${
+        <div className={`pointer-events-auto flex items-center gap-2 px-3 py-1.5 rounded-full border text-xs font-mono-tech shadow-xl backdrop-blur-md transition-colors ${
           isLightMode
-            ? "bg-white/95 border-slate-300 text-sky-700"
-            : "bg-[#0c1017]/95 border-[#232f42] text-cyan-300"
+            ? "bg-white/95 border-black/10 text-[#171716]"
+            : "bg-[#080808]/90 border-white/10 text-[#E8E8E5]"
         }`}>
-          <div className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
-          <span className="font-bold uppercase">OFFICIAL SURVEY OF INDIA CARTOGRAPHY</span>
+          <div className="w-2 h-2 rounded-full bg-[#AEB796] animate-pulse" />
+          <span className="font-bold uppercase tracking-wider">SURVEY OF INDIA CARTOGRAPHY</span>
           <span className="opacity-40">|</span>
-          <span className="font-semibold">{stations.length} SYNOPTIC STATIONS</span>
+          <span className="font-semibold text-[#8B8B87]">{stations.length} SYNOPTIC STATIONS</span>
         </div>
 
         {/* Right: Map Navigation Controls */}
-        <div className={`pointer-events-auto flex items-center gap-1.5 p-1 rounded-xl border shadow-xl backdrop-blur-md transition-colors ${
+        <div className={`pointer-events-auto flex items-center gap-1.5 p-1 rounded-full border shadow-xl backdrop-blur-md transition-colors ${
           isLightMode
-            ? "bg-white/95 border-slate-300 text-slate-700"
-            : "bg-[#0c1017]/95 border-[#232f42] text-[#94a3b8]"
+            ? "bg-white/95 border-black/10 text-[#171716]"
+            : "bg-[#080808]/90 border-white/10 text-[#8B8B87]"
         }`}>
           <button
             onClick={() => handleZoom(1)}
-            className="p-1.5 rounded-lg hover:text-black hover:bg-slate-200 dark:hover:text-white dark:hover:bg-[#1a2333] transition cursor-pointer"
+            className="p-1.5 rounded-full hover:text-black hover:bg-black/5 dark:hover:text-white dark:hover:bg-white/10 transition cursor-pointer"
             title="Zoom In"
           >
-            <ZoomIn size={15} />
+            <ZoomIn size={14} />
           </button>
           <button
             onClick={() => handleZoom(-1)}
-            className="p-1.5 rounded-lg hover:text-black hover:bg-slate-200 dark:hover:text-white dark:hover:bg-[#1a2333] transition cursor-pointer"
+            className="p-1.5 rounded-full hover:text-black hover:bg-black/5 dark:hover:text-white dark:hover:bg-white/10 transition cursor-pointer"
             title="Zoom Out"
           >
-            <ZoomOut size={15} />
+            <ZoomOut size={14} />
           </button>
           <button
             onClick={handleReset}
-            className="p-1.5 rounded-lg hover:text-black hover:bg-slate-200 dark:hover:text-white dark:hover:bg-[#1a2333] transition cursor-pointer"
+            className="p-1.5 rounded-full hover:text-black hover:bg-black/5 dark:hover:text-white dark:hover:bg-white/10 transition cursor-pointer"
             title="Reset to All-India View"
           >
-            <RotateCcw size={15} />
+            <RotateCcw size={14} />
           </button>
         </div>
       </div>
@@ -482,32 +482,32 @@ export default function IndiaActualMap({
       {/* Floating Rich Telemetry Data Box: Follows Cursor Right Next to Pointer */}
       {hoveredStation && cursorPos && (
         <div 
-          className={`absolute z-[1000] pointer-events-none p-3.5 rounded-xl border shadow-2xl min-w-[250px] font-linear-mono text-xs backdrop-blur-md transition-all duration-75 ${
+          className={`absolute z-[1000] pointer-events-none p-3.5 rounded-2xl border shadow-2xl min-w-[250px] font-mono-tech text-xs backdrop-blur-md transition-all duration-75 ${
             isLightMode
-              ? "bg-white/95 border-slate-300 text-slate-800"
-              : "bg-[#0e131d]/95 border-[#2b3a50] text-[#cbd5e1]"
+              ? "bg-white/95 border-black/10 text-[#171716]"
+              : "bg-[#080808]/95 border-white/15 text-[#D8D8D3]"
           }`}
           style={{
             left: `${Math.max(12, Math.min(cursorPos.x + 18, (mapContainerRef.current?.clientWidth || 800) - 270))}px`,
             top: `${Math.max(12, Math.min(cursorPos.y - 36, (mapContainerRef.current?.clientHeight || 600) - 210))}px`,
           }}
         >
-          <div className="flex items-center justify-between border-b pb-2 mb-2 border-slate-200 dark:border-[#232f42]">
+          <div className="flex items-center justify-between border-b pb-2 mb-2 border-black/10 dark:border-white/10">
             <div>
-              <span className={`text-sm font-bold block leading-tight ${isLightMode ? "text-slate-900" : "text-white"}`}>
+              <span className={`text-sm font-bold block leading-tight ${isLightMode ? "text-[#171716]" : "text-[#E8E8E5]"}`}>
                 {hoveredStation.name}
               </span>
-              <span className="text-[11px] text-cyan-600 dark:text-cyan-400 font-semibold">
+              <span className="text-[11px] text-[#AEB796] font-semibold">
                 {hoveredStation.region}
               </span>
             </div>
             <span
-              className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+              className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
                 (hoveredStation.bust_probability ?? 0) >= 0.65
-                  ? "bg-red-500/15 text-red-600 dark:text-red-400 border border-red-500/40"
+                  ? "bg-red-500/15 text-red-500 border border-red-500/40"
                   : (hoveredStation.bust_probability ?? 0) >= 0.35
-                  ? "bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/40"
-                  : "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/40"
+                  ? "bg-amber-500/15 text-amber-500 border border-amber-500/40"
+                  : "bg-[#AEB796]/15 text-[#565F45] dark:text-[#D6DDA9] border border-[#AEB796]/40"
               }`}
             >
               {((hoveredStation.bust_probability ?? 0.3) * 100).toFixed(0)}% BUST RISK
@@ -516,22 +516,22 @@ export default function IndiaActualMap({
 
           <div className="space-y-1.5">
             <div className="flex justify-between">
-              <span className={isLightMode ? "text-slate-500" : "text-[#94a3b8]"}>Coordinates:</span>
+              <span className="text-[#8B8B87]">Coordinates:</span>
               <span className="font-semibold">
                 {hoveredStation.latitude.toFixed(2)}&deg;N, {hoveredStation.longitude.toFixed(2)}&deg;E
               </span>
             </div>
             <div className="flex justify-between">
-              <span className={isLightMode ? "text-slate-500" : "text-[#94a3b8]"}>Rainfall (24h):</span>
-              <span className="text-cyan-600 dark:text-cyan-300 font-bold">{hoveredStation.rainfall ?? 18.5} mm</span>
+              <span className="text-[#8B8B87]">Rainfall (24h):</span>
+              <span className="text-[#AEB796] font-bold">{hoveredStation.rainfall ?? 18.5} mm</span>
             </div>
             <div className="flex justify-between">
-              <span className={isLightMode ? "text-slate-500" : "text-[#94a3b8]"}>Surface Wind:</span>
+              <span className="text-[#8B8B87]">Surface Wind:</span>
               <span>{hoveredStation.wind_speed ?? 6.2} m/s</span>
             </div>
             <div className="flex justify-between">
-              <span className={isLightMode ? "text-slate-500" : "text-[#94a3b8]"}>Model Confidence:</span>
-              <span className="text-emerald-600 dark:text-emerald-400 font-bold">
+              <span className="text-[#8B8B87]">Model Confidence:</span>
+              <span className="text-[#D6DDA9] font-bold">
                 {((hoveredStation.confidence ?? 0.78) * 100).toFixed(0)}%
               </span>
             </div>
@@ -540,10 +540,10 @@ export default function IndiaActualMap({
       )}
 
       {/* Map Legend Footer */}
-      <div className={`px-4 py-2.5 border-t flex flex-wrap items-center justify-between gap-3 text-[11px] font-linear-mono z-10 transition-colors ${
+      <div className={`px-4 py-2.5 border-t flex flex-wrap items-center justify-between gap-3 text-[11px] font-mono-tech z-10 transition-colors ${
         isLightMode
-          ? "bg-slate-100 border-slate-200 text-slate-600"
-          : "bg-[#090c12] border-[#1e2533] text-[#94a3b8]"
+          ? "bg-black/[0.02] border-black/10 text-[#8B8B87]"
+          : "bg-white/[0.02] border-white/10 text-[#8B8B87]"
       }`}>
         <div className="flex items-center gap-4">
           <span className="flex items-center gap-1.5">
@@ -555,11 +555,11 @@ export default function IndiaActualMap({
             <span>Moderate (35-64%)</span>
           </span>
           <span className="flex items-center gap-1.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-[#22c55e]" />
+            <span className="w-2.5 h-2.5 rounded-full bg-[#AEB796]" />
             <span>Low Risk (&lt;35%)</span>
           </span>
           <span className="flex items-center gap-1.5">
-            <span className="w-2.5 h-2.5 rounded-full border-2 border-[#e4f222] bg-[#e4f222]" />
+            <span className={`w-2.5 h-2.5 rounded-full border-2 ${isLightMode ? "border-[#171716] bg-[#171716]" : "border-[#E8E8E4] bg-[#E8E8E4]"}`} />
             <span>Target Station</span>
           </span>
         </div>

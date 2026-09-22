@@ -29,11 +29,10 @@ import {
   TrendingUp,
   ShieldCheck,
   AlertTriangle,
-  Key,
-  BarChart2,
   Scale,
   Sliders,
-  Cpu
+  Cpu,
+  BarChart2
 } from "lucide-react";
 import {
   ResponsiveContainer,
@@ -333,10 +332,10 @@ export default function WindyWeatherMap() {
   // Synoptic Heatmap Matrix (ECMWF vs GFS vs NCUM)
   const heatmapVariables = useMemo(() => {
     return [
-      { name: "2m Temperature", unit: "°C", ecmwf: weather.temp + windyAnalysis.tempBias, gfs: +(weather.temp + windyAnalysis.tempBias * 1.3).toFixed(1), obs: weather.temp, diff: Math.abs(windyAnalysis.tempBias) },
-      { name: "Surface Wind", unit: "m/s", ecmwf: weather.windSpeed + windyAnalysis.windDiff, gfs: +(weather.windSpeed + windyAnalysis.windDiff * 1.2).toFixed(1), obs: weather.windSpeed, diff: Math.abs(windyAnalysis.windDiff) },
+      { name: "2m Temperature", unit: "°C", ecmwf: +(weather.temp + windyAnalysis.tempBias).toFixed(1), gfs: +(weather.temp + windyAnalysis.tempBias * 1.3).toFixed(1), obs: weather.temp, diff: Math.abs(windyAnalysis.tempBias) },
+      { name: "Surface Wind", unit: "m/s", ecmwf: +(weather.windSpeed + windyAnalysis.windDiff).toFixed(1), gfs: +(weather.windSpeed + windyAnalysis.windDiff * 1.2).toFixed(1), obs: weather.windSpeed, diff: Math.abs(windyAnalysis.windDiff) },
       { name: "24h Precipitation", unit: "mm", ecmwf: windyAnalysis.windyForecast.precipitation_rate, gfs: +(windyAnalysis.windyForecast.precipitation_rate * 1.4).toFixed(1), obs: weather.precipitation, diff: Math.abs(windyAnalysis.rainDiff) },
-      { name: "MSL Pressure", unit: "hPa", ecmwf: weather.pressureMsl + windyAnalysis.presDiff, gfs: +(weather.pressureMsl + windyAnalysis.presDiff * 1.1).toFixed(1), obs: weather.pressureMsl, diff: Math.abs(windyAnalysis.presDiff) },
+      { name: "MSL Pressure", unit: "hPa", ecmwf: +(weather.pressureMsl + windyAnalysis.presDiff).toFixed(1), gfs: +(weather.pressureMsl + windyAnalysis.presDiff * 1.1).toFixed(1), obs: weather.pressureMsl, diff: Math.abs(windyAnalysis.presDiff) },
       { name: "Relative Humidity", unit: "%", ecmwf: weather.humidity + 4, gfs: weather.humidity - 3, obs: weather.humidity, diff: 7 },
       { name: "Convective CAPE", unit: "J/kg", ecmwf: thermoIndices.cape, gfs: thermoIndices.cape - 280, obs: thermoIndices.cape - 120, diff: 280 },
       { name: "CIN Inhibition", unit: "J/kg", ecmwf: thermoIndices.cin, gfs: thermoIndices.cin + 35, obs: thermoIndices.cin, diff: 35 },
@@ -348,22 +347,24 @@ export default function WindyWeatherMap() {
   const isModRisk = windyAnalysis.calibratedBustProb >= 0.35 && windyAnalysis.calibratedBustProb < 0.65;
 
   return (
-    <div className={`space-y-6 select-none transition-all ${isFullscreen ? "fixed inset-0 z-50 bg-[#06080c] p-6 overflow-y-auto" : ""}`}>
+    <div className={`space-y-6 select-none transition-all ${isFullscreen ? "fixed inset-0 z-50 bg-[#080808] p-6 overflow-y-auto" : ""}`}>
       
       {/* 1. Header & Location Command Bar */}
-      <div className="flex flex-wrap items-center justify-between gap-4 p-4 rounded-2xl bg-[#0c1220]/90 backdrop-blur-xl border border-white/10 shadow-xl">
+      <div className="glass-feature p-4 sm:p-5 flex flex-wrap items-center justify-between gap-4 border border-white/10">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400 shadow-inner">
-            <Wind size={22} className="animate-spin" style={{ animationDuration: "12s" }} />
+          <div className="w-10 h-10 rounded-full bg-white/[0.06] border border-white/10 flex items-center justify-center text-[#E8E8E5] shadow-sm">
+            <Wind size={20} className="animate-spin text-[#AEB796]" style={{ animationDuration: "16s" }} />
           </div>
           <div>
-            <div className="flex items-center gap-2">
-              <h2 className="text-lg font-bold text-white tracking-tight">Wind &amp; Radar Studio</h2>
-              <span className="px-2 py-0.5 rounded-full text-[10px] font-mono bg-cyan-950 border border-cyan-500/40 text-cyan-300 font-bold">
+            <div className="flex items-center gap-2 mb-1">
+              <h2 className="text-lg font-bold text-[#E8E8E5] tracking-tight font-sans">
+                Wind &amp; Radar Studio
+              </h2>
+              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono-tech uppercase bg-white/[0.04] text-[#AEB796] border border-white/10 font-semibold">
                 WINDY.COM ENGINE
               </span>
             </div>
-            <p className="text-xs text-white/50 font-mono">
+            <p className="text-xs text-[#92928C] font-mono-tech">
               Live ECMWF IFS 9km vs NOAA GFS Global Discrepancy &amp; Convective Dynamics
             </p>
           </div>
@@ -371,18 +372,18 @@ export default function WindyWeatherMap() {
 
         <div className="flex flex-wrap items-center gap-2.5">
           {/* Station Selector */}
-          <div className="flex items-center gap-1.5 bg-[#151d30] px-3 py-1.5 rounded-xl border border-white/15 text-xs font-mono">
-            <MapPin size={14} className="text-cyan-400" />
+          <div className="flex items-center gap-1.5 bg-white/[0.04] px-3.5 py-1.5 rounded-full border border-white/10 text-xs font-mono-tech">
+            <MapPin size={14} className="text-[#AEB796]" />
             <select
               value={selectedStation.name}
               onChange={(e) => {
                 const found = MAJOR_INDIAN_STATIONS.find((s) => s.name === e.target.value);
                 if (found) setSelectedStation(found);
               }}
-              className="bg-transparent text-white focus:outline-none cursor-pointer pr-2"
+              className="bg-transparent text-[#E8E8E5] focus:outline-none cursor-pointer pr-2 font-mono-tech"
             >
               {MAJOR_INDIAN_STATIONS.map((st) => (
-                <option key={st.name} value={st.name} className="bg-[#0e1424] text-white">
+                <option key={st.name} value={st.name} className="bg-[#121212] text-white">
                   {st.name} ({st.state})
                 </option>
               ))}
@@ -390,16 +391,16 @@ export default function WindyWeatherMap() {
           </div>
 
           {/* Lead Day Selector */}
-          <div className="flex items-center gap-1 bg-[#151d30] p-1 rounded-xl border border-white/15 text-xs font-mono">
-            <span className="text-white/40 px-1.5 uppercase font-bold">Lead:</span>
+          <div className="flex items-center gap-1 bg-black/40 p-1 rounded-full border border-white/10 text-xs font-mono-tech">
+            <span className="text-[#8B8B87] px-2 uppercase font-semibold text-[11px]">Lead:</span>
             {[1, 3, 5, 7, 10].map((d) => (
               <button
                 key={d}
                 onClick={() => setLeadDay(d)}
-                className={`px-2.5 py-1 rounded-lg transition cursor-pointer font-bold ${
+                className={`px-3 py-1 rounded-full transition cursor-pointer text-xs font-mono-tech ${
                   leadDay === d
-                    ? "bg-cyan-500 text-black shadow-md shadow-cyan-500/30"
-                    : "text-white/60 hover:text-white"
+                    ? "bg-[#E8E8E4] text-[#141414] font-bold shadow-sm"
+                    : "text-[#8B8B87] hover:text-[#E8E8E5]"
                 }`}
               >
                 D{d}
@@ -411,43 +412,44 @@ export default function WindyWeatherMap() {
           <button
             onClick={() => fetchTelemetryAndWindyAnalysis(selectedStation, leadDay)}
             disabled={isLoading}
-            className="px-3 py-1.5 bg-white/5 hover:bg-white/10 text-white rounded-xl border border-white/10 transition flex items-center gap-1.5 text-xs font-mono cursor-pointer"
+            className="px-3.5 py-1.5 bg-white/[0.04] hover:bg-white/[0.08] text-[#E8E8E5] rounded-full border border-white/10 transition flex items-center gap-1.5 text-xs font-mono-tech cursor-pointer"
           >
-            <RefreshCw size={14} className={isLoading ? "animate-spin text-cyan-400" : ""} />
+            <RefreshCw size={14} className={isLoading ? "animate-spin text-[#AEB796]" : "text-[#AEB796]"} />
             <span>Sync</span>
           </button>
 
           {/* Fullscreen Toggle */}
           <button
             onClick={() => setIsFullscreen(!isFullscreen)}
-            className="p-2 bg-white/5 hover:bg-white/10 text-white rounded-xl border border-white/10 transition cursor-pointer"
+            className="p-2 bg-white/[0.04] hover:bg-white/[0.08] text-[#E8E8E5] rounded-full border border-white/10 transition cursor-pointer"
+            title={isFullscreen ? "Exit Fullscreen" : "Fullscreen"}
           >
-            {isFullscreen ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
+            {isFullscreen ? <Minimize2 size={15} /> : <Maximize2 size={15} />}
           </button>
         </div>
       </div>
 
-      {/* 2. Active Atmospheric Layer Toolbar (Spacious & Cleanly Segmented) */}
-      <div className="bg-[#0c1220]/90 backdrop-blur-xl p-3.5 rounded-2xl border border-white/10 shadow-xl space-y-3">
+      {/* 2. Active Atmospheric Layer Toolbar */}
+      <div className="glass-feature p-4 rounded-2xl border border-white/10 space-y-3.5">
         <div className="flex items-center justify-between">
-          <span className="text-xs font-mono uppercase font-bold text-white/50 flex items-center gap-1.5">
-            <Layers size={14} className="text-cyan-400" /> Active Atmospheric Layer
+          <span className="text-xs font-mono-tech uppercase font-semibold text-[#8B8B87] flex items-center gap-1.5">
+            <Layers size={14} className="text-[#AEB796]" /> Active Atmospheric Layer
           </span>
-          <span className="text-[11px] font-mono text-cyan-400">
-            Current: {overlay.toUpperCase()}
+          <span className="text-[11px] font-mono-tech text-[#AEB796] uppercase tracking-wider">
+            Layer: {overlay}
           </span>
         </div>
 
-        {/* 7 Cleanly Spaced Layer Buttons */}
+        {/* 7 Clean Monochrome Layer Buttons */}
         <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2">
           {[
-            { id: "wind", label: "Wind & Streamlines", icon: Wind, color: "text-cyan-400", activeBg: "bg-cyan-500/20 border-cyan-500/60 text-cyan-300" },
-            { id: "rain", label: "Rain & Radar", icon: CloudRain, color: "text-blue-400", activeBg: "bg-blue-500/20 border-blue-500/60 text-blue-300" },
-            { id: "temp", label: "Temperature", icon: Thermometer, color: "text-amber-400", activeBg: "bg-amber-500/20 border-amber-500/60 text-amber-300" },
-            { id: "pressure", label: "Pressure Isobars", icon: Gauge, color: "text-purple-400", activeBg: "bg-purple-500/20 border-purple-500/60 text-purple-300" },
-            { id: "clouds", label: "Satellite / Clouds", icon: CloudFog, color: "text-emerald-400", activeBg: "bg-emerald-500/20 border-emerald-500/60 text-emerald-300" },
-            { id: "waves", label: "Ocean Waves", icon: Waves, color: "text-teal-400", activeBg: "bg-teal-500/20 border-teal-500/60 text-teal-300" },
-            { id: "thunder", label: "Thunderstorms / CAPE", icon: CloudLightning, color: "text-rose-400", activeBg: "bg-rose-500/20 border-rose-500/60 text-rose-300" },
+            { id: "wind", label: "Wind & Streamlines", icon: Wind },
+            { id: "rain", label: "Rain & Radar", icon: CloudRain },
+            { id: "temp", label: "Temperature", icon: Thermometer },
+            { id: "pressure", label: "Pressure Isobars", icon: Gauge },
+            { id: "clouds", label: "Satellite / Clouds", icon: CloudFog },
+            { id: "waves", label: "Ocean Waves", icon: Waves },
+            { id: "thunder", label: "Thunder / CAPE", icon: CloudLightning },
           ].map((lyr) => {
             const Icon = lyr.icon;
             const isActive = overlay === lyr.id;
@@ -455,13 +457,13 @@ export default function WindyWeatherMap() {
               <button
                 key={lyr.id}
                 onClick={() => setOverlay(lyr.id as WindyOverlay)}
-                className={`p-2.5 rounded-xl border flex items-center justify-center gap-2 transition text-xs font-mono font-semibold cursor-pointer ${
+                className={`p-2.5 rounded-xl border flex items-center justify-center gap-2 transition text-xs font-mono-tech font-semibold cursor-pointer ${
                   isActive
-                    ? `${lyr.activeBg} shadow-lg font-bold scale-[1.02]`
-                    : "bg-[#151d30]/70 border-white/10 text-white/70 hover:text-white hover:bg-[#1a253d]"
+                    ? "bg-[#E8E8E4] text-[#141414] border-white font-bold shadow-sm scale-[1.01]"
+                    : "bg-white/[0.03] border-white/10 text-[#8B8B87] hover:text-[#E8E8E5] hover:bg-white/[0.06]"
                 }`}
               >
-                <Icon size={16} className={isActive ? lyr.color : "text-white/40"} />
+                <Icon size={15} className={isActive ? "text-[#141414]" : "text-[#AEB796]"} />
                 <span className="truncate">{lyr.label}</span>
               </button>
             );
@@ -469,11 +471,11 @@ export default function WindyWeatherMap() {
         </div>
 
         {/* Numerical Model & Vertical Atmospheric Level Sub-Strip */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-2 border-t border-white/10">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-2.5 border-t border-white/10">
           {/* NWP Numerical Model Selector */}
-          <div className="flex items-center gap-2 bg-[#121826] p-2 rounded-xl border border-white/10 text-xs font-mono">
-            <span className="text-white/40 uppercase font-bold text-[11px] px-1 shrink-0 flex items-center gap-1">
-              <Activity size={13} className="text-amber-400" /> Model:
+          <div className="flex items-center gap-2 bg-white/[0.02] p-2 rounded-xl border border-white/10 text-xs font-mono-tech">
+            <span className="text-[#8B8B87] uppercase font-semibold text-[11px] px-1 shrink-0 flex items-center gap-1">
+              <Activity size={13} className="text-[#AEB796]" /> Model:
             </span>
             <div className="grid grid-cols-3 gap-1.5 flex-1">
               {[
@@ -486,21 +488,21 @@ export default function WindyWeatherMap() {
                   onClick={() => setModel(m.id as NWPModel)}
                   className={`p-1.5 rounded-lg text-center transition border cursor-pointer ${
                     model === m.id
-                      ? "bg-amber-500/20 text-amber-300 border-amber-500/50 font-bold shadow-sm"
-                      : "bg-white/5 text-white/60 border-transparent hover:bg-white/10 hover:text-white"
+                      ? "bg-[#E8E8E4] text-[#141414] border-white font-bold shadow-sm"
+                      : "bg-white/[0.04] text-[#8B8B87] border-transparent hover:text-white hover:bg-white/[0.08]"
                   }`}
                 >
                   <div className="font-bold text-[11px]">{m.label}</div>
-                  <div className="text-[9px] text-white/40">{m.tag}</div>
+                  <div className="text-[9px] opacity-70">{m.tag}</div>
                 </button>
               ))}
             </div>
           </div>
 
           {/* Vertical Pressure Level */}
-          <div className="flex items-center gap-2 bg-[#121826] p-2 rounded-xl border border-white/10 text-xs font-mono">
-            <span className="text-white/40 uppercase font-bold text-[11px] px-1 shrink-0 flex items-center gap-1">
-              <Compass size={13} className="text-purple-400" /> Altitude:
+          <div className="flex items-center gap-2 bg-white/[0.02] p-2 rounded-xl border border-white/10 text-xs font-mono-tech">
+            <span className="text-[#8B8B87] uppercase font-semibold text-[11px] px-1 shrink-0 flex items-center gap-1">
+              <Compass size={13} className="text-[#AEB796]" /> Altitude:
             </span>
             <div className="grid grid-cols-5 gap-1.5 flex-1">
               {[
@@ -515,12 +517,12 @@ export default function WindyWeatherMap() {
                   onClick={() => setLevel(lvl.id as AtmosphericLevel)}
                   className={`p-1.5 rounded-lg text-center transition border cursor-pointer ${
                     level === lvl.id
-                      ? "bg-purple-500/20 text-purple-300 border-purple-500/50 font-bold shadow-sm"
-                      : "bg-white/5 text-white/60 border-transparent hover:bg-white/10 hover:text-white"
+                      ? "bg-[#E8E8E4] text-[#141414] border-white font-bold shadow-sm"
+                      : "bg-white/[0.04] text-[#8B8B87] border-transparent hover:text-white hover:bg-white/[0.08]"
                   }`}
                 >
                   <div className="text-[11px] font-bold">{lvl.label}</div>
-                  <div className="text-[9px] text-white/40">{lvl.sub}</div>
+                  <div className="text-[9px] opacity-70">{lvl.sub}</div>
                 </button>
               ))}
             </div>
@@ -529,9 +531,9 @@ export default function WindyWeatherMap() {
       </div>
 
       {/* 3. Main Split View: Windy Interactive Embed (Left 8 Cols) & Multi-Model Telemetry HUD (Right 4 Cols) */}
-      <div className="grid grid-cols-1 xl:grid-cols-12 gap-4 items-stretch">
+      <div className="grid grid-cols-1 xl:grid-cols-12 gap-5 items-stretch">
         {/* Left Column: Windy Interactive Embed with Full Height Matching */}
-        <div className="xl:col-span-8 rounded-2xl overflow-hidden border border-white/10 bg-[#070b14] shadow-2xl relative min-h-[660px] h-full flex flex-col">
+        <div className="xl:col-span-8 rounded-2xl overflow-hidden border border-white/10 glass-feature shadow-2xl relative min-h-[660px] h-full flex flex-col p-0">
           <iframe
             src={windyEmbedUrl}
             width="100%"
@@ -542,205 +544,205 @@ export default function WindyWeatherMap() {
           />
 
           {/* Floating HUD Pill on the map showing active station */}
-          <div className="absolute top-3 left-3 z-10 pointer-events-none flex items-center gap-2 bg-[#0c1220]/90 backdrop-blur-md px-3.5 py-1.5 rounded-xl border border-white/15 text-xs font-mono text-white shadow-xl">
-            <span className="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-ping inline-block" />
+          <div className="absolute top-3 left-3 z-10 pointer-events-none flex items-center gap-2 bg-[#080808]/90 backdrop-blur-md px-3.5 py-1.5 rounded-full border border-white/15 text-xs font-mono-tech text-[#E8E8E5] shadow-xl">
+            <span className="w-2 h-2 rounded-full bg-[#AEB796] animate-ping inline-block" />
             <span className="font-bold">{selectedStation.name}</span>
-            <span className="text-white/40">|</span>
-            <span className="text-cyan-300">{selectedStation.lat.toFixed(2)}°N, {selectedStation.lon.toFixed(2)}°E</span>
-            <span className="text-white/40">|</span>
-            <span className="text-amber-300 font-bold uppercase">{model} T+{(leadDay * 24)}h</span>
+            <span className="text-[#8B8B87]">|</span>
+            <span className="text-[#D8D8D3]">{selectedStation.lat.toFixed(2)}°N, {selectedStation.lon.toFixed(2)}°E</span>
+            <span className="text-[#8B8B87]">|</span>
+            <span className="text-[#D6DDA9] font-bold uppercase">{model} T+{(leadDay * 24)}h</span>
           </div>
         </div>
 
         {/* Right Column: Comparative Multi-Model Telemetry HUD */}
         <div className="xl:col-span-4 flex flex-col gap-3">
           {/* Comparative Model Discrepancy & Bust Evaluation Card */}
-          <div className="bg-[#0c1220]/95 backdrop-blur-xl p-4 rounded-2xl border border-white/15 shadow-2xl space-y-3">
-            <div className="flex items-center justify-between pb-2.5 border-b border-white/10">
-              <div className="flex items-center gap-2">
-                <div className="p-1.5 rounded-lg bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
-                  <Scale className="w-4 h-4" />
+          <div className="detail-card space-y-3 flex-1 flex flex-col justify-between">
+            <div>
+              <div className="flex items-center justify-between pb-3 border-b border-white/10">
+                <div className="flex items-center gap-2.5">
+                  <div className="p-1.5 rounded-full bg-white/[0.04] text-[#AEB796] border border-white/10">
+                    <Scale className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-bold text-[#E8E8E5] tracking-wide font-sans">
+                      ECMWF vs Ground Truth Verification
+                    </h3>
+                    <p className="text-xs font-mono-tech text-[#8B8B87]">
+                      Lead Day +{leadDay} Forecast Validation
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <h3 className="text-sm font-bold text-white tracking-wide">
-                    ECMWF vs Ground Truth Verification
-                  </h3>
-                  <p className="text-xs font-mono text-white/50">
-                    Lead Day +{leadDay} Forecast Validation
-                  </p>
+
+                {/* Bust Risk Badge */}
+                <div className={`px-2.5 py-1 rounded-full text-xs font-mono-tech font-bold tracking-wider border ${
+                  isHighRisk
+                    ? "bg-red-500/15 text-red-400 border-red-500/40 animate-pulse"
+                    : isModRisk
+                    ? "bg-amber-500/15 text-amber-300 border-amber-500/40"
+                    : "bg-[#AEB796]/15 text-[#D6DDA9] border-[#AEB796]/40"
+                }`}>
+                  {(windyAnalysis.calibratedBustProb * 100).toFixed(1)}% BUST RISK
                 </div>
               </div>
 
-              {/* Bust Risk Badge */}
-              <div className={`px-2.5 py-1 rounded-xl text-xs font-mono font-bold tracking-wider border ${
-                isHighRisk
-                  ? "bg-rose-500/20 text-rose-300 border-rose-500/40 animate-pulse shadow-sm shadow-rose-950/50"
-                  : isModRisk
-                  ? "bg-amber-500/20 text-amber-300 border-amber-500/40 shadow-sm shadow-amber-950/50"
-                  : "bg-emerald-500/20 text-emerald-300 border-emerald-500/40 shadow-sm shadow-emerald-950/50"
-              }`}>
-                {(windyAnalysis.calibratedBustProb * 100).toFixed(1)}% BUST RISK
+              {/* Side-by-Side Model Comparison Grid */}
+              <div className="grid grid-cols-2 gap-2 text-xs font-mono-tech mt-3">
+                {/* Temperature Comparison */}
+                <div className="bg-white/[0.03] p-2.5 rounded-xl border border-white/10">
+                  <div className="flex justify-between text-[#8B8B87] mb-1">
+                    <span className="font-semibold">Temperature</span>
+                    <span className={windyAnalysis.tempBias > 0 ? "text-red-400 font-bold" : "text-[#D6DDA9] font-bold"}>
+                      Δ {windyAnalysis.tempBias > 0 ? `+${windyAnalysis.tempBias}` : windyAnalysis.tempBias}°C
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-baseline">
+                    <div>
+                      <span className="text-[10px] text-[#8B8B87] block mb-0.5">Windy ECMWF</span>
+                      <span className="text-sm font-bold text-[#D8D8D3]">{windyAnalysis.windyForecast.temperature_2m}°C</span>
+                    </div>
+                    <div className="text-right">
+                      <span className="text-[10px] text-[#8B8B87] block mb-0.5">Observed</span>
+                      <span className="text-sm font-bold text-[#E8E8E5]">{weather.temp}°C</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Barometric MSL Pressure Comparison */}
+                <div className="bg-white/[0.03] p-2.5 rounded-xl border border-white/10">
+                  <div className="flex justify-between text-[#8B8B87] mb-1">
+                    <span className="font-semibold">MSL Pressure</span>
+                    <span className={Math.abs(windyAnalysis.presDiff) > 3 ? "text-red-400 font-bold" : "text-[#D6DDA9] font-bold"}>
+                      Δ {windyAnalysis.presDiff > 0 ? `+${windyAnalysis.presDiff}` : windyAnalysis.presDiff} hPa
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-baseline">
+                    <div>
+                      <span className="text-[10px] text-[#8B8B87] block mb-0.5">Windy ECMWF</span>
+                      <span className="text-sm font-bold text-[#D8D8D3]">{windyAnalysis.windyForecast.surface_pressure_msl}</span>
+                    </div>
+                    <div className="text-right">
+                      <span className="text-[10px] text-[#8B8B87] block mb-0.5">Observed</span>
+                      <span className="text-sm font-bold text-[#E8E8E5]">{weather.pressureMsl}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Wind Speed Comparison */}
+                <div className="bg-white/[0.03] p-2.5 rounded-xl border border-white/10">
+                  <div className="flex justify-between text-[#8B8B87] mb-1">
+                    <span className="font-semibold">Wind Velocity</span>
+                    <span className="text-[#AEB796] font-bold">
+                      Δ {windyAnalysis.windDiff > 0 ? `+${windyAnalysis.windDiff}` : windyAnalysis.windDiff} m/s
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-baseline">
+                    <div>
+                      <span className="text-[10px] text-[#8B8B87] block mb-0.5">Windy ECMWF</span>
+                      <span className="text-sm font-bold text-[#D8D8D3]">{windyAnalysis.windyForecast.wind_speed_10m} m/s</span>
+                    </div>
+                    <div className="text-right">
+                      <span className="text-[10px] text-[#8B8B87] block mb-0.5">Observed</span>
+                      <span className="text-sm font-bold text-[#E8E8E5]">{weather.windSpeed} m/s</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Precipitation Comparison */}
+                <div className="bg-white/[0.03] p-2.5 rounded-xl border border-white/10">
+                  <div className="flex justify-between text-[#8B8B87] mb-1">
+                    <span className="font-semibold">Rainfall Rate</span>
+                    <span className={windyAnalysis.rainDiff !== 0 ? "text-amber-400 font-bold" : "text-[#D6DDA9] font-bold"}>
+                      Δ {windyAnalysis.rainDiff > 0 ? `+${windyAnalysis.rainDiff}` : windyAnalysis.rainDiff} mm
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-baseline">
+                    <div>
+                      <span className="text-[10px] text-[#8B8B87] block mb-0.5">Windy ECMWF</span>
+                      <span className="text-sm font-bold text-[#D8D8D3]">{windyAnalysis.windyForecast.precipitation_rate} mm</span>
+                    </div>
+                    <div className="text-right">
+                      <span className="text-[10px] text-[#8B8B87] block mb-0.5">Observed</span>
+                      <span className="text-sm font-bold text-[#E8E8E5]">{weather.precipitation} mm</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Model Diagnostic Narrative */}
+              <div className="bg-white/[0.02] p-3 rounded-xl border border-white/10 text-xs text-[#92928C] leading-relaxed font-mono-tech mt-3">
+                <span className="text-[#E8E8E5] font-bold block mb-1">Physical Diagnostic:</span>
+                {windyAnalysis.diagnostic}
+              </div>
+
+              {/* Multi-Level Vertical Wind Shear Profile */}
+              <div className="bg-white/[0.02] p-3 rounded-xl border border-white/10 space-y-2 mt-3">
+                <span className="text-xs font-mono-tech uppercase text-[#8B8B87] font-semibold block flex items-center justify-between">
+                  <span>Vertical Atmospheric Profile</span>
+                  <span className="text-[#AEB796]">ECMWF 9km Grid</span>
+                </span>
+                <div className="grid grid-cols-5 gap-1.5 text-center font-mono-tech">
+                  {[
+                    { lvl: "SFC", alt: "10m", wind: windyAnalysis.verticalProfile?.surface?.wind_speed ?? 5.5, temp: windyAnalysis.verticalProfile?.surface?.temp ?? 28 },
+                    { lvl: "850h", alt: "1.5k", wind: windyAnalysis.verticalProfile?.["850hpa"]?.wind_speed ?? 8.8, temp: windyAnalysis.verticalProfile?.["850hpa"]?.temp ?? 21 },
+                    { lvl: "700h", alt: "3.0k", wind: windyAnalysis.verticalProfile?.["700hpa"]?.wind_speed ?? 11.5, temp: windyAnalysis.verticalProfile?.["700hpa"]?.temp ?? 13 },
+                    { lvl: "500h", alt: "5.5k", wind: windyAnalysis.verticalProfile?.["500hpa"]?.wind_speed ?? 15.4, temp: windyAnalysis.verticalProfile?.["500hpa"]?.temp ?? 0 },
+                    { lvl: "250h", alt: "Jet", wind: windyAnalysis.verticalProfile?.["250hpa"]?.wind_speed ?? 24.8, temp: windyAnalysis.verticalProfile?.["250hpa"]?.temp ?? -24 },
+                  ].map((item) => (
+                    <div key={item.lvl} className="bg-white/[0.04] p-1.5 rounded-lg border border-white/5">
+                      <span className="text-[10px] text-[#8B8B87] block mb-0.5">{item.lvl} ({item.alt})</span>
+                      <span className="text-xs font-bold text-[#E8E8E5] block">{item.wind} m/s</span>
+                      <span className="text-xs text-[#AEB796] block">{item.temp}°C</span>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
 
-            {/* Side-by-Side Model Comparison Grid */}
-            <div className="grid grid-cols-2 gap-2 text-xs font-mono">
-              {/* Temperature Comparison */}
-              <div className="bg-white/[0.03] p-2.5 rounded-xl border border-white/5">
-                <div className="flex justify-between text-white/50 mb-1">
-                  <span className="font-semibold">Temperature</span>
-                  <span className={windyAnalysis.tempBias > 0 ? "text-rose-400 font-bold" : "text-blue-400 font-bold"}>
-                    Δ {windyAnalysis.tempBias > 0 ? `+${windyAnalysis.tempBias}` : windyAnalysis.tempBias}°C
-                  </span>
-                </div>
-                <div className="flex justify-between items-baseline">
-                  <div>
-                    <span className="text-[11px] text-white/50 block mb-0.5">Windy ECMWF</span>
-                    <span className="text-sm font-bold text-amber-300">{windyAnalysis.windyForecast.temperature_2m}°C</span>
-                  </div>
-                  <div className="text-right">
-                    <span className="text-[11px] text-white/50 block mb-0.5">Observed</span>
-                    <span className="text-sm font-bold text-white">{weather.temp}°C</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Barometric MSL Pressure Comparison */}
-              <div className="bg-white/[0.03] p-2.5 rounded-xl border border-white/5">
-                <div className="flex justify-between text-white/50 mb-1">
-                  <span className="font-semibold">MSL Pressure</span>
-                  <span className={Math.abs(windyAnalysis.presDiff) > 3 ? "text-rose-400 font-bold" : "text-emerald-400 font-bold"}>
-                    Δ {windyAnalysis.presDiff > 0 ? `+${windyAnalysis.presDiff}` : windyAnalysis.presDiff} hPa
-                  </span>
-                </div>
-                <div className="flex justify-between items-baseline">
-                  <div>
-                    <span className="text-[11px] text-white/50 block mb-0.5">Windy ECMWF</span>
-                    <span className="text-sm font-bold text-purple-300">{windyAnalysis.windyForecast.surface_pressure_msl}</span>
-                  </div>
-                  <div className="text-right">
-                    <span className="text-[11px] text-white/50 block mb-0.5">Observed</span>
-                    <span className="text-sm font-bold text-white">{weather.pressureMsl}</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Wind Speed Comparison */}
-              <div className="bg-white/[0.03] p-2.5 rounded-xl border border-white/5">
-                <div className="flex justify-between text-white/50 mb-1">
-                  <span className="font-semibold">Wind Velocity</span>
-                  <span className="text-cyan-300 font-bold">
-                    Δ {windyAnalysis.windDiff > 0 ? `+${windyAnalysis.windDiff}` : windyAnalysis.windDiff} m/s
-                  </span>
-                </div>
-                <div className="flex justify-between items-baseline">
-                  <div>
-                    <span className="text-[11px] text-white/50 block mb-0.5">Windy ECMWF</span>
-                    <span className="text-sm font-bold text-cyan-300">{windyAnalysis.windyForecast.wind_speed_10m} m/s</span>
-                  </div>
-                  <div className="text-right">
-                    <span className="text-[11px] text-white/50 block mb-0.5">Observed</span>
-                    <span className="text-sm font-bold text-white">{weather.windSpeed} m/s</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Precipitation Comparison */}
-              <div className="bg-white/[0.03] p-2.5 rounded-xl border border-white/5">
-                <div className="flex justify-between text-white/50 mb-1">
-                  <span className="font-semibold">Rainfall Rate</span>
-                  <span className={windyAnalysis.rainDiff !== 0 ? "text-amber-400 font-bold" : "text-emerald-400 font-bold"}>
-                    Δ {windyAnalysis.rainDiff > 0 ? `+${windyAnalysis.rainDiff}` : windyAnalysis.rainDiff} mm
-                  </span>
-                </div>
-                <div className="flex justify-between items-baseline">
-                  <div>
-                    <span className="text-[11px] text-white/50 block mb-0.5">Windy ECMWF</span>
-                    <span className="text-sm font-bold text-blue-300">{windyAnalysis.windyForecast.precipitation_rate} mm</span>
-                  </div>
-                  <div className="text-right">
-                    <span className="text-[11px] text-white/50 block mb-0.5">Observed</span>
-                    <span className="text-sm font-bold text-white">{weather.precipitation} mm</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Model Diagnostic Narrative */}
-            <div className="bg-white/[0.02] p-2.5 rounded-xl border border-white/5 text-xs text-white/70 leading-relaxed font-mono">
-              <span className="text-cyan-400 font-bold block mb-0.5">Physical Diagnostic:</span>
-              {windyAnalysis.diagnostic}
-            </div>
-
-            {/* Multi-Level Vertical Wind Shear Profile */}
-            <div className="bg-white/[0.02] p-2.5 rounded-xl border border-white/5 space-y-1.5">
-              <span className="text-xs font-mono uppercase text-white/50 font-bold block flex items-center justify-between">
-                <span>Vertical Atmospheric Profile</span>
-                <span className="text-amber-300">ECMWF 9km Grid</span>
+            {/* Quick Multi-City Regional Fast Switcher */}
+            <div className="pt-3 border-t border-white/10 space-y-2">
+              <span className="text-xs font-mono-tech uppercase font-semibold text-[#8B8B87] block">
+                Regional Fast Switcher
               </span>
-              <div className="grid grid-cols-5 gap-1 text-center font-mono">
-                {[
-                  { lvl: "SFC", alt: "10m", wind: windyAnalysis.verticalProfile?.surface?.wind_speed ?? 5.5, temp: windyAnalysis.verticalProfile?.surface?.temp ?? 28 },
-                  { lvl: "850h", alt: "1.5k", wind: windyAnalysis.verticalProfile?.["850hpa"]?.wind_speed ?? 8.8, temp: windyAnalysis.verticalProfile?.["850hpa"]?.temp ?? 21 },
-                  { lvl: "700h", alt: "3.0k", wind: windyAnalysis.verticalProfile?.["700hpa"]?.wind_speed ?? 11.5, temp: windyAnalysis.verticalProfile?.["700hpa"]?.temp ?? 13 },
-                  { lvl: "500h", alt: "5.5k", wind: windyAnalysis.verticalProfile?.["500hpa"]?.wind_speed ?? 15.4, temp: windyAnalysis.verticalProfile?.["500hpa"]?.temp ?? 0 },
-                  { lvl: "250h", alt: "Jet", wind: windyAnalysis.verticalProfile?.["250hpa"]?.wind_speed ?? 24.8, temp: windyAnalysis.verticalProfile?.["250hpa"]?.temp ?? -24 },
-                ].map((item) => (
-                  <div key={item.lvl} className="bg-white/5 p-1.5 rounded-lg">
-                    <span className="text-[10px] text-white/50 block mb-0.5">{item.lvl} ({item.alt})</span>
-                    <span className="text-xs font-bold text-cyan-300 block">{item.wind} m/s</span>
-                    <span className="text-xs text-amber-300 block">{item.temp}°C</span>
-                  </div>
+              <div className="grid grid-cols-3 gap-1.5">
+                {MAJOR_INDIAN_STATIONS.slice(0, 6).map((city) => (
+                  <button
+                    key={city.name}
+                    onClick={() => setSelectedStation(city)}
+                    className={`p-2 rounded-xl text-left border transition cursor-pointer font-mono-tech ${
+                      selectedStation.name === city.name
+                        ? "bg-[#E8E8E4] text-[#141414] border-white font-bold shadow-sm"
+                        : "bg-white/[0.03] border-white/10 text-[#8B8B87] hover:text-[#E8E8E5] hover:bg-white/[0.06]"
+                    }`}
+                  >
+                    <div className="text-xs font-bold truncate">{city.name}</div>
+                    <div className="flex justify-between items-center mt-1 text-[10px] opacity-75">
+                      <span>{city.region}</span>
+                      <span>D+{leadDay}</span>
+                    </div>
+                  </button>
                 ))}
               </div>
-            </div>
-          </div>
-
-          {/* Quick Multi-City Regional Fast Switcher */}
-          <div className="bg-[#0c1220]/90 p-3.5 rounded-2xl border border-white/10 space-y-2">
-            <span className="text-xs font-mono uppercase font-bold text-white/50 block">
-              Regional Fast Switcher
-            </span>
-            <div className="grid grid-cols-3 gap-1.5">
-              {MAJOR_INDIAN_STATIONS.slice(0, 6).map((city) => (
-                <button
-                  key={city.name}
-                  onClick={() => setSelectedStation(city)}
-                  className={`p-2 rounded-xl text-left border transition cursor-pointer ${
-                    selectedStation.name === city.name
-                      ? "bg-cyan-500/20 border-cyan-500/40 text-white shadow-sm"
-                      : "bg-white/5 border-transparent text-white/60 hover:text-white hover:bg-white/10"
-                  }`}
-                >
-                  <div className="text-xs font-bold truncate">{city.name}</div>
-                  <div className="flex justify-between items-center mt-1 text-[11px] font-mono">
-                    <span className="text-cyan-300">{city.region}</span>
-                    <span className="text-white/40">D+{leadDay}</span>
-                  </div>
-                </button>
-              ))}
             </div>
           </div>
         </div>
       </div>
 
-      {/* ========================================================
-          4. ADVANCED DYNAMIC ANALYTICS DECK (HEATMAPS, 3D SIMULATOR, CONVECTIVE CHARTS)
-          ======================================================== */}
+      {/* 4. ADVANCED DYNAMIC ANALYTICS DECK (HEATMAPS, SOUNDING SIMULATOR, CONVECTIVE CHARTS) */}
       <div className="space-y-6 pt-4 border-t border-white/10">
         
         {/* Section Header */}
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
-            <h3 className="text-lg font-bold text-white tracking-tight flex items-center gap-2">
-              <Sparkles className="text-[#e4f222]" size={18} />
+            <h3 className="text-lg font-bold text-[#E8E8E5] tracking-tight flex items-center gap-2 font-sans">
+              <Sparkles className="text-[#AEB796]" size={18} />
               <span>Multi-Model Discrepancy Heatmap &amp; 3D Thermodynamic Simulator</span>
             </h3>
-            <p className="text-xs text-white/50 font-mono">
+            <p className="text-xs text-[#92928C] font-mono-tech">
               Live Real-Time Mathematical Discrepancy Matrix Across ECMWF IFS, NOAA GFS, and NCUM 9km Grid
             </p>
           </div>
-          <div className="text-xs font-mono px-3 py-1 rounded-full bg-cyan-950/60 border border-cyan-500/40 text-cyan-300">
+          <div className="text-xs font-mono-tech px-3 py-1 rounded-full bg-white/[0.04] border border-white/10 text-[#AEB796] shrink-0">
             DYNAMIC REAL-TIME ENGINE
           </div>
         </div>
@@ -749,24 +751,24 @@ export default function WindyWeatherMap() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
           
           {/* Component 1: Multi-Model Spatial Discrepancy Heatmap Matrix */}
-          <div className="lg:col-span-6 bg-[#0c1220]/90 p-5 rounded-2xl border border-white/10 shadow-xl space-y-4">
+          <div className="lg:col-span-6 detail-card space-y-4">
             <div className="flex items-center justify-between border-b border-white/10 pb-3">
               <div className="flex items-center gap-2">
-                <BarChart2 className="text-cyan-400" size={18} />
-                <span className="text-sm font-bold text-white font-mono">
+                <BarChart2 className="text-[#AEB796]" size={18} />
+                <span className="text-sm font-bold text-[#E8E8E5] font-sans">
                   Synoptic Variable Discrepancy Matrix
                 </span>
               </div>
-              <span className="text-xs text-white/50 font-mono">
+              <span className="text-xs text-[#8B8B87] font-mono-tech">
                 {selectedStation.name} · Lead +{leadDay}d
               </span>
             </div>
 
             {/* Heatmap Table */}
             <div className="overflow-x-auto">
-              <table className="w-full text-xs font-mono">
+              <table className="w-full text-xs font-mono-tech">
                 <thead>
-                  <tr className="border-b border-white/10 text-white/40 uppercase">
+                  <tr className="border-b border-white/10 text-[#8B8B87] uppercase text-[11px]">
                     <th className="text-left py-2 font-semibold">Parameter</th>
                     <th className="text-center py-2 font-semibold">ECMWF (9km)</th>
                     <th className="text-center py-2 font-semibold">GFS (22km)</th>
@@ -779,18 +781,18 @@ export default function WindyWeatherMap() {
                     const isSevere = row.diff > 15;
                     const isModerate = row.diff > 5 && row.diff <= 15;
                     return (
-                      <tr key={row.name} className="hover:bg-white/5 transition">
-                        <td className="py-2.5 text-white/90 font-medium">{row.name}</td>
-                        <td className="text-center py-2.5 text-cyan-300">{row.ecmwf} {row.unit}</td>
-                        <td className="text-center py-2.5 text-amber-300">{row.gfs} {row.unit}</td>
-                        <td className="text-center py-2.5 text-emerald-300 font-bold">{row.obs} {row.unit}</td>
+                      <tr key={row.name} className="hover:bg-white/[0.03] transition">
+                        <td className="py-2.5 text-[#E8E8E5] font-medium">{row.name}</td>
+                        <td className="text-center py-2.5 text-[#D8D8D3]">{row.ecmwf} {row.unit}</td>
+                        <td className="text-center py-2.5 text-[#8B8B87]">{row.gfs} {row.unit}</td>
+                        <td className="text-center py-2.5 text-[#AEB796] font-bold">{row.obs} {row.unit}</td>
                         <td className="text-right py-2.5">
-                          <span className={`px-2 py-0.5 rounded text-[11px] font-bold ${
+                          <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold ${
                             isSevere 
-                              ? "bg-red-500/20 text-red-400 border border-red-500/40" 
+                              ? "bg-red-500/15 text-red-400 border border-red-500/40" 
                               : isModerate 
-                              ? "bg-amber-500/20 text-amber-400 border border-amber-500/40" 
-                              : "bg-emerald-500/20 text-emerald-400 border border-emerald-500/40"
+                              ? "bg-amber-500/15 text-amber-300 border border-amber-500/40" 
+                              : "bg-[#AEB796]/15 text-[#D6DDA9] border border-[#AEB796]/40"
                           }`}>
                             ±{row.diff} {row.unit}
                           </span>
@@ -802,58 +804,58 @@ export default function WindyWeatherMap() {
               </table>
             </div>
 
-            <div className="p-3 rounded-xl bg-white/[0.02] border border-white/5 flex items-center justify-between text-[11px] font-mono text-white/50">
+            <div className="p-3 rounded-xl bg-white/[0.02] border border-white/10 flex items-center justify-between text-[11px] font-mono-tech text-[#8B8B87]">
               <span className="flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-emerald-400" /> &lt;5 Divergence (Consensus)
+                <span className="w-2 h-2 rounded-full bg-[#AEB796]" /> &lt;5 Consensus
               </span>
               <span className="flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-amber-400" /> 5-15 Moderate Spread
+                <span className="w-2 h-2 rounded-full bg-amber-400" /> 5-15 Spread
               </span>
               <span className="flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-red-400" /> &gt;15 Severe Bust Threat
+                <span className="w-2 h-2 rounded-full bg-red-400" /> &gt;15 Bust Threat
               </span>
             </div>
           </div>
 
           {/* Component 2: 3D-like Thermodynamic Radiosonde / Skew-T Sounding Simulator */}
-          <div className="lg:col-span-6 bg-[#0c1220]/90 p-5 rounded-2xl border border-white/10 shadow-xl space-y-4">
+          <div className="lg:col-span-6 detail-card space-y-4">
             <div className="flex items-center justify-between border-b border-white/10 pb-3">
               <div className="flex items-center gap-2">
-                <Cpu className="text-purple-400" size={18} />
-                <span className="text-sm font-bold text-white font-mono">
+                <Cpu className="text-[#AEB796]" size={18} />
+                <span className="text-sm font-bold text-[#E8E8E5] font-sans">
                   Thermodynamic Sounding &amp; Convective Simulator
                 </span>
               </div>
-              <div className="text-xs font-mono text-[#e4f222] font-bold">
+              <div className="text-xs font-mono-tech text-[#D6DDA9] font-bold">
                 CAPE: {thermoIndices.cape} J/kg
               </div>
             </div>
 
             {/* Calculated Thermodynamic Indices */}
-            <div className="grid grid-cols-4 gap-2 text-center font-mono">
-              <div className="bg-white/5 p-2.5 rounded-xl border border-white/5">
-                <span className="text-[10px] text-white/40 block uppercase">CAPE Energy</span>
-                <span className="text-sm font-black text-rose-400">{thermoIndices.cape} J/kg</span>
+            <div className="grid grid-cols-4 gap-2 text-center font-mono-tech">
+              <div className="bg-white/[0.03] p-2.5 rounded-xl border border-white/10">
+                <span className="text-[10px] text-[#8B8B87] block uppercase">CAPE Energy</span>
+                <span className="text-sm font-bold text-red-400">{thermoIndices.cape} J/kg</span>
               </div>
-              <div className="bg-white/5 p-2.5 rounded-xl border border-white/5">
-                <span className="text-[10px] text-white/40 block uppercase">CIN Inhibition</span>
-                <span className="text-sm font-black text-blue-400">{thermoIndices.cin} J/kg</span>
+              <div className="bg-white/[0.03] p-2.5 rounded-xl border border-white/10">
+                <span className="text-[10px] text-[#8B8B87] block uppercase">CIN Inhibition</span>
+                <span className="text-sm font-bold text-[#D8D8D3]">{thermoIndices.cin} J/kg</span>
               </div>
-              <div className="bg-white/5 p-2.5 rounded-xl border border-white/5">
-                <span className="text-[10px] text-white/40 block uppercase">LCL Cloud Base</span>
-                <span className="text-sm font-black text-cyan-300">{thermoIndices.lcl} m</span>
+              <div className="bg-white/[0.03] p-2.5 rounded-xl border border-white/10">
+                <span className="text-[10px] text-[#8B8B87] block uppercase">LCL Cloud Base</span>
+                <span className="text-sm font-bold text-[#AEB796]">{thermoIndices.lcl} m</span>
               </div>
-              <div className="bg-white/5 p-2.5 rounded-xl border border-white/5">
-                <span className="text-[10px] text-white/40 block uppercase">Lifted Index</span>
-                <span className="text-sm font-black text-amber-400">{thermoIndices.liftedIndex}°C</span>
+              <div className="bg-white/[0.03] p-2.5 rounded-xl border border-white/10">
+                <span className="text-[10px] text-[#8B8B87] block uppercase">Lifted Index</span>
+                <span className="text-sm font-bold text-amber-300">{thermoIndices.liftedIndex}°C</span>
               </div>
             </div>
 
             {/* Interactive Thermodynamic Sliders */}
-            <div className="space-y-3 bg-white/[0.02] p-3.5 rounded-xl border border-white/5 text-xs font-mono">
+            <div className="space-y-3 bg-white/[0.02] p-3.5 rounded-xl border border-white/10 text-xs font-mono-tech">
               <div className="flex items-center justify-between">
-                <span className="text-white/60">Surface Heating Offset:</span>
-                <span className="text-cyan-400 font-bold">{surfaceTempOffset > 0 ? `+${surfaceTempOffset}` : surfaceTempOffset}°C</span>
+                <span className="text-[#8B8B87]">Surface Heating Offset:</span>
+                <span className="text-[#E8E8E5] font-bold">{surfaceTempOffset > 0 ? `+${surfaceTempOffset}` : surfaceTempOffset}°C</span>
               </div>
               <input
                 type="range"
@@ -866,8 +868,8 @@ export default function WindyWeatherMap() {
               />
 
               <div className="flex items-center justify-between">
-                <span className="text-white/60">Boundary Moisture Flux:</span>
-                <span className="text-blue-400 font-bold">{moistureOffset > 0 ? `+${moistureOffset}` : moistureOffset}%</span>
+                <span className="text-[#8B8B87]">Boundary Moisture Flux:</span>
+                <span className="text-[#AEB796] font-bold">{moistureOffset > 0 ? `+${moistureOffset}` : moistureOffset}%</span>
               </div>
               <input
                 type="range"
@@ -884,16 +886,23 @@ export default function WindyWeatherMap() {
             <div className="h-[200px] w-full pt-1">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={thermoIndices.soundingProfile} margin={{ top: 5, right: 15, left: -20, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#232f42" opacity={0.5} />
-                  <XAxis dataKey="pressure" stroke="#64748b" tick={{ fill: "#94a3b8", fontSize: 10 }} />
-                  <YAxis stroke="#64748b" tick={{ fill: "#94a3b8", fontSize: 10 }} />
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255, 255, 255, 0.08)" />
+                  <XAxis dataKey="pressure" tick={{ fill: "#8B8B87", fontSize: 10, fontFamily: "var(--font-mono-var)" }} />
+                  <YAxis tick={{ fill: "#8B8B87", fontSize: 10, fontFamily: "var(--font-mono-var)" }} />
                   <Tooltip
-                    contentStyle={{ backgroundColor: "#0c1220", borderColor: "#232f42", borderRadius: "8px", fontSize: "11px" }}
+                    contentStyle={{ 
+                      backgroundColor: "rgba(14, 14, 14, 0.95)", 
+                      borderColor: "rgba(255, 255, 255, 0.12)", 
+                      borderRadius: "12px", 
+                      fontSize: "11px",
+                      fontFamily: "var(--font-mono-var)",
+                      color: "#E8E8E5" 
+                    }}
                   />
-                  <Legend wrapperStyle={{ fontSize: "10px" }} />
-                  <Line type="monotone" dataKey="envTemp" stroke="#ef4444" name="Env Temp (°C)" strokeWidth={2} dot={{ r: 3 }} />
-                  <Line type="monotone" dataKey="dewTemp" stroke="#38bdf8" name="Dewpoint (°C)" strokeWidth={2} dot={{ r: 3 }} />
-                  <Line type="monotone" dataKey="parcelTemp" stroke="#e4f222" name="Ascending Parcel (°C)" strokeWidth={2} strokeDasharray="4 4" dot={{ r: 3 }} />
+                  <Legend wrapperStyle={{ fontSize: "10px", fontFamily: "var(--font-mono-var)" }} />
+                  <Line type="monotone" dataKey="envTemp" stroke="#ef4444" name="Env Temp (°C)" strokeWidth={2} dot={{ r: 2 }} />
+                  <Line type="monotone" dataKey="dewTemp" stroke="#AEB796" name="Dewpoint (°C)" strokeWidth={2} dot={{ r: 2 }} />
+                  <Line type="monotone" dataKey="parcelTemp" stroke="#D6DDA9" name="Parcel (°C)" strokeWidth={2} strokeDasharray="4 4" dot={{ r: 2 }} />
                 </LineChart>
               </ResponsiveContainer>
             </div>
@@ -901,26 +910,26 @@ export default function WindyWeatherMap() {
         </div>
 
         {/* Component 3: 10-Day Multi-Model Consensus Decay Graph */}
-        <div className="bg-[#0c1220]/90 p-5 rounded-2xl border border-white/10 shadow-xl space-y-4">
+        <div className="detail-card space-y-4">
           <div className="flex flex-wrap items-center justify-between gap-2 border-b border-white/10 pb-3">
             <div>
-              <h4 className="text-sm font-bold text-white font-mono flex items-center gap-2">
-                <TrendingUp className="text-cyan-400" size={16} />
+              <h4 className="text-sm font-bold text-[#E8E8E5] font-sans flex items-center gap-2">
+                <TrendingUp className="text-[#AEB796]" size={16} />
                 <span>10-Day Multi-Model Consensus Decay &amp; Bust Probability Curve</span>
               </h4>
-              <p className="text-xs text-white/50 font-mono">
+              <p className="text-xs text-[#92928C] font-mono-tech">
                 Comparative tracking of ECMWF IFS vs NOAA GFS spread and bust probability from Day 1 to Day 10
               </p>
             </div>
-            <div className="flex items-center gap-3 text-xs font-mono text-white/60">
+            <div className="flex items-center gap-3 text-xs font-mono-tech text-[#8B8B87]">
               <span className="flex items-center gap-1.5">
-                <span className="w-2.5 h-2.5 rounded-full bg-cyan-400" /> ECMWF IFS
+                <span className="w-2.5 h-2.5 rounded-full bg-[#E8E8E5]" /> ECMWF IFS
               </span>
               <span className="flex items-center gap-1.5">
-                <span className="w-2.5 h-2.5 rounded-full bg-amber-400" /> NOAA GFS
+                <span className="w-2.5 h-2.5 rounded-full bg-[#AEB796]" /> NOAA GFS
               </span>
               <span className="flex items-center gap-1.5">
-                <span className="w-2.5 h-2.5 rounded-full bg-rose-500" /> Bust Threat %
+                <span className="w-2.5 h-2.5 rounded-full bg-red-500" /> Bust Threat %
               </span>
             </div>
           </div>
@@ -934,18 +943,25 @@ export default function WindyWeatherMap() {
                     <stop offset="95%" stopColor="#ef4444" stopOpacity={0.0} />
                   </linearGradient>
                   <linearGradient id="ecmwfGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#38bdf8" stopOpacity={0.25} />
-                    <stop offset="95%" stopColor="#38bdf8" stopOpacity={0.0} />
+                    <stop offset="5%" stopColor="#AEB796" stopOpacity={0.25} />
+                    <stop offset="95%" stopColor="#AEB796" stopOpacity={0.0} />
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="#232f42" opacity={0.5} />
-                <XAxis dataKey="day" stroke="#64748b" tick={{ fill: "#94a3b8", fontSize: 11 }} />
-                <YAxis stroke="#64748b" tick={{ fill: "#94a3b8", fontSize: 11 }} />
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255, 255, 255, 0.08)" />
+                <XAxis dataKey="day" tick={{ fill: "#8B8B87", fontSize: 11, fontFamily: "var(--font-mono-var)" }} />
+                <YAxis tick={{ fill: "#8B8B87", fontSize: 11, fontFamily: "var(--font-mono-var)" }} />
                 <Tooltip
-                  contentStyle={{ backgroundColor: "#0c1220", borderColor: "#232f42", borderRadius: "10px", fontSize: "11px" }}
+                  contentStyle={{ 
+                    backgroundColor: "rgba(14, 14, 14, 0.95)", 
+                    borderColor: "rgba(255, 255, 255, 0.12)", 
+                    borderRadius: "12px", 
+                    fontSize: "11px",
+                    fontFamily: "var(--font-mono-var)",
+                    color: "#E8E8E5" 
+                  }}
                 />
-                <Area type="monotone" dataKey="ecmwf" stroke="#38bdf8" strokeWidth={2} fill="url(#ecmwfGrad)" name="ECMWF Forecast (°C)" />
-                <Area type="monotone" dataKey="gfs" stroke="#f59e0b" strokeWidth={2} fill="none" name="GFS Forecast (°C)" />
+                <Area type="monotone" dataKey="ecmwf" stroke="#E8E8E5" strokeWidth={2} fill="url(#ecmwfGrad)" name="ECMWF Forecast (°C)" />
+                <Area type="monotone" dataKey="gfs" stroke="#AEB796" strokeWidth={2} fill="none" name="GFS Forecast (°C)" />
                 <Area type="monotone" dataKey="bustRisk" stroke="#ef4444" strokeWidth={2} fill="url(#bustGrad)" name="Bust Risk (%)" />
               </AreaChart>
             </ResponsiveContainer>

@@ -101,8 +101,8 @@ export default function TopRightToolbar({
       activeHighlightedElementRef.current.classList.remove(
         "outline",
         "outline-2",
-        "outline-[#e4f222]",
-        "bg-[#e4f222]/10",
+        "outline-[#AEB796]",
+        "bg-[#AEB796]/15",
         "rounded-lg",
         "transition-all"
       );
@@ -192,8 +192,8 @@ export default function TopRightToolbar({
       node.classList.add(
         "outline",
         "outline-2",
-        "outline-[#e4f222]",
-        "bg-[#e4f222]/10",
+        "outline-[#AEB796]",
+        "bg-[#AEB796]/15",
         "rounded-lg",
         "transition-all"
       );
