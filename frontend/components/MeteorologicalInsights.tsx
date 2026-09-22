@@ -164,17 +164,17 @@ export default function MeteorologicalInsights() {
   return (
     <div className="space-y-6">
       {/* Top Banner */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-5 rounded-2xl glass-feature border border-white/10">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-6 rounded-2xl glass-feature border border-white/10">
         <div>
-          <div className="flex items-center gap-2.5 mb-1">
-            <div className="w-8 h-8 rounded-full bg-white/[0.06] border border-white/10 flex items-center justify-center text-[#E8E8E5]">
-              <Activity size={16} />
+          <div className="flex items-center gap-2.5 mb-1.5">
+            <div className="w-9 h-9 rounded-full bg-white/[0.06] border border-white/10 flex items-center justify-center text-white">
+              <Activity size={18} />
             </div>
-            <h2 className="text-lg font-bold text-[#E8E8E5] tracking-wide font-sans">
+            <h2 className="text-xl font-bold text-white tracking-wide font-sans">
               Advanced Real-Time Meteorological Diagnostics &amp; Physical Insights
             </h2>
           </div>
-          <p className="text-xs text-[#92928C] leading-relaxed max-w-3xl">
+          <p className="text-sm text-[#A3A3A3] leading-relaxed max-w-3xl">
             Dynamically evaluated thermodynamic, kinematic, and baroclinic parameters across Indian stations.
           </p>
         </div>
@@ -182,11 +182,11 @@ export default function MeteorologicalInsights() {
         {/* Station Selector */}
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-2 bg-white/[0.04] px-4 py-2 rounded-full border border-white/10">
-            <MapPin className="w-3.5 h-3.5 text-[#AEB796]" />
+            <MapPin className="w-4 h-4 text-white" />
             <select
               value={selectedCity}
               onChange={(e) => setSelectedCity(e.target.value)}
-              className="bg-transparent text-xs font-mono-tech font-semibold text-[#E8E8E5] focus:outline-none cursor-pointer"
+              className="bg-transparent text-xs font-mono-tech font-semibold text-white focus:outline-none cursor-pointer"
             >
               {stationList.map((c) => (
                 <option key={c.name} value={c.name} className="bg-[#121212] text-white">
@@ -197,11 +197,11 @@ export default function MeteorologicalInsights() {
           </div>
 
           <div className="flex items-center gap-1.5 bg-white/[0.04] px-4 py-2 rounded-full border border-white/10">
-            <span className="text-xs font-mono-tech text-[#8B8B87]">Lead:</span>
+            <span className="text-xs font-mono-tech text-[#A3A3A3]">Lead:</span>
             <select
               value={leadDay}
               onChange={(e) => setLeadDay(Number(e.target.value))}
-              className="bg-transparent text-xs font-mono-tech font-bold text-[#E8E8E5] focus:outline-none cursor-pointer"
+              className="bg-transparent text-xs font-mono-tech font-bold text-white focus:outline-none cursor-pointer"
             >
               {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((d) => (
                 <option key={d} value={d} className="bg-[#121212] text-white">
@@ -219,177 +219,177 @@ export default function MeteorologicalInsights() {
           {/* Diagnostic 1: Baroclinic Instability */}
           <div className="detail-card p-6 rounded-2xl flex flex-col justify-between">
             <div>
-              <div className="flex items-center justify-between mb-3 border-b border-white/10 pb-3">
+              <div className="flex items-center justify-between mb-4 border-b border-white/10 pb-3">
                 <div className="flex items-center gap-2.5">
-                  <div className="w-8 h-8 rounded-full bg-white/[0.06] border border-white/10 flex items-center justify-center text-[#E8E8E5]">
+                  <div className="w-8 h-8 rounded-full bg-white/[0.06] border border-white/10 flex items-center justify-center text-white">
                     <Activity className="w-4 h-4" />
                   </div>
                   <div>
                     <div className="noir-kicker">PARAM / 01</div>
-                    <span className="text-xs font-bold text-[#E8E8E5] uppercase tracking-wider">
+                    <span className="text-sm font-bold text-white uppercase tracking-wider">
                       Baroclinic Growth Rate
                     </span>
                   </div>
                 </div>
-                <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-mono-tech font-bold border ${
+                <span className={`px-2.5 py-1 rounded-full text-xs font-mono-tech font-bold border ${
                   insight.baroclinicIndex > 1.2 
                     ? "bg-red-500/10 text-red-400 border-red-500/30" 
-                    : "bg-white/[0.05] text-[#D8D8D3] border-white/10"
+                    : "bg-white/[0.06] text-white border-white/15"
                 }`}>
                   {insight.baroclinicIndex > 1.2 ? "HIGH SHEAR" : "STABLE"}
                 </span>
               </div>
 
               <div className="my-4">
-                <div className="text-3xl font-extrabold font-mono-tech text-[#E8E8E5] tracking-tight">
-                  {insight.baroclinicIndex} <span className="text-xs font-normal text-[#8B8B87]">day⁻¹</span>
+                <div className="text-3xl sm:text-4xl font-extrabold font-mono-tech text-white tracking-tight">
+                  {insight.baroclinicIndex} <span className="text-sm font-normal text-[#A3A3A3]">day⁻¹</span>
                 </div>
-                <p className="text-xs text-[#92928C] mt-2 leading-relaxed">
+                <p className="text-sm text-[#A3A3A3] mt-2.5 leading-relaxed">
                   Measures vertical wind shear and potential temperature gradient (Eady growth rate σ_BI = 0.31 · (f / N) · |∂U/∂z|). High values trigger rapid cyclogenesis.
                 </p>
               </div>
             </div>
 
-            <div className="pt-3 border-t border-white/10 flex items-center justify-between text-[11px] font-mono-tech text-[#8B8B87]">
+            <div className="pt-3 border-t border-white/10 flex items-center justify-between text-xs font-mono-tech text-[#A3A3A3]">
               <span>Threshold: &gt; 1.0 day⁻¹</span>
-              <span className="text-[#D8D8D3]">Eady Model</span>
+              <span className="text-white/80">Eady Model</span>
             </div>
           </div>
 
           {/* Diagnostic 2: Moisture Flux Convergence */}
           <div className="detail-card p-6 rounded-2xl flex flex-col justify-between">
             <div>
-              <div className="flex items-center justify-between mb-3 border-b border-white/10 pb-3">
+              <div className="flex items-center justify-between mb-4 border-b border-white/10 pb-3">
                 <div className="flex items-center gap-2.5">
-                  <div className="w-8 h-8 rounded-full bg-white/[0.06] border border-white/10 flex items-center justify-center text-[#E8E8E5]">
+                  <div className="w-8 h-8 rounded-full bg-white/[0.06] border border-white/10 flex items-center justify-center text-white">
                     <Droplets className="w-4 h-4" />
                   </div>
                   <div>
                     <div className="noir-kicker">PARAM / 02</div>
-                    <span className="text-xs font-bold text-[#E8E8E5] uppercase tracking-wider">
+                    <span className="text-sm font-bold text-white uppercase tracking-wider">
                       Moisture Flux (MFC)
                     </span>
                   </div>
                 </div>
-                <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-mono-tech font-bold border ${
+                <span className={`px-2.5 py-1 rounded-full text-xs font-mono-tech font-bold border ${
                   insight.mfc > 8.0 
                     ? "bg-red-500/10 text-red-400 border-red-500/30" 
-                    : "bg-white/[0.05] text-[#D8D8D3] border-white/10"
+                    : "bg-white/[0.06] text-white border-white/15"
                 }`}>
                   {insight.mfc > 8.0 ? "CONVERGENT" : "MODERATE"}
                 </span>
               </div>
 
               <div className="my-4">
-                <div className="text-3xl font-extrabold font-mono-tech text-[#E8E8E5] tracking-tight">
-                  {insight.mfc} <span className="text-xs font-normal text-[#8B8B87]">g·kg⁻¹·s⁻¹</span>
+                <div className="text-3xl sm:text-4xl font-extrabold font-mono-tech text-white tracking-tight">
+                  {insight.mfc} <span className="text-sm font-normal text-[#A3A3A3]">g·kg⁻¹·s⁻¹</span>
                 </div>
-                <p className="text-xs text-[#92928C] mt-2 leading-relaxed">
+                <p className="text-sm text-[#A3A3A3] mt-2.5 leading-relaxed">
                   Evaluates dynamic moisture accumulation (-∇ · (q V)). High convergence zones indicate intense thunderstorm or cloudburst trigger potential.
                 </p>
               </div>
             </div>
 
-            <div className="pt-3 border-t border-white/10 flex items-center justify-between text-[11px] font-mono-tech text-[#8B8B87]">
+            <div className="pt-3 border-t border-white/10 flex items-center justify-between text-xs font-mono-tech text-[#A3A3A3]">
               <span>Humidity: {insight.humidity}%</span>
-              <span className="text-[#D8D8D3]">Moisture Budget</span>
+              <span className="text-white/80">Moisture Budget</span>
             </div>
           </div>
 
           {/* Diagnostic 3: CAPE Proxy */}
           <div className="detail-card p-6 rounded-2xl flex flex-col justify-between">
             <div>
-              <div className="flex items-center justify-between mb-3 border-b border-white/10 pb-3">
+              <div className="flex items-center justify-between mb-4 border-b border-white/10 pb-3">
                 <div className="flex items-center gap-2.5">
-                  <div className="w-8 h-8 rounded-full bg-white/[0.06] border border-white/10 flex items-center justify-center text-[#E8E8E5]">
+                  <div className="w-8 h-8 rounded-full bg-white/[0.06] border border-white/10 flex items-center justify-center text-white">
                     <Flame className="w-4 h-4" />
                   </div>
                   <div>
                     <div className="noir-kicker">PARAM / 03</div>
-                    <span className="text-xs font-bold text-[#E8E8E5] uppercase tracking-wider">
+                    <span className="text-sm font-bold text-white uppercase tracking-wider">
                       Convective CAPE Proxy
                     </span>
                   </div>
                 </div>
-                <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-mono-tech font-bold border ${
+                <span className={`px-2.5 py-1 rounded-full text-xs font-mono-tech font-bold border ${
                   insight.capeProxy > 1800 
                     ? "bg-red-500/10 text-red-400 border-red-500/30" 
-                    : "bg-white/[0.05] text-[#D8D8D3] border-white/10"
+                    : "bg-white/[0.06] text-white border-white/15"
                 }`}>
                   {insight.capeProxy > 1800 ? "UNSTABLE" : "MODERATE"}
                 </span>
               </div>
 
               <div className="my-4">
-                <div className="text-3xl font-extrabold font-mono-tech text-[#E8E8E5] tracking-tight">
-                  {insight.capeProxy} <span className="text-xs font-normal text-[#8B8B87]">J/kg</span>
+                <div className="text-3xl sm:text-4xl font-extrabold font-mono-tech text-white tracking-tight">
+                  {insight.capeProxy} <span className="text-sm font-normal text-[#A3A3A3]">J/kg</span>
                 </div>
-                <p className="text-xs text-[#92928C] mt-2 leading-relaxed">
+                <p className="text-sm text-[#A3A3A3] mt-2.5 leading-relaxed">
                   Convective Available Potential Energy estimated from surface thermal buoyancy and boundary layer moisture. Values &gt; 1500 J/kg signal severe convective bust susceptibility.
                 </p>
               </div>
             </div>
 
-            <div className="pt-3 border-t border-white/10 flex items-center justify-between text-[11px] font-mono-tech text-[#8B8B87]">
+            <div className="pt-3 border-t border-white/10 flex items-center justify-between text-xs font-mono-tech text-[#A3A3A3]">
               <span>Temp: {insight.temp}°C</span>
-              <span className="text-[#D8D8D3]">Thermodynamics</span>
+              <span className="text-white/80">Thermodynamics</span>
             </div>
           </div>
 
           {/* Diagnostic 4: Relative Vorticity Advection */}
           <div className="detail-card p-6 rounded-2xl flex flex-col justify-between">
             <div>
-              <div className="flex items-center justify-between mb-3 border-b border-white/10 pb-3">
+              <div className="flex items-center justify-between mb-4 border-b border-white/10 pb-3">
                 <div className="flex items-center gap-2.5">
-                  <div className="w-8 h-8 rounded-full bg-white/[0.06] border border-white/10 flex items-center justify-center text-[#E8E8E5]">
+                  <div className="w-8 h-8 rounded-full bg-white/[0.06] border border-white/10 flex items-center justify-center text-white">
                     <Compass className="w-4 h-4" />
                   </div>
                   <div>
                     <div className="noir-kicker">PARAM / 04</div>
-                    <span className="text-xs font-bold text-[#E8E8E5] uppercase tracking-wider">
+                    <span className="text-sm font-bold text-white uppercase tracking-wider">
                       Vorticity Advection
                     </span>
                   </div>
                 </div>
-                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono-tech font-bold bg-white/[0.05] text-[#D8D8D3] border border-white/10">
+                <span className="px-2.5 py-1 rounded-full text-xs font-mono-tech font-bold bg-white/[0.06] text-white border border-white/15">
                   CYCLONIC
                 </span>
               </div>
 
               <div className="my-4">
-                <div className="text-3xl font-extrabold font-mono-tech text-[#E8E8E5] tracking-tight">
-                  {insight.vorticityAdvection} <span className="text-xs font-normal text-[#8B8B87]">×10⁻⁵ s⁻²</span>
+                <div className="text-3xl sm:text-4xl font-extrabold font-mono-tech text-white tracking-tight">
+                  {insight.vorticityAdvection} <span className="text-sm font-normal text-[#A3A3A3]">×10⁻⁵ s⁻²</span>
                 </div>
-                <p className="text-xs text-[#92928C] mt-2 leading-relaxed">
+                <p className="text-sm text-[#A3A3A3] mt-2.5 leading-relaxed">
                   Differential vorticity advection (∂ζ/∂t) indicates mid-tropospheric dynamic lift and shortwave trough progression across the Indian monsoon corridor.
                 </p>
               </div>
             </div>
 
-            <div className="pt-3 border-t border-white/10 flex items-center justify-between text-[11px] font-mono-tech text-[#8B8B87]">
+            <div className="pt-3 border-t border-white/10 flex items-center justify-between text-xs font-mono-tech text-[#A3A3A3]">
               <span>Wind: {insight.windSpeed} m/s</span>
-              <span className="text-[#D8D8D3]">Kinematics</span>
+              <span className="text-white/80">Kinematics</span>
             </div>
           </div>
 
           {/* Diagnostic 5: Spread-to-Skill Ratio */}
           <div className="detail-card p-6 rounded-2xl flex flex-col justify-between">
             <div>
-              <div className="flex items-center justify-between mb-3 border-b border-white/10 pb-3">
+              <div className="flex items-center justify-between mb-4 border-b border-white/10 pb-3">
                 <div className="flex items-center gap-2.5">
-                  <div className="w-8 h-8 rounded-full bg-white/[0.06] border border-white/10 flex items-center justify-center text-[#E8E8E5]">
+                  <div className="w-8 h-8 rounded-full bg-white/[0.06] border border-white/10 flex items-center justify-center text-white">
                     <Layers className="w-4 h-4" />
                   </div>
                   <div>
                     <div className="noir-kicker">PARAM / 05</div>
-                    <span className="text-xs font-bold text-[#E8E8E5] uppercase tracking-wider">
+                    <span className="text-sm font-bold text-white uppercase tracking-wider">
                       Spread-to-Skill (SSR)
                     </span>
                   </div>
                 </div>
-                <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-mono-tech font-bold border ${
+                <span className={`px-2.5 py-1 rounded-full text-xs font-mono-tech font-bold border ${
                   Math.abs(insight.spreadSkillRatio - 1.0) <= 0.15
-                    ? "bg-white/[0.05] text-[#D8D8D3] border-white/10"
+                    ? "bg-white/[0.06] text-white border-white/15"
                     : "bg-amber-500/10 text-amber-400 border-amber-500/30"
                 }`}>
                   {Math.abs(insight.spreadSkillRatio - 1.0) <= 0.15 ? "CALIBRATED" : "DISPERSIVE"}
@@ -397,55 +397,55 @@ export default function MeteorologicalInsights() {
               </div>
 
               <div className="my-4">
-                <div className="text-3xl font-extrabold font-mono-tech text-[#E8E8E5] tracking-tight">
-                  {insight.spreadSkillRatio} <span className="text-xs font-normal text-[#8B8B87]">ratio</span>
+                <div className="text-3xl sm:text-4xl font-extrabold font-mono-tech text-white tracking-tight">
+                  {insight.spreadSkillRatio} <span className="text-sm font-normal text-[#A3A3A3]">ratio</span>
                 </div>
-                <p className="text-xs text-[#92928C] mt-2 leading-relaxed">
+                <p className="text-sm text-[#A3A3A3] mt-2.5 leading-relaxed">
                   Ratio of ECMWF 51-member ensemble spread to root mean squared error. Optimal ratio is 1.0; ratios &lt; 0.8 indicate overconfidence.
                 </p>
               </div>
             </div>
 
-            <div className="pt-3 border-t border-white/10 flex items-center justify-between text-[11px] font-mono-tech text-[#8B8B87]">
+            <div className="pt-3 border-t border-white/10 flex items-center justify-between text-xs font-mono-tech text-[#A3A3A3]">
               <span>Target: 1.00 ± 0.15</span>
-              <span className="text-[#D8D8D3]">Ensemble Reliability</span>
+              <span className="text-white/80">Ensemble Reliability</span>
             </div>
           </div>
 
           {/* Diagnostic 6: Diurnal Anomaly */}
           <div className="detail-card p-6 rounded-2xl flex flex-col justify-between">
             <div>
-              <div className="flex items-center justify-between mb-3 border-b border-white/10 pb-3">
+              <div className="flex items-center justify-between mb-4 border-b border-white/10 pb-3">
                 <div className="flex items-center gap-2.5">
-                  <div className="w-8 h-8 rounded-full bg-white/[0.06] border border-white/10 flex items-center justify-center text-[#E8E8E5]">
+                  <div className="w-8 h-8 rounded-full bg-white/[0.06] border border-white/10 flex items-center justify-center text-white">
                     <Zap className="w-4 h-4" />
                   </div>
                   <div>
                     <div className="noir-kicker">PARAM / 06</div>
-                    <span className="text-xs font-bold text-[#E8E8E5] uppercase tracking-wider">
+                    <span className="text-sm font-bold text-white uppercase tracking-wider">
                       Diurnal Thermal Departure
                     </span>
                   </div>
                 </div>
-                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono-tech font-bold bg-white/[0.05] text-[#D8D8D3] border border-white/10">
+                <span className="px-2.5 py-1 rounded-full text-xs font-mono-tech font-bold bg-white/[0.06] text-white border border-white/15">
                   {insight.diurnalAnomaly >= 0 ? `+${insight.diurnalAnomaly}°C` : `${insight.diurnalAnomaly}°C`}
                 </span>
               </div>
 
               <div className="my-4">
-                <div className="text-3xl font-extrabold font-mono-tech text-[#E8E8E5] tracking-tight">
+                <div className="text-3xl sm:text-4xl font-extrabold font-mono-tech text-white tracking-tight">
                   {insight.diurnalAnomaly >= 0 ? `+${insight.diurnalAnomaly}` : insight.diurnalAnomaly}{" "}
-                  <span className="text-xs font-normal text-[#8B8B87]">°C vs 30d Mean</span>
+                  <span className="text-sm font-normal text-[#A3A3A3]">°C vs 30d Mean</span>
                 </div>
-                <p className="text-xs text-[#92928C] mt-2 leading-relaxed">
+                <p className="text-sm text-[#A3A3A3] mt-2.5 leading-relaxed">
                   Real-time surface temperature departure from the 30-day climatological diurnal harmonic curve. Anomalies &gt; 3.0°C indicate boundary layer decoupling.
                 </p>
               </div>
             </div>
 
-            <div className="pt-3 border-t border-white/10 flex items-center justify-between text-[11px] font-mono-tech text-[#8B8B87]">
+            <div className="pt-3 border-t border-white/10 flex items-center justify-between text-xs font-mono-tech text-[#A3A3A3]">
               <span>Pressure: {insight.pressure} hPa</span>
-              <span className="text-[#D8D8D3]">Boundary Layer</span>
+              <span className="text-white/80">Boundary Layer</span>
             </div>
           </div>
         </div>

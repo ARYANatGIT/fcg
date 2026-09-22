@@ -151,7 +151,7 @@ Forecast bust warnings do not supersede official statutory weather bulletins iss
         {/* Header */}
         <div className="p-5 border-b border-white/10 flex justify-between items-center bg-white/[0.02]">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-white/[0.06] border border-white/10 flex items-center justify-center text-[#AEB796] shadow-sm">
+            <div className="w-10 h-10 rounded-full bg-white/[0.06] border border-white/10 flex items-center justify-center text-white shadow-sm">
               <FileText size={18} />
             </div>
             <div>
@@ -192,7 +192,7 @@ Forecast bust warnings do not supersede official statutory weather bulletins iss
               onClick={handleCopy}
               className="px-3.5 py-1.5 rounded-full bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 text-[#E8E8E5] text-xs font-mono-tech flex items-center gap-1.5 transition cursor-pointer"
             >
-              {copied ? <Check size={14} className="text-[#AEB796]" /> : <Copy size={14} />}
+              {copied ? <Check size={14} className="text-white" /> : <Copy size={14} />}
               <span>{copied ? "Copied" : "Copy"}</span>
             </button>
 

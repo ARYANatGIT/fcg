@@ -247,7 +247,7 @@ Click any quick prompt below or ask any question about stations, bust detection,
       // Blockquote
       if (line.startsWith("> ")) {
         return (
-          <blockquote key={idx} className="border-l-2 border-[#AEB796]/60 bg-white/[0.02] pl-3 py-1.5 text-xs text-[#92928C] my-1 rounded-r">
+          <blockquote key={idx} className="border-l-2 border-white/40 bg-white/[0.02] pl-3 py-1.5 text-xs text-[#92928C] my-1 rounded-r">
             {line.replace("> ", "")}
           </blockquote>
         );
@@ -257,7 +257,7 @@ Click any quick prompt below or ask any question about stations, bust detection,
         const bulletText = line.substring(2);
         return (
           <div key={idx} className="flex items-start gap-2 text-xs text-[#D8D8D3] my-0.5 pl-1 leading-relaxed">
-            <span className="text-[#AEB796] shrink-0 mt-0.5">•</span>
+            <span className="text-white shrink-0 mt-0.5">•</span>
             <div>{renderInlineFormatting(bulletText)}</div>
           </div>
         );
@@ -265,7 +265,7 @@ Click any quick prompt below or ask any question about stations, bust detection,
       // Math equation block ($$...$$)
       if (line.startsWith("$$") && line.endsWith("$$")) {
         return (
-          <div key={idx} className="my-2 p-2 bg-black/60 border border-white/10 rounded-lg text-center font-mono-tech text-xs text-[#D6DDA9] overflow-x-auto">
+          <div key={idx} className="my-2 p-2 bg-black/60 border border-white/10 rounded-lg text-center font-mono-tech text-xs text-white overflow-x-auto">
             {line.replace(/\$\$/g, "")}
           </div>
         );
@@ -292,14 +292,14 @@ Click any quick prompt below or ask any question about stations, bust detection,
       }
       if (part.startsWith("`") && part.endsWith("`")) {
         return (
-          <code key={i} className="px-1 py-0.5 rounded bg-white/[0.06] text-[#AEB796] font-mono-tech text-[11px] border border-white/10">
+          <code key={i} className="px-1 py-0.5 rounded bg-white/[0.06] text-[#E8E8E5] font-mono-tech text-xs border border-white/10">
             {part.slice(1, -1)}
           </code>
         );
       }
       if (part.startsWith("$") && part.endsWith("$")) {
         return (
-          <span key={i} className="font-mono-tech text-[#D6DDA9] px-0.5 text-[11px]">
+          <span key={i} className="font-mono-tech text-white px-0.5 text-xs">
             {part.slice(1, -1)}
           </span>
         );
@@ -314,8 +314,8 @@ Click any quick prompt below or ask any question about stations, bust detection,
       {!isOpen && (
         <div className="fixed bottom-6 right-6 z-50 flex items-center gap-3">
           {/* Subtle Hint Capsule */}
-          <div className="hidden sm:flex items-center gap-2 bg-[#111210]/90 border border-white/10 text-[#D8D8D3] px-3.5 py-1.5 rounded-full shadow-[0_10px_30px_rgba(0,0,0,0.5)] backdrop-blur-md text-[11px] font-mono-tech tracking-wider">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#D6DDA9] animate-pulse" />
+          <div className="hidden sm:flex items-center gap-2 bg-[#111210]/90 border border-white/10 text-[#D8D8D3] px-3.5 py-1.5 rounded-full shadow-[0_10px_30px_rgba(0,0,0,0.5)] backdrop-blur-md text-xs font-mono-tech tracking-wider">
+            <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
             <span>AI COPILOT</span>
           </div>
 
@@ -330,7 +330,7 @@ Click any quick prompt below or ask any question about stations, bust detection,
           >
             <Bot className="w-6 h-6 text-[#E8E8E5] group-hover:text-white transition-colors" />
             {/* Active Status Dot */}
-            <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 rounded-full bg-[#AEB796] border-2 border-[#080808]" />
+            <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 rounded-full bg-white border-2 border-[#080808]" />
           </button>
         </div>
       )}
@@ -348,22 +348,22 @@ Click any quick prompt below or ask any question about stations, bust detection,
           <div className="flex items-center justify-between px-4 py-3 bg-white/[0.03] border-b border-white/[0.08] shrink-0">
             <div className="flex items-center gap-2.5">
               <div className="relative">
-                <div className="w-8 h-8 rounded-full bg-white/[0.06] border border-white/10 flex items-center justify-center text-[#AEB796]">
+                <div className="w-8 h-8 rounded-full bg-white/[0.06] border border-white/10 flex items-center justify-center text-white">
                   <Bot className="w-4 h-4" />
                 </div>
-                <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-[#AEB796] border border-[#080808]" />
+                <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-white border border-[#080808]" />
               </div>
               <div>
                 <div className="flex items-center gap-2">
                   <h3 className="text-xs font-semibold text-[#E8E8E5] font-mono-tech tracking-wider">
                     FORECASTGUARD COPILOT
                   </h3>
-                  <span className="px-1.5 py-0.5 rounded-full text-[9px] font-mono-tech bg-white/[0.05] text-[#AEB796] border border-white/10">
+                  <span className="px-1.5 py-0.5 rounded-full text-xs font-mono-tech bg-white/[0.05] text-white border border-white/10">
                     AI RAG
                   </span>
                 </div>
                 {!isMinimized && (
-                  <p className="text-[10px] text-[#92928C] font-mono-tech tracking-tight">
+                  <p className="text-xs text-[#92928C] font-mono-tech tracking-tight">
                     43 Synoptic Stations • IMD Sync • Physical Models
                   </p>
                 )}
@@ -434,8 +434,8 @@ Click any quick prompt below or ask any question about stations, bust detection,
 
                 {/* Loading indicator */}
                 {isLoading && (
-                  <div className="flex items-center gap-2 bg-white/[0.04] border border-white/10 text-[#AEB796] text-xs px-3.5 py-2 rounded-2xl rounded-bl-sm max-w-[75%] font-mono-tech animate-pulse">
-                    <Activity className="w-3.5 h-3.5 animate-spin text-[#AEB796]" />
+                  <div className="flex items-center gap-2 bg-white/[0.04] border border-white/10 text-white text-xs px-3.5 py-2 rounded-2xl rounded-bl-sm max-w-[75%] font-mono-tech animate-pulse">
+                    <Activity className="w-3.5 h-3.5 animate-spin text-white" />
                     <span>Querying MoES database & physics engine...</span>
                   </div>
                 )}
@@ -444,8 +444,8 @@ Click any quick prompt below or ask any question about stations, bust detection,
 
               {/* Quick Prompt Chips */}
               <div className="px-3.5 py-2.5 bg-white/[0.02] border-t border-white/[0.06]">
-                <div className="text-[10px] text-[#8B8B87] uppercase font-mono-tech tracking-wider mb-1.5 flex items-center gap-1.5">
-                  <Sparkles className="w-3 h-3 text-[#AEB796]" /> Suggested Meteorological Queries
+                <div className="text-xs text-[#8B8B87] uppercase font-mono-tech tracking-wider mb-1.5 flex items-center gap-1.5">
+                  <Sparkles className="w-3.5 h-3.5 text-white" /> Suggested Meteorological Queries
                 </div>
                 <div className="flex gap-1.5 overflow-x-auto pb-1 scrollbar-none">
                   {QUICK_PROMPTS.map((p, idx) => (
@@ -453,7 +453,7 @@ Click any quick prompt below or ask any question about stations, bust detection,
                       key={idx}
                       onClick={() => handleSendMessage(p.query)}
                       disabled={isLoading}
-                      className="px-3 py-1 rounded-full bg-white/[0.03] hover:bg-white/[0.08] text-[#92928C] hover:text-[#E8E8E5] border border-white/[0.08] hover:border-white/20 text-[11px] font-mono-tech shrink-0 transition cursor-pointer"
+                      className="px-3 py-1 rounded-full bg-white/[0.03] hover:bg-white/[0.08] text-[#92928C] hover:text-[#E8E8E5] border border-white/[0.08] hover:border-white/20 text-xs font-mono-tech shrink-0 transition cursor-pointer"
                     >
                       {p.label}
                     </button>
@@ -477,7 +477,7 @@ Click any quick prompt below or ask any question about stations, bust detection,
                     onChange={(e) => setInputQuery(e.target.value)}
                     placeholder="Ask about stations, bust risk, physics..."
                     disabled={isLoading}
-                    className="flex-1 bg-white/[0.04] border border-white/10 focus:border-[#AEB796]/50 rounded-full px-4 py-2 text-xs text-[#E8E8E5] placeholder-[#5E5E5B] focus:outline-none transition font-sans"
+                    className="flex-1 bg-white/[0.04] border border-white/10 focus:border-white/40 rounded-full px-4 py-2 text-xs text-[#E8E8E5] placeholder-[#5E5E5B] focus:outline-none transition font-sans"
                   />
                   <button
                     type="submit"

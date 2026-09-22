@@ -135,20 +135,20 @@ export default function SynopticRegimes({ onSelectRegime }: SynopticRegimesProps
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-5 rounded-2xl glass-feature border border-white/10">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-6 rounded-2xl glass-feature border border-white/10">
         <div>
           <div className="flex items-center gap-2.5 mb-1.5">
-            <div className="w-8 h-8 rounded-full bg-white/[0.06] border border-white/10 flex items-center justify-center text-[#E8E8E5]">
-              <ShieldAlert size={16} />
+            <div className="w-9 h-9 rounded-full bg-white/[0.06] border border-white/10 flex items-center justify-center text-white">
+              <ShieldAlert size={18} />
             </div>
-            <h2 className="text-lg font-bold text-[#E8E8E5] tracking-wide font-sans">
+            <h2 className="text-xl font-bold text-white tracking-wide font-sans">
               High-Risk Synoptic Meteorological Regimes
             </h2>
-            <span className="px-2.5 py-0.5 rounded-full text-[11px] font-mono-tech bg-white/[0.05] text-[#D8D8D3] border border-white/10">
+            <span className="px-2.5 py-0.5 rounded-full text-xs font-mono-tech bg-white/[0.06] text-white border border-white/15">
               {regimes.length} REGIMES
             </span>
           </div>
-          <p className="text-xs text-[#92928C] leading-relaxed max-w-3xl">
+          <p className="text-sm text-[#A3A3A3] leading-relaxed max-w-3xl">
             Operational medium-range NWP guidance exhibits peak forecast bust frequency during these synoptic patterns across India. Select any regime to evaluate its atmospheric state in the Live Cockpit.
           </p>
         </div>
@@ -167,15 +167,15 @@ export default function SynopticRegimes({ onSelectRegime }: SynopticRegimesProps
                 {/* Header */}
                 <div className="flex items-start justify-between gap-2 border-b border-white/10 pb-4 mb-4">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-white/[0.06] border border-white/10 flex items-center justify-center text-[#E8E8E5] shrink-0">
+                    <div className="w-10 h-10 rounded-full bg-white/[0.06] border border-white/10 flex items-center justify-center text-white shrink-0">
                       <IconComponent size={18} />
                     </div>
                     <div>
                       <div className="noir-kicker mb-0.5">REGIME / {String(idx + 1).padStart(2, "0")}</div>
-                      <h3 className="text-base font-bold text-[#E8E8E5] leading-snug">
+                      <h3 className="text-lg font-bold text-white leading-snug">
                         {r.title}
                       </h3>
-                      <span className="text-[11px] text-[#92928C] block mt-0.5 font-mono-tech">
+                      <span className="text-xs text-[#A3A3A3] block mt-0.5 font-mono-tech">
                         {r.season}
                       </span>
                     </div>
@@ -183,19 +183,19 @@ export default function SynopticRegimes({ onSelectRegime }: SynopticRegimesProps
                 </div>
 
                 {/* Threat Badge */}
-                <div className="mb-3.5">
-                  <span className={`px-3 py-1 rounded-full text-[10px] font-mono-tech font-semibold border tracking-wider ${r.riskBadgeColor || "bg-red-500/10 text-red-400 border-red-500/30"}`}>
+                <div className="mb-4">
+                  <span className={`px-3 py-1 rounded-full text-xs font-mono-tech font-semibold border tracking-wider ${r.riskBadgeColor || "bg-red-500/10 text-red-400 border-red-500/30"}`}>
                     {r.riskLevel}
                   </span>
                 </div>
 
                 {/* Affected Regions */}
-                <div className="text-xs text-[#D8D8D3] mb-3">
-                  <strong className="text-[#E8E8E5] font-semibold">Affected Zones:</strong> {r.regions}
+                <div className="text-sm text-white/90 mb-3">
+                  <strong className="text-white font-semibold">Affected Zones:</strong> {r.regions}
                 </div>
 
                 {/* Description */}
-                <p className="text-xs text-[#92928C] leading-relaxed mb-4">
+                <p className="text-sm text-[#A3A3A3] leading-relaxed mb-4">
                   {r.synopticDescription}
                 </p>
 
@@ -204,7 +204,7 @@ export default function SynopticRegimes({ onSelectRegime }: SynopticRegimesProps
                   <span className="noir-kicker block">
                     Observed Model Failure Modes:
                   </span>
-                  <ul className="text-xs text-[#D8D8D3] space-y-1.5 pl-4 list-disc leading-relaxed">
+                  <ul className="text-sm text-white/90 space-y-1.5 pl-4 list-disc leading-relaxed">
                     {r.failureModes && r.failureModes.map((fm: string, fIdx: number) => (
                       <li key={fIdx}>{fm}</li>
                     ))}
@@ -222,7 +222,7 @@ export default function SynopticRegimes({ onSelectRegime }: SynopticRegimesProps
                     ...r.parameters,
                   })
                 }
-                className="w-full flex items-center justify-between py-2.5 px-4 rounded-full text-xs font-mono-tech font-semibold text-[#E8E8E5] bg-white/[0.05] hover:bg-white/[0.12] border border-white/10 transition-all cursor-pointer active:scale-[0.99]"
+                className="w-full flex items-center justify-between py-2.5 px-4 rounded-full text-xs font-mono-tech font-semibold text-white bg-white/[0.05] hover:bg-white/[0.12] border border-white/10 transition-all cursor-pointer active:scale-[0.99]"
               >
                 <span>Evaluate in Live Overview</span>
                 <ArrowUpRight size={14} />

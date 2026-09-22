@@ -109,12 +109,12 @@ export default function ModelInspector() {
 
         {/* Live Model Training Status Badge */}
         <div className="flex items-center gap-2.5 px-4 py-2 rounded-full bg-white/[0.04] border border-white/10 text-xs font-mono-tech shrink-0 shadow-sm">
-          <Activity size={14} className="text-[#AEB796] animate-pulse" />
+          <Activity size={14} className="text-white animate-pulse" />
           <div>
-            <span className="text-[#E8E8E5] font-bold block">
+            <span className="text-[#E8E8E5] font-bold block text-sm">
               {livePerf ? `${(livePerf.train_samples + livePerf.test_samples).toLocaleString()} SYNOPTIC SAMPLES` : "35,380 SAMPLES"}
             </span>
-            <span className="text-[11px] text-[#8B8B87]">Cadence: {retrainSchedule}</span>
+            <span className="text-xs text-[#8B8B87]">Cadence: {retrainSchedule}</span>
           </div>
         </div>
       </div>
@@ -130,7 +130,7 @@ export default function ModelInspector() {
               Evaluated strictly on chronological train/val/test splits (PR-AUC prioritized due to ~10% positive bust class imbalance).
             </p>
           </div>
-          <span className="px-3 py-1 rounded-full font-mono-tech text-[11px] bg-white/[0.05] text-[#D8D8D3] border border-white/10 font-semibold">
+          <span className="px-3 py-1 rounded-full font-mono-tech text-xs bg-white/[0.05] text-[#D8D8D3] border border-white/10 font-semibold">
             CHRONOLOGICAL SPLIT (70% / 15% / 15%)
           </span>
         </div>
@@ -159,7 +159,7 @@ export default function ModelInspector() {
                   >
                     <td className="py-3.5 px-4 font-sans">
                       <span className="font-semibold text-[#E8E8E5] block text-sm">{m.model}</span>
-                      <span className="text-[11px] text-[#8B8B87] font-mono-tech">
+                      <span className="text-xs text-[#8B8B87] font-mono-tech">
                         {isDynamicLgbm ? `${(livePerf.train_samples + livePerf.test_samples).toLocaleString()}-Sample Synoptic Regressor` : m.type}
                       </span>
                     </td>
@@ -175,13 +175,13 @@ export default function ModelInspector() {
                     <td className="py-3.5 px-4 text-[#D8D8D3]">
                       {isDynamicLgbm ? `${(livePerf.train_samples + livePerf.test_samples).toLocaleString()} N` : m.testRocAuc}
                     </td>
-                    <td className="py-3.5 px-4 text-[#AEB796] font-bold">{m.brier}</td>
+                    <td className="py-3.5 px-4 text-[#E8E8E5] font-bold">{m.brier}</td>
                     <td className="py-3.5 px-4 text-[#D8D8D3]">
                       {isDynamicLgbm ? `${(livePerf.r2_score * 100).toFixed(1)}% Var` : m.f1}
                     </td>
                     <td className="py-3.5 px-4">
                       <span
-                        className={`px-2.5 py-0.5 rounded-full text-[10px] font-mono-tech font-semibold border ${
+                        className={`px-2.5 py-0.5 rounded-full text-xs font-mono-tech font-semibold border ${
                           m.isPrimary
                             ? "bg-white/[0.08] text-[#E8E8E5] border-white/20"
                             : "text-[#8B8B87] border-white/10"
@@ -206,13 +206,13 @@ export default function ModelInspector() {
           <div className="flex justify-between items-center border-b border-white/10 pb-3.5">
             <div>
               <h3 className="text-base font-bold text-[#E8E8E5] flex items-center gap-2">
-                <BarChart2 size={16} className="text-[#AEB796]" /> Global SHAP Feature Importance Hierarchy
+                <BarChart2 size={16} className="text-white" /> Global SHAP Feature Importance Hierarchy
               </h3>
               <p className="text-xs text-[#92928C] mt-0.5">
                 Mean absolute SHAP value across holdout validation cases.
               </p>
             </div>
-            <span className="px-2.5 py-0.5 rounded-full font-mono-tech text-[10px] bg-white/[0.05] text-[#8B8B87] border border-white/10">
+            <span className="px-2.5 py-0.5 rounded-full font-mono-tech text-xs bg-white/[0.05] text-[#8B8B87] border border-white/10">
               N = 19 FEATURES
             </span>
           </div>
@@ -233,7 +233,7 @@ export default function ModelInspector() {
                     style={{ width: `${f.pct}%` }}
                   />
                 </div>
-                <div className="text-[11px] text-[#8B8B87] italic">
+                <div className="text-xs text-[#8B8B87] italic">
                   {f.role}
                 </div>
               </div>
@@ -245,12 +245,12 @@ export default function ModelInspector() {
         <div className="lg:col-span-5 detail-card flex flex-col justify-between p-6 rounded-2xl">
           <div>
             <div className="flex items-center gap-2.5 border-b border-white/10 pb-3.5 mb-4">
-              <ShieldCheck size={20} className="text-[#AEB796]" />
+              <ShieldCheck size={20} className="text-white" />
               <div>
                 <h3 className="text-base font-bold text-[#E8E8E5]">
                   Anti-Leakage Audit Certificate
                 </h3>
-                <span className="text-[11px] font-mono-tech text-[#AEB796] font-semibold">
+                <span className="text-xs font-mono-tech text-[#E8E8E5] font-semibold">
                   STATUS: VERIFIED COMPLIANT
                 </span>
               </div>
@@ -268,10 +268,10 @@ export default function ModelInspector() {
                 { title: "Temporal-Bounded Analogs Retrieval", desc: "Historical analog cases strictly filtered to dates strictly prior to forecast initialization." }
               ].map((item, idx) => (
                 <div key={idx} className="bg-white/[0.03] p-3.5 rounded-xl border border-white/10 flex items-start gap-3">
-                  <CheckCircle2 size={16} className="text-[#AEB796] shrink-0 mt-0.5" />
+                  <CheckCircle2 size={16} className="text-white shrink-0 mt-0.5" />
                   <div>
                     <div className="text-xs font-semibold text-[#E8E8E5]">{item.title}</div>
-                    <div className="text-[11px] text-[#92928C] mt-0.5 leading-snug">{item.desc}</div>
+                    <div className="text-xs text-[#92928C] mt-0.5 leading-snug">{item.desc}</div>
                   </div>
                 </div>
               ))}
@@ -280,7 +280,7 @@ export default function ModelInspector() {
 
           <div className="mt-5 pt-4 border-t border-white/10 flex items-center justify-between text-xs font-mono-tech text-[#8B8B87]">
             <span>AUDIT SUITE: pytest tests/</span>
-            <span className="text-[#AEB796] font-bold">48/48 TESTS PASSING</span>
+            <span className="text-white font-bold">48/48 TESTS PASSING</span>
           </div>
         </div>
       </div>

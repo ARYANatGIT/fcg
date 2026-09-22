@@ -133,20 +133,20 @@ export default function HistoricalArchive() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-5 rounded-2xl glass-feature border border-white/10">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-6 rounded-2xl glass-feature border border-white/10">
         <div>
           <div className="flex items-center gap-2.5 mb-1.5">
-            <div className="w-8 h-8 rounded-full bg-white/[0.06] border border-white/10 flex items-center justify-center text-[#E8E8E5]">
-              <Archive size={16} />
+            <div className="w-9 h-9 rounded-full bg-white/[0.06] border border-white/10 flex items-center justify-center text-white">
+              <Archive size={18} />
             </div>
-            <h2 className="text-lg font-bold text-[#E8E8E5] tracking-wide font-sans">
+            <h2 className="text-xl font-bold text-white tracking-wide font-sans">
               Severe Historical NWP Forecast Bust Archive
             </h2>
-            <span className="px-2.5 py-0.5 rounded-full text-[11px] font-mono-tech bg-white/[0.05] text-[#D8D8D3] border border-white/10">
+            <span className="px-2.5 py-0.5 rounded-full text-xs font-mono-tech bg-white/[0.06] text-white border border-white/15">
               {cases.length} BENCHMARKED CASES
             </span>
           </div>
-          <p className="text-xs text-[#92928C] leading-relaxed max-w-3xl">
+          <p className="text-sm text-[#A3A3A3] leading-relaxed max-w-3xl">
             Catalog of validated historical medium-range forecast failure events across India, documenting synoptic root causes, verification metrics, and ForecastGuard early-warning detection.
           </p>
         </div>
@@ -156,13 +156,13 @@ export default function HistoricalArchive() {
       <div className="grid grid-cols-1 sm:grid-cols-12 gap-3">
         {/* Search */}
         <div className="sm:col-span-6 relative">
-          <Search size={15} className="absolute left-4 top-1/2 -translate-y-1/2 text-[#8B8B87]" />
+          <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-[#A3A3A3]" />
           <input
             type="text"
             placeholder="Search by station, state, cyclone, or synoptic event..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full h-10 bg-white/[0.04] border border-white/10 rounded-full pl-11 pr-4 text-xs font-mono-tech text-[#E8E8E5] placeholder-[#8B8B87] focus:outline-none focus:border-white/30 transition"
+            className="w-full h-11 bg-white/[0.04] border border-white/10 rounded-full pl-11 pr-4 text-xs font-mono-tech text-white placeholder-[#A3A3A3] focus:outline-none focus:border-white/30 transition"
           />
         </div>
 
@@ -171,7 +171,7 @@ export default function HistoricalArchive() {
           <select
             value={stateFilter}
             onChange={(e) => setStateFilter(e.target.value)}
-            className="w-full h-10 px-4 bg-white/[0.04] border border-white/10 rounded-full text-xs font-mono-tech text-[#E8E8E5] focus:outline-none focus:border-white/30 transition cursor-pointer"
+            className="w-full h-11 px-4 bg-white/[0.04] border border-white/10 rounded-full text-xs font-mono-tech text-white focus:outline-none focus:border-white/30 transition cursor-pointer"
           >
             <option value="all" className="bg-[#121212] text-white">All States / Subdivisions</option>
             <option value="Maharashtra" className="bg-[#121212] text-white">Maharashtra</option>
@@ -203,10 +203,10 @@ export default function HistoricalArchive() {
             <button
               key={f.id}
               onClick={() => setLeadFilter(f.id)}
-              className={`flex-1 h-8 text-[11px] font-mono-tech font-semibold rounded-full transition-all cursor-pointer ${
+              className={`flex-1 h-9 text-xs font-mono-tech font-semibold rounded-full transition-all cursor-pointer ${
                 leadFilter === f.id
                   ? "is-active bg-[#E8E8E4] text-[#141414] font-bold shadow-sm"
-                  : "text-[#8B8B87] hover:text-[#E8E8E5]"
+                  : "text-[#A3A3A3] hover:text-white"
               }`}
             >
               {f.label}
@@ -220,28 +220,28 @@ export default function HistoricalArchive() {
         {filteredCases.map((c, idx) => (
           <div
             key={c.id}
-            className="detail-card space-y-4 p-5 rounded-2xl transition-all"
+            className="detail-card space-y-4 p-6 rounded-2xl transition-all"
           >
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 border-b border-white/10 pb-3.5">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 border-b border-white/10 pb-4">
               <div className="flex items-center gap-3">
-                <span className="px-2.5 py-0.5 rounded-full font-mono-tech text-[10px] bg-white/[0.06] text-[#D8D8D3] border border-white/10 font-bold">
+                <span className="px-2.5 py-0.5 rounded-full font-mono-tech text-xs bg-white/[0.06] text-white border border-white/15 font-bold">
                   {c.id.toUpperCase()}
                 </span>
                 <div>
                   <div className="noir-kicker mb-0.5">CASE BENCHMARK / {String(idx + 1).padStart(2, "0")}</div>
-                  <h3 className="text-base font-bold text-[#E8E8E5]">
+                  <h3 className="text-lg font-bold text-white">
                     {c.event}
                   </h3>
-                  <div className="flex items-center gap-3 text-xs font-mono-tech text-[#8B8B87] mt-0.5">
-                    <span className="flex items-center gap-1"><MapPin size={12} className="text-[#AEB796]" /> {c.station}, {c.state}</span>
-                    <span className="flex items-center gap-1"><Calendar size={12} className="text-[#8B8B87]" /> {c.date}</span>
+                  <div className="flex items-center gap-3 text-xs font-mono-tech text-[#A3A3A3] mt-1">
+                    <span className="flex items-center gap-1"><MapPin size={13} className="text-white" /> {c.station}, {c.state}</span>
+                    <span className="flex items-center gap-1"><Calendar size={13} className="text-[#A3A3A3]" /> {c.date}</span>
                     <span>Lead: Day {c.leadDay}</span>
                   </div>
                 </div>
               </div>
 
               <div className="flex items-center gap-3">
-                <span className="px-3 py-1 rounded-full font-mono-tech text-[11px] bg-red-500/10 text-red-400 border border-red-500/30 font-bold">
+                <span className="px-3 py-1 rounded-full font-mono-tech text-xs bg-red-500/10 text-red-400 border border-red-500/30 font-bold">
                   {c.predictedStatus} ({c.modelPredictedRisk})
                 </span>
               </div>
@@ -250,26 +250,26 @@ export default function HistoricalArchive() {
             {/* Metrics Comparison Grid */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
               <div className="bg-white/[0.03] p-3 rounded-xl border border-white/10">
-                <span className="text-[10px] font-mono-tech text-[#8B8B87] uppercase block mb-0.5">NWP Predicted</span>
-                <span className="text-sm font-bold font-mono-tech text-[#D8D8D3]">{c.forecastRain}</span>
+                <span className="text-xs font-mono-tech text-[#A3A3A3] uppercase block mb-0.5">NWP Predicted</span>
+                <span className="text-base font-bold font-mono-tech text-white">{c.forecastRain}</span>
               </div>
               <div className="bg-white/[0.03] p-3 rounded-xl border border-white/10">
-                <span className="text-[10px] font-mono-tech text-[#8B8B87] uppercase block mb-0.5">Actual Observed</span>
-                <span className="text-sm font-bold font-mono-tech text-red-400">{c.observedRain}</span>
+                <span className="text-xs font-mono-tech text-[#A3A3A3] uppercase block mb-0.5">Actual Observed</span>
+                <span className="text-base font-bold font-mono-tech text-red-400">{c.observedRain}</span>
               </div>
               <div className="bg-white/[0.03] p-3 rounded-xl border border-white/10">
-                <span className="text-[10px] font-mono-tech text-[#8B8B87] uppercase block mb-0.5">Error Score</span>
-                <span className="text-sm font-bold font-mono-tech text-[#E8E8E5]">{c.errorScore}</span>
+                <span className="text-xs font-mono-tech text-[#A3A3A3] uppercase block mb-0.5">Error Score</span>
+                <span className="text-base font-bold font-mono-tech text-white">{c.errorScore}</span>
               </div>
               <div className="bg-white/[0.03] p-3 rounded-xl border border-white/10">
-                <span className="text-[10px] font-mono-tech text-[#8B8B87] uppercase block mb-0.5">Bust Threshold (90th)</span>
-                <span className="text-sm font-bold font-mono-tech text-[#8B8B87]">{c.bustThreshold}</span>
+                <span className="text-xs font-mono-tech text-[#A3A3A3] uppercase block mb-0.5">Bust Threshold (90th)</span>
+                <span className="text-base font-bold font-mono-tech text-[#A3A3A3]">{c.bustThreshold}</span>
               </div>
             </div>
 
             {/* Synoptic Summary */}
-            <p className="text-xs text-[#92928C] leading-relaxed bg-white/[0.02] p-3.5 rounded-xl border border-white/10 font-sans">
-              <strong className="text-[#E8E8E5] font-semibold">Meteorological Post-Mortem:</strong> {c.synopticSummary}
+            <p className="text-sm text-[#A3A3A3] leading-relaxed bg-white/[0.02] p-4 rounded-xl border border-white/10 font-sans">
+              <strong className="text-white font-semibold">Meteorological Post-Mortem:</strong> {c.synopticSummary}
             </p>
           </div>
         ))}

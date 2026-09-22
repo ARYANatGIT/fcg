@@ -218,7 +218,7 @@ export default function WhatIfSimulator({
             disabled={isSaving}
             className="flex items-center gap-2 px-4 py-2 rounded-full border border-white/10 bg-white/[0.04] hover:bg-white/[0.08] text-[#E8E8E5] text-xs font-mono-tech font-semibold transition cursor-pointer active:scale-[0.99]"
           >
-            <RefreshCw className={`w-3.5 h-3.5 ${isSaving ? "animate-spin text-[#AEB796]" : ""}`} />
+            <RefreshCw className={`w-3.5 h-3.5 ${isSaving ? "animate-spin text-white" : ""}`} />
             <span>{saveSuccess ? "Saved!" : "Save Scenario"}</span>
           </button>
 
@@ -289,11 +289,11 @@ export default function WhatIfSimulator({
 
           {/* 1. Rainfall */}
           <div className="space-y-2 bg-white/[0.03] p-4 rounded-xl border border-white/10">
-            <div className="flex justify-between items-center text-xs">
+            <div className="flex justify-between items-center text-sm">
               <span className="text-[#E8E8E5] font-semibold flex items-center gap-2">
-                <CloudRain size={15} className="text-[#AEB796]" /> Predicted 24h Rainfall
+                <CloudRain size={16} className="text-white" /> Predicted 24h Rainfall
               </span>
-              <span className="font-mono-tech text-[#E8E8E5] text-sm font-bold">{rainfall} mm</span>
+              <span className="font-mono-tech text-[#E8E8E5] text-base font-bold">{rainfall} mm</span>
             </div>
             <input
               type="range"
@@ -302,9 +302,9 @@ export default function WhatIfSimulator({
               step="1"
               value={rainfall}
               onChange={(e) => setRainfall(Number(e.target.value))}
-              className="w-full"
+              className="w-full accent-white cursor-pointer"
             />
-            <div className="flex justify-between text-[11px] font-mono-tech text-[#8B8B87]">
+            <div className="flex justify-between text-xs font-mono-tech text-[#8B8B87]">
               <span>0 mm (Dry)</span>
               <span>50 mm</span>
               <span>120 mm</span>
@@ -314,11 +314,11 @@ export default function WhatIfSimulator({
 
           {/* 2. Wind Speed */}
           <div className="space-y-2 bg-white/[0.03] p-4 rounded-xl border border-white/10">
-            <div className="flex justify-between items-center text-xs">
+            <div className="flex justify-between items-center text-sm">
               <span className="text-[#E8E8E5] font-semibold flex items-center gap-2">
-                <Wind size={15} className="text-[#AEB796]" /> 10m Wind Speed Magnitude
+                <Wind size={16} className="text-white" /> 10m Wind Speed Magnitude
               </span>
-              <span className="font-mono-tech text-[#E8E8E5] text-sm font-bold">{windSpeed.toFixed(1)} m/s</span>
+              <span className="font-mono-tech text-[#E8E8E5] text-base font-bold">{windSpeed.toFixed(1)} m/s</span>
             </div>
             <input
               type="range"
@@ -327,9 +327,9 @@ export default function WhatIfSimulator({
               step="0.5"
               value={windSpeed}
               onChange={(e) => setWindSpeed(Number(e.target.value))}
-              className="w-full"
+              className="w-full accent-white cursor-pointer"
             />
-            <div className="flex justify-between text-[11px] font-mono-tech text-[#8B8B87]">
+            <div className="flex justify-between text-xs font-mono-tech text-[#8B8B87]">
               <span>0 m/s</span>
               <span>10 m/s</span>
               <span>20 m/s</span>
@@ -339,11 +339,11 @@ export default function WhatIfSimulator({
 
           {/* 3. 2m Temperature */}
           <div className="space-y-2 bg-white/[0.03] p-4 rounded-xl border border-white/10">
-            <div className="flex justify-between items-center text-xs">
+            <div className="flex justify-between items-center text-sm">
               <span className="text-[#E8E8E5] font-semibold flex items-center gap-2">
-                <Thermometer size={15} className="text-[#AEB796]" /> 2m Surface Temperature
+                <Thermometer size={16} className="text-white" /> 2m Surface Temperature
               </span>
-              <span className="font-mono-tech text-[#E8E8E5] text-sm font-bold">{temp.toFixed(1)} °C</span>
+              <span className="font-mono-tech text-[#E8E8E5] text-base font-bold">{temp.toFixed(1)} °C</span>
             </div>
             <input
               type="range"
@@ -352,9 +352,9 @@ export default function WhatIfSimulator({
               step="0.5"
               value={temp}
               onChange={(e) => setTemp(Number(e.target.value))}
-              className="w-full"
+              className="w-full accent-white cursor-pointer"
             />
-            <div className="flex justify-between text-[11px] font-mono-tech text-[#8B8B87]">
+            <div className="flex justify-between text-xs font-mono-tech text-[#8B8B87]">
               <span>5 °C</span>
               <span>25 °C</span>
               <span>38 °C</span>
@@ -364,11 +364,11 @@ export default function WhatIfSimulator({
 
           {/* 4. Surface Pressure */}
           <div className="space-y-2 bg-white/[0.03] p-4 rounded-xl border border-white/10">
-            <div className="flex justify-between items-center text-xs">
+            <div className="flex justify-between items-center text-sm">
               <span className="text-[#E8E8E5] font-semibold flex items-center gap-2">
-                <Gauge size={15} className="text-[#AEB796]" /> Surface Atmospheric Pressure
+                <Gauge size={16} className="text-white" /> Surface Atmospheric Pressure
               </span>
-              <span className="font-mono-tech text-[#E8E8E5] text-sm font-bold">{pressure.toFixed(1)} hPa</span>
+              <span className="font-mono-tech text-[#E8E8E5] text-base font-bold">{pressure.toFixed(1)} hPa</span>
             </div>
             <input
               type="range"
@@ -377,9 +377,9 @@ export default function WhatIfSimulator({
               step="0.5"
               value={pressure}
               onChange={(e) => setPressure(Number(e.target.value))}
-              className="w-full"
+              className="w-full accent-white cursor-pointer"
             />
-            <div className="flex justify-between text-[11px] font-mono-tech text-[#8B8B87]">
+            <div className="flex justify-between text-xs font-mono-tech text-[#8B8B87]">
               <span>975 hPa (Depression)</span>
               <span>1000 hPa</span>
               <span>1013 hPa</span>
@@ -389,11 +389,11 @@ export default function WhatIfSimulator({
 
           {/* 5. Relative Humidity */}
           <div className="space-y-2 bg-white/[0.03] p-4 rounded-xl border border-white/10">
-            <div className="flex justify-between items-center text-xs">
+            <div className="flex justify-between items-center text-sm">
               <span className="text-[#E8E8E5] font-semibold flex items-center gap-2">
-                <Droplets size={15} className="text-[#AEB796]" /> 2m Relative Humidity
+                <Droplets size={16} className="text-white" /> 2m Relative Humidity
               </span>
-              <span className="font-mono-tech text-[#E8E8E5] text-sm font-bold">{humidity.toFixed(0)} %</span>
+              <span className="font-mono-tech text-[#E8E8E5] text-base font-bold">{humidity.toFixed(0)} %</span>
             </div>
             <input
               type="range"
@@ -402,9 +402,9 @@ export default function WhatIfSimulator({
               step="1"
               value={humidity}
               onChange={(e) => setHumidity(Number(e.target.value))}
-              className="w-full"
+              className="w-full accent-white cursor-pointer"
             />
-            <div className="flex justify-between text-[11px] font-mono-tech text-[#8B8B87]">
+            <div className="flex justify-between text-xs font-mono-tech text-[#8B8B87]">
               <span>15% (Dry)</span>
               <span>50%</span>
               <span>75%</span>
@@ -414,11 +414,11 @@ export default function WhatIfSimulator({
 
           {/* 6. Lead Day */}
           <div className="space-y-2 bg-white/[0.03] p-4 rounded-xl border border-white/10">
-            <div className="flex justify-between items-center text-xs">
+            <div className="flex justify-between items-center text-sm">
               <span className="text-[#E8E8E5] font-semibold flex items-center gap-2">
-                <Zap size={15} className="text-[#AEB796]" /> Medium-Range Lead Day
+                <Zap size={16} className="text-white" /> Medium-Range Lead Day
               </span>
-              <span className="font-mono-tech text-[#E8E8E5] text-sm font-bold">Day {leadDay}</span>
+              <span className="font-mono-tech text-[#E8E8E5] text-base font-bold">Day {leadDay}</span>
             </div>
             <input
               type="range"
@@ -427,9 +427,9 @@ export default function WhatIfSimulator({
               step="1"
               value={leadDay}
               onChange={(e) => setLeadDay(Number(e.target.value))}
-              className="w-full"
+              className="w-full accent-white cursor-pointer"
             />
-            <div className="flex justify-between text-[11px] font-mono-tech text-[#8B8B87]">
+            <div className="flex justify-between text-xs font-mono-tech text-[#8B8B87]">
               <span>Day 1 (Short)</span>
               <span>Day 5 (Medium)</span>
               <span>Day 10 (Extended)</span>
@@ -464,7 +464,7 @@ export default function WhatIfSimulator({
 
               <div className="bg-white/[0.03] p-4 rounded-xl border border-white/10 mt-4 space-y-2 text-xs">
                 <div className="font-semibold text-[#E8E8E5] flex items-center gap-2">
-                  <AlertTriangle size={14} className="text-[#AEB796]" />
+                  <AlertTriangle size={15} className="text-white" />
                   Sensitivity Analysis Insights:
                 </div>
                 <ul className="text-[#92928C] space-y-1.5 pl-4 list-disc leading-relaxed">

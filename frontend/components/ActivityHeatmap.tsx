@@ -294,23 +294,23 @@ export default function ActivityHeatmap({
     return { weeks: weekCols, monthLabels: months, summaryStat: statText };
   }, [cityName, lat, lon, metricMode, liveData]);
 
-  // Color mapping matching the Noir Index sage palette
+  // Color mapping matching pure monochrome scale
   const getCellColor = (level: number) => {
     if (isLightMode) {
       switch (level) {
-        case 4: return "bg-[#546247]";
-        case 3: return "bg-[#777B63]";
-        case 2: return "bg-[#AEB796]";
-        case 1: return "bg-[#D6DDA9]";
-        default: return "bg-[#e2e8f0]";
+        case 4: return "bg-[#141414]";
+        case 3: return "bg-[#52525b]";
+        case 2: return "bg-[#a1a1aa]";
+        case 1: return "bg-[#e4e4e7]";
+        default: return "bg-[#f4f4f5]";
       }
     } else {
-      // Noir Index Sage Dark Mode Scale
+      // Pure Monochrome Dark Mode Scale (pure white high intensity)
       switch (level) {
-        case 4: return "bg-[#D6DDA9]"; // Active glowing sage
-        case 3: return "bg-[#AEB796]"; // Base sage
-        case 2: return "bg-[#68745C]"; // Deep ambient sage
-        case 1: return "bg-[#292A27]"; // Muted atmospheric olive
+        case 4: return "bg-[#FFFFFF] shadow-[0_0_6px_rgba(255,255,255,0.35)]"; // Pure glowing white
+        case 3: return "bg-[#D4D4D8]"; // Crisp silver
+        case 2: return "bg-[#71717A]"; // Mid zinc
+        case 1: return "bg-[#27272A]"; // Deep dark zinc
         default: return "bg-white/[0.04]"; // Translucent inactive cell
       }
     }
@@ -336,15 +336,15 @@ export default function ActivityHeatmap({
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-white/10">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <CloudRain size={16} className="text-[#AEB796]" />
+            <CloudRain size={16} className="text-white" />
             <h3 className="text-base font-bold tracking-tight text-[#E8E8E5]">
               365-Day Meteorological Observation &amp; Forecast Heatmap
             </h3>
-            <span className="text-[11px] font-mono-tech px-2.5 py-0.5 rounded-full border border-white/10 bg-white/[0.04] text-[#AEB796] flex items-center gap-1">
-              <MapPin size={10} /> {cityName}, {stateName}
+            <span className="text-xs font-mono-tech px-2.5 py-0.5 rounded-full border border-white/10 bg-white/[0.06] text-[#E8E8E5] flex items-center gap-1">
+              <MapPin size={11} /> {cityName}, {stateName}
             </span>
             {loading && (
-              <RefreshCw size={12} className="animate-spin text-[#AEB796]" />
+              <RefreshCw size={13} className="animate-spin text-white" />
             )}
           </div>
           <p className="text-xs text-[#92928C]">
@@ -433,7 +433,7 @@ export default function ActivityHeatmap({
                       onMouseLeave={handleMouseLeave}
                       className={`w-[11px] h-[11px] rounded-[2px] transition-all duration-100 cursor-pointer ${getCellColor(
                         day.level
-                      )} hover:ring-2 hover:ring-[#D6DDA9] hover:scale-125 z-0 hover:z-20`}
+                      )} hover:ring-2 hover:ring-white hover:scale-125 z-0 hover:z-20`}
                     />
                   ))}
                 </div>
@@ -451,26 +451,26 @@ export default function ActivityHeatmap({
         >
           <div className="font-semibold text-white mb-1 border-b border-white/10 pb-1 flex justify-between gap-3">
             <span>{hoveredDay.displayDate}</span>
-            <span className="text-[#D6DDA9] font-bold">{hoveredDay.details.condition}</span>
+            <span className="text-white font-bold">{hoveredDay.details.condition}</span>
           </div>
-          <div className="space-y-1 text-[11px]">
+          <div className="space-y-1 text-xs">
             {metricMode === "rainfall" && (
-              <div className="text-[#D6DDA9] font-bold">
+              <div className="text-white font-bold">
                 {hoveredDay.details.rainfall} mm Daily Rainfall
               </div>
             )}
             {metricMode === "temperature" && (
-              <div className="text-[#D6DDA9] font-bold">
+              <div className="text-white font-bold">
                 {hoveredDay.details.tempMax} °C Maximum Temperature
               </div>
             )}
             {metricMode === "wind" && (
-              <div className="text-[#D6DDA9] font-bold">
+              <div className="text-white font-bold">
                 {hoveredDay.details.windSpeed} km/h Peak Surface Wind
               </div>
             )}
             {metricMode === "humidity" && (
-              <div className="text-[#D6DDA9] font-bold">
+              <div className="text-white font-bold">
                 {hoveredDay.details.humidity}% Relative Humidity
               </div>
             )}

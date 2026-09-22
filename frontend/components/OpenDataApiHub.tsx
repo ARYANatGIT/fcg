@@ -110,27 +110,27 @@ getForecastGuardTelemetry();`
   return (
     <div className="space-y-6">
       {/* Header Banner */}
-      <div className="glass-feature p-5 rounded-2xl border border-white/10 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+      <div className="glass-feature p-6 rounded-2xl border border-white/10 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2.5 mb-1">
-            <div className="w-8 h-8 rounded-full bg-white/[0.06] border border-white/10 flex items-center justify-center text-[#E8E8E5]">
-              <Database size={16} />
+          <div className="flex items-center gap-2.5 mb-1.5">
+            <div className="w-9 h-9 rounded-full bg-white/[0.06] border border-white/10 flex items-center justify-center text-white">
+              <Database size={18} />
             </div>
-            <h2 className="text-lg font-bold text-[#E8E8E5] tracking-tight font-sans">
+            <h2 className="text-xl font-bold text-white tracking-tight font-sans">
               Developer API &amp; Open Data Hub
             </h2>
-            <span className="px-2.5 py-0.5 rounded-full text-[11px] font-mono-tech bg-white/[0.05] text-[#D8D8D3] border border-white/10">
+            <span className="px-2.5 py-0.5 rounded-full text-xs font-mono-tech bg-white/[0.06] text-white border border-white/15">
               MoES Open Data
             </span>
           </div>
-          <p className="text-xs text-[#92928C] leading-relaxed max-w-3xl">
+          <p className="text-sm text-[#A3A3A3] leading-relaxed max-w-3xl">
             Access high-frequency NWP forecast bust datasets, verified analog archives, and production REST APIs for operational and meteorological researchers.
           </p>
         </div>
 
         <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/[0.04] border border-white/10 text-xs font-mono-tech text-[#D8D8D3]">
-            <ShieldCheck size={14} className="text-[#AEB796]" />
+          <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/[0.04] border border-white/10 text-xs font-mono-tech text-white">
+            <ShieldCheck size={15} className="text-white" />
             <span>Open Science License (CC-BY 4.0)</span>
           </div>
         </div>
@@ -142,78 +142,78 @@ getForecastGuardTelemetry();`
         {/* Left: Complete Dataset Export Downloads */}
         <div className="lg:col-span-6 detail-card flex flex-col justify-between space-y-6 p-6 rounded-2xl">
           <div>
-            <div className="flex items-center justify-between border-b border-white/10 pb-3 mb-4">
+            <div className="flex items-center justify-between border-b border-white/10 pb-4 mb-4">
               <div className="flex items-center gap-2">
-                <Download size={16} className="text-[#AEB796]" />
-                <h3 className="text-base font-semibold text-[#E8E8E5]">Full Dataset Downloads</h3>
+                <Download size={18} className="text-white" />
+                <h3 className="text-lg font-bold text-white">Full Dataset Downloads</h3>
               </div>
-              <span className="text-[11px] font-mono-tech text-[#8B8B87]">Updated Hourly</span>
+              <span className="text-xs font-mono-tech text-[#A3A3A3]">Updated Hourly</span>
             </div>
 
-            <p className="text-xs text-[#92928C] mb-4 leading-relaxed">
+            <p className="text-sm text-[#A3A3A3] mb-4 leading-relaxed">
               Download complete medium-range NWP predictions (D1–D10), historical bust records, atmospheric variables, and SHAP attribution vectors across 43 Indian meteorological stations.
             </p>
 
             <div className="space-y-3">
               {/* JSON Dataset */}
-              <div className="flex items-center justify-between p-3.5 rounded-xl bg-white/[0.03] border border-white/10 hover:border-white/25 transition">
+              <div className="flex items-center justify-between p-4 rounded-xl bg-white/[0.03] border border-white/10 hover:border-white/25 transition">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-white/[0.06] border border-white/10 flex items-center justify-center text-[#E8E8E5]">
+                  <div className="w-10 h-10 rounded-full bg-white/[0.06] border border-white/10 flex items-center justify-center text-white">
                     <FileText size={18} />
                   </div>
                   <div>
-                    <div className="text-sm font-semibold text-[#E8E8E5]">Complete Telemetry &amp; Forecast Archive</div>
-                    <div className="text-[11px] text-[#8B8B87] font-mono-tech">JSON Format · ~4.2 MB · Multi-Station Grid</div>
+                    <div className="text-sm font-semibold text-white">Complete Telemetry &amp; Forecast Archive</div>
+                    <div className="text-xs text-[#A3A3A3] font-mono-tech">JSON Format · ~4.2 MB · Multi-Station Grid</div>
                   </div>
                 </div>
                 <button
                   onClick={() => handleDownloadDataset("json")}
                   disabled={downloadingFormat === "json"}
-                  className="px-3.5 py-1.5 rounded-full bg-white/[0.06] hover:bg-white/[0.12] text-[#E8E8E5] border border-white/10 text-xs font-mono-tech flex items-center gap-1.5 transition cursor-pointer active:scale-[0.99]"
+                  className="px-4 py-2 rounded-full bg-white/[0.06] hover:bg-white/[0.12] text-white border border-white/10 text-xs font-mono-tech flex items-center gap-1.5 transition cursor-pointer active:scale-[0.99]"
                 >
-                  <Download size={13} />
+                  <Download size={14} />
                   <span>{downloadingFormat === "json" ? "Downloading..." : "JSON"}</span>
                 </button>
               </div>
 
               {/* ZIP Archive */}
-              <div className="flex items-center justify-between p-3.5 rounded-xl bg-white/[0.03] border border-white/10 hover:border-white/25 transition">
+              <div className="flex items-center justify-between p-4 rounded-xl bg-white/[0.03] border border-white/10 hover:border-white/25 transition">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-white/[0.06] border border-white/10 flex items-center justify-center text-[#E8E8E5]">
+                  <div className="w-10 h-10 rounded-full bg-white/[0.06] border border-white/10 flex items-center justify-center text-white">
                     <FileArchive size={18} />
                   </div>
                   <div>
-                    <div className="text-sm font-semibold text-[#E8E8E5]">Raw NetCDF/GRIB &amp; Station CSV Package</div>
-                    <div className="text-[11px] text-[#8B8B87] font-mono-tech">ZIP Bundle · Includes Parquet &amp; Metadata</div>
+                    <div className="text-sm font-semibold text-white">Raw NetCDF/GRIB &amp; Station CSV Package</div>
+                    <div className="text-xs text-[#A3A3A3] font-mono-tech">ZIP Bundle · Includes Parquet &amp; Metadata</div>
                   </div>
                 </div>
                 <button
                   onClick={() => handleDownloadDataset("zip")}
                   disabled={downloadingFormat === "zip"}
-                  className="px-3.5 py-1.5 rounded-full bg-white/[0.06] hover:bg-white/[0.12] text-[#E8E8E5] border border-white/10 text-xs font-mono-tech flex items-center gap-1.5 transition cursor-pointer active:scale-[0.99]"
+                  className="px-4 py-2 rounded-full bg-white/[0.06] hover:bg-white/[0.12] text-white border border-white/10 text-xs font-mono-tech flex items-center gap-1.5 transition cursor-pointer active:scale-[0.99]"
                 >
-                  <Download size={13} />
+                  <Download size={14} />
                   <span>{downloadingFormat === "zip" ? "Downloading..." : "ZIP"}</span>
                 </button>
               </div>
 
               {/* CSV Format */}
-              <div className="flex items-center justify-between p-3.5 rounded-xl bg-white/[0.03] border border-white/10 hover:border-white/25 transition">
+              <div className="flex items-center justify-between p-4 rounded-xl bg-white/[0.03] border border-white/10 hover:border-white/25 transition">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-white/[0.06] border border-white/10 flex items-center justify-center text-[#E8E8E5]">
+                  <div className="w-10 h-10 rounded-full bg-white/[0.06] border border-white/10 flex items-center justify-center text-white">
                     <FileSpreadsheet size={18} />
                   </div>
                   <div>
-                    <div className="text-sm font-semibold text-[#E8E8E5]">43 Stations Observation Time-Series</div>
-                    <div className="text-[11px] text-[#8B8B87] font-mono-tech">CSV Format · Compatible with Excel / Pandas</div>
+                    <div className="text-sm font-semibold text-white">43 Stations Observation Time-Series</div>
+                    <div className="text-xs text-[#A3A3A3] font-mono-tech">CSV Format · Compatible with Excel / Pandas</div>
                   </div>
                 </div>
                 <button
                   onClick={() => handleDownloadDataset("csv")}
                   disabled={downloadingFormat === "csv"}
-                  className="px-3.5 py-1.5 rounded-full bg-white/[0.06] hover:bg-white/[0.12] text-[#E8E8E5] border border-white/10 text-xs font-mono-tech flex items-center gap-1.5 transition cursor-pointer active:scale-[0.99]"
+                  className="px-4 py-2 rounded-full bg-white/[0.06] hover:bg-white/[0.12] text-white border border-white/10 text-xs font-mono-tech flex items-center gap-1.5 transition cursor-pointer active:scale-[0.99]"
                 >
-                  <Download size={13} />
+                  <Download size={14} />
                   <span>{downloadingFormat === "csv" ? "Downloading..." : "CSV"}</span>
                 </button>
               </div>
@@ -221,8 +221,8 @@ getForecastGuardTelemetry();`
           </div>
 
           {/* Data Usage Notice */}
-          <div className="p-3 rounded-xl bg-white/[0.02] border border-white/10 text-[11px] text-[#8B8B87] flex items-center gap-2 font-mono-tech">
-            <AlertCircle size={14} className="shrink-0 text-[#AEB796]" />
+          <div className="p-3.5 rounded-xl bg-white/[0.02] border border-white/10 text-xs text-[#A3A3A3] flex items-center gap-2 font-mono-tech">
+            <AlertCircle size={15} className="shrink-0 text-white" />
             <span>Open for academic research, operational meteorological forecasting, and NWP model verification.</span>
           </div>
         </div>
@@ -230,47 +230,47 @@ getForecastGuardTelemetry();`
         {/* Right: API Key Generator & Key Management */}
         <div className="lg:col-span-6 detail-card flex flex-col justify-between space-y-6 p-6 rounded-2xl">
           <div>
-            <div className="flex items-center justify-between border-b border-white/10 pb-3 mb-4">
+            <div className="flex items-center justify-between border-b border-white/10 pb-4 mb-4">
               <div className="flex items-center gap-2">
-                <Key size={16} className="text-[#AEB796]" />
-                <h3 className="text-base font-semibold text-[#E8E8E5]">Developer API Key Generator</h3>
+                <Key size={18} className="text-white" />
+                <h3 className="text-lg font-bold text-white">Developer API Key Generator</h3>
               </div>
-              <span className="text-[11px] font-mono-tech text-[#D8D8D3]">Quota: 1,000 Req/Day</span>
+              <span className="text-xs font-mono-tech text-white/90">Quota: 1,000 Req/Day</span>
             </div>
 
             <div className="space-y-4">
               <div>
-                <label className="block text-xs font-mono-tech text-[#92928C] mb-1.5">
+                <label className="block text-xs font-mono-tech text-[#A3A3A3] mb-1.5">
                   Organization / Agency Name:
                 </label>
                 <input
                   type="text"
                   value={agencyName}
                   onChange={(e) => setAgencyName(e.target.value)}
-                  className="w-full bg-white/[0.04] border border-white/10 rounded-full px-4 py-2 text-xs text-[#E8E8E5] font-mono-tech focus:outline-none focus:border-white/30"
+                  className="w-full bg-white/[0.04] border border-white/10 rounded-full px-4 py-2.5 text-xs text-white font-mono-tech focus:outline-none focus:border-white/30"
                   placeholder="e.g. Atmospheric Research Lab, State Met Centre..."
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-mono-tech text-[#92928C] mb-1.5">
+                <label className="block text-xs font-mono-tech text-[#A3A3A3] mb-1.5">
                   Production API Key:
                 </label>
                 <div className="flex items-center gap-2">
-                  <div className="flex-1 bg-white/[0.03] border border-white/10 rounded-full px-4 py-2 text-xs font-mono-tech select-all overflow-x-auto min-h-[38px] flex items-center">
+                  <div className="flex-1 bg-white/[0.03] border border-white/10 rounded-full px-4 py-2.5 text-xs font-mono-tech select-all overflow-x-auto min-h-[42px] flex items-center">
                     {apiKey ? (
-                      <span className="text-[#E8E8E5] font-bold">{apiKey}</span>
+                      <span className="text-white font-bold">{apiKey}</span>
                     ) : (
-                      <span className="text-[#5E5E5B] italic">Click &quot;Generate New Key&quot; to create your API credentials</span>
+                      <span className="text-[#A3A3A3] italic">Click &quot;Generate New Key&quot; to create your API credentials</span>
                     )}
                   </div>
                   {apiKey && (
                     <button
                       onClick={handleCopyKey}
-                      className="px-3.5 py-2 rounded-full bg-white/[0.06] hover:bg-white/[0.12] border border-white/10 text-[#E8E8E5] text-xs font-mono-tech flex items-center gap-1.5 transition cursor-pointer shrink-0"
+                      className="px-4 py-2.5 rounded-full bg-white/[0.06] hover:bg-white/[0.12] border border-white/10 text-white text-xs font-mono-tech flex items-center gap-1.5 transition cursor-pointer shrink-0"
                       title="Copy API Key"
                     >
-                      {copied ? <Check size={14} className="text-[#AEB796]" /> : <Copy size={14} />}
+                      {copied ? <Check size={14} className="text-white" /> : <Copy size={14} />}
                       <span>{copied ? "Copied" : "Copy"}</span>
                     </button>
                   )}
@@ -281,55 +281,55 @@ getForecastGuardTelemetry();`
                 <button
                   onClick={handleGenerateKey}
                   disabled={isGenerating}
-                  className="px-4 py-2 rounded-full bg-[#E8E8E4] hover:bg-white text-[#141414] font-bold text-xs font-mono-tech flex items-center gap-2 transition cursor-pointer active:scale-[0.99] shadow-sm"
+                  className="px-5 py-2.5 rounded-full bg-[#E8E8E4] hover:bg-white text-[#141414] font-bold text-xs font-mono-tech flex items-center gap-2 transition cursor-pointer active:scale-[0.99] shadow-sm"
                 >
-                  <RefreshCw size={13} className={isGenerating ? "animate-spin" : ""} />
+                  <RefreshCw size={14} className={isGenerating ? "animate-spin" : ""} />
                   <span>{isGenerating ? "Generating..." : "Generate New Key"}</span>
                 </button>
-                <span className="text-[11px] font-mono-tech text-[#8B8B87]">
+                <span className="text-xs font-mono-tech text-[#A3A3A3]">
                   Bearer Token Auth &middot; TLS 1.3
                 </span>
               </div>
             </div>
           </div>
 
-          <div className="p-3 rounded-xl bg-white/[0.02] border border-white/10 text-[11px] font-mono-tech text-[#8B8B87] flex items-center justify-between">
+          <div className="p-3.5 rounded-xl bg-white/[0.02] border border-white/10 text-xs font-mono-tech text-[#A3A3A3] flex items-center justify-between">
             <span>Daily Rate: 1,000 requests/day</span>
-            <span>Status: {apiKey ? "ACTIVE" : "READY"}</span>
+            <span className="text-white font-semibold">Status: {apiKey ? "ACTIVE" : "READY"}</span>
           </div>
         </div>
       </div>
 
       {/* Code Snippets & Integration SDK */}
       <div className="detail-card space-y-4 p-6 rounded-2xl">
-        <div className="flex flex-wrap items-center justify-between border-b border-white/10 pb-3 gap-3">
+        <div className="flex flex-wrap items-center justify-between border-b border-white/10 pb-4 gap-3">
           <div className="flex items-center gap-2">
-            <Code size={16} className="text-[#AEB796]" />
-            <h3 className="text-base font-semibold text-[#E8E8E5]">Integration Code Snippets</h3>
+            <Code size={18} className="text-white" />
+            <h3 className="text-lg font-bold text-white">Integration Code Snippets</h3>
           </div>
 
           {/* Language Switcher */}
           <div className="flex items-center gap-1 bg-white/[0.03] p-1 rounded-full border border-white/10">
             <button
               onClick={() => setActiveCodeTab("python")}
-              className={`px-3 py-1 rounded-full text-xs font-mono-tech transition cursor-pointer ${
-                activeCodeTab === "python" ? "is-active bg-[#E8E8E4] text-[#141414] font-bold shadow-sm" : "text-[#8B8B87] hover:text-[#E8E8E5]"
+              className={`px-3.5 py-1.5 rounded-full text-xs font-mono-tech transition cursor-pointer ${
+                activeCodeTab === "python" ? "is-active bg-[#E8E8E4] text-[#141414] font-bold shadow-sm" : "text-[#A3A3A3] hover:text-white"
               }`}
             >
               Python
             </button>
             <button
               onClick={() => setActiveCodeTab("curl")}
-              className={`px-3 py-1 rounded-full text-xs font-mono-tech transition cursor-pointer ${
-                activeCodeTab === "curl" ? "is-active bg-[#E8E8E4] text-[#141414] font-bold shadow-sm" : "text-[#8B8B87] hover:text-[#E8E8E5]"
+              className={`px-3.5 py-1.5 rounded-full text-xs font-mono-tech transition cursor-pointer ${
+                activeCodeTab === "curl" ? "is-active bg-[#E8E8E4] text-[#141414] font-bold shadow-sm" : "text-[#A3A3A3] hover:text-white"
               }`}
             >
               cURL
             </button>
             <button
               onClick={() => setActiveCodeTab("node")}
-              className={`px-3 py-1 rounded-full text-xs font-mono-tech transition cursor-pointer ${
-                activeCodeTab === "node" ? "is-active bg-[#E8E8E4] text-[#141414] font-bold shadow-sm" : "text-[#8B8B87] hover:text-[#E8E8E5]"
+              className={`px-3.5 py-1.5 rounded-full text-xs font-mono-tech transition cursor-pointer ${
+                activeCodeTab === "node" ? "is-active bg-[#E8E8E4] text-[#141414] font-bold shadow-sm" : "text-[#A3A3A3] hover:text-white"
               }`}
             >
               JavaScript
@@ -338,8 +338,8 @@ getForecastGuardTelemetry();`
         </div>
 
         {/* Code View Area */}
-        <div className="relative bg-black/60 border border-white/10 rounded-xl p-4 overflow-x-auto">
-          <pre className="text-xs font-mono-tech text-[#D8D8D3] leading-relaxed">
+        <div className="relative bg-black/60 border border-white/10 rounded-xl p-5 overflow-x-auto">
+          <pre className="text-xs font-mono-tech text-white/90 leading-relaxed">
             <code>{codeSnippets[activeCodeTab]}</code>
           </pre>
           <button
@@ -347,9 +347,9 @@ getForecastGuardTelemetry();`
               navigator.clipboard.writeText(codeSnippets[activeCodeTab]);
               alert("Code snippet copied to clipboard!");
             }}
-            className="absolute top-3 right-3 px-3 py-1 rounded-full bg-white/[0.08] hover:bg-white/[0.15] border border-white/10 text-[11px] font-mono-tech text-[#E8E8E5] flex items-center gap-1.5 transition cursor-pointer active:scale-[0.99]"
+            className="absolute top-4 right-4 px-3.5 py-1.5 rounded-full bg-white/[0.08] hover:bg-white/[0.15] border border-white/10 text-xs font-mono-tech text-white flex items-center gap-1.5 transition cursor-pointer active:scale-[0.99]"
           >
-            <Copy size={12} />
+            <Copy size={13} />
             <span>Copy</span>
           </button>
         </div>

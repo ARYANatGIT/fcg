@@ -47,9 +47,9 @@ export default function LandingScreen({ onGetStarted }: LandingScreenProps) {
         <div className="absolute w-full h-full rounded-full border border-white/[0.04]" />
         <div className="absolute w-3/4 h-3/4 rounded-full border border-white/[0.06]" />
         <div className="absolute w-1/2 h-1/2 rounded-full border border-white/[0.08]" />
-        <div className="absolute w-1/4 h-1/4 rounded-full border border-[#AEB796]/20" />
+        <div className="absolute w-1/4 h-1/4 rounded-full border border-white/20" />
         <div 
-          className="absolute w-1/2 h-[1px] bg-gradient-to-r from-transparent via-[#D6DDA9]/40 to-[#AEB796] origin-left"
+          className="absolute w-1/2 h-[1px] bg-gradient-to-r from-transparent via-white/40 to-white origin-left"
           style={{
             left: "50%",
             transform: `rotate(${pulseCount * 36}deg)`,
@@ -61,24 +61,24 @@ export default function LandingScreen({ onGetStarted }: LandingScreenProps) {
       {/* 4. Top Navigation Bar (Floating Glass Shell) */}
       <header className="relative z-10 w-full max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4 py-4 px-6 rounded-full glass border border-white/10 backdrop-blur-2xl">
         <div className="flex items-center gap-3.5">
-          <div className="w-10 h-10 rounded-full bg-white/[0.06] border border-white/10 flex items-center justify-center text-[#AEB796] shadow-sm">
+          <div className="w-10 h-10 rounded-full bg-white/[0.06] border border-white/10 flex items-center justify-center text-white shadow-sm">
             <Compass size={22} strokeWidth={2} />
           </div>
           <div>
             <div className="flex items-center gap-2">
               <span className="text-lg font-bold text-[#E8E8E5] tracking-tight">ForecastGuard</span>
-              <span className="px-2 py-0.5 rounded-full text-[10px] font-mono-tech uppercase bg-white/[0.06] border border-white/10 text-[#AEB796]">
+              <span className="px-2 py-0.5 rounded-full text-xs font-mono-tech uppercase bg-white/[0.06] border border-white/10 text-white">
                 v1.0-moes
               </span>
             </div>
-            <span className="text-[11px] text-[#8B8B87] font-mono-tech tracking-wide block">
+            <span className="text-xs text-[#8B8B87] font-mono-tech tracking-wide block">
               Ministry of Earth Sciences · NCMRWF
             </span>
           </div>
         </div>
 
         {/* Numbered Category Tabs (Noir Index Style) */}
-        <div className="hidden lg:flex items-center gap-1 text-[11px] font-mono-tech text-[#8B8B87]">
+        <div className="hidden lg:flex items-center gap-1 text-xs font-mono-tech text-[#8B8B87]">
           <span className="px-3 py-1 rounded-full bg-white/[0.04] text-[#E8E8E5] border border-white/10">01 COCKPIT</span>
           <span className="px-3 py-1 rounded-full hover:text-[#E8E8E5] transition">02 CARTOGRAPHY</span>
           <span className="px-3 py-1 rounded-full hover:text-[#E8E8E5] transition">03 DIAGNOSTICS</span>
@@ -86,7 +86,7 @@ export default function LandingScreen({ onGetStarted }: LandingScreenProps) {
         </div>
 
         <div className="flex items-center gap-2">
-          <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-black/40 border border-white/10 text-[11px] font-mono-tech text-[#D8D8D3]">
+          <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-black/40 border border-white/10 text-xs font-mono-tech text-[#D8D8D3]">
             <span className="status-dot-active" />
             <span className="hidden sm:inline">NCUM 9km Global Ensemble · OPERATIONAL</span>
           </div>
@@ -97,12 +97,12 @@ export default function LandingScreen({ onGetStarted }: LandingScreenProps) {
       <main className="relative z-10 w-full max-w-5xl mx-auto my-auto py-12 md:py-16 flex flex-col items-center text-center space-y-8">
         
         {/* Monospace Metadata Micro-Label */}
-        <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-white/[0.04] border border-white/10 text-[#AEB796] text-[11px] font-mono-tech tracking-widest uppercase shadow-sm">
-          <Radio size={13} className="animate-pulse text-[#D6DDA9]" />
+        <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-white/[0.04] border border-white/10 text-white text-xs font-mono-tech tracking-widest uppercase shadow-sm">
+          <Radio size={13} className="animate-pulse text-white" />
           <span>01 / MEDIUM-RANGE NWP FORECAST BUST DETECTION</span>
         </div>
 
-        {/* Hero Title with Dramatic Manrope Typography & Muted Sage Emphasis */}
+        {/* Hero Title with Dramatic Manrope Typography */}
         <div className="space-y-5 max-w-4xl">
           <h1 className="text-4xl sm:text-6xl md:text-7xl lg:text-[5rem] font-bold text-[#E8E8E5] tracking-[-0.075em] leading-[0.92]">
             Operational Medium-Range <br className="hidden sm:inline" />
@@ -124,7 +124,7 @@ export default function LandingScreen({ onGetStarted }: LandingScreenProps) {
               <ArrowUpRight size={18} strokeWidth={2.4} className="transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
             </div>
           </button>
-          <span className="text-[11px] font-mono-tech text-[#8B8B87] tracking-wider uppercase">
+          <span className="text-xs font-mono-tech text-[#8B8B87] tracking-wider uppercase">
             Click above to launch the Live Overview &amp; Synoptic Matrix
           </span>
         </div>
@@ -135,7 +135,7 @@ export default function LandingScreen({ onGetStarted }: LandingScreenProps) {
             <div className="metric-item text-left space-y-2">
               <div className="flex items-center justify-between">
                 <span className="mono-label">01 / COVERAGE</span>
-                <MapPin size={16} className="text-[#AEB796]" />
+                <MapPin size={16} className="text-white" />
               </div>
               <div className="text-3xl font-bold text-[#E8E8E5] font-mono-tech">43</div>
               <p className="text-xs text-[#92928C] leading-normal font-sans">
@@ -146,7 +146,7 @@ export default function LandingScreen({ onGetStarted }: LandingScreenProps) {
             <div className="metric-item text-left space-y-2">
               <div className="flex items-center justify-between">
                 <span className="mono-label">02 / LEAD HORIZON</span>
-                <TrendingUp size={16} className="text-[#D6DDA9]" />
+                <TrendingUp size={16} className="text-white" />
               </div>
               <div className="text-3xl font-bold text-[#E8E8E5] font-mono-tech">10-Day</div>
               <p className="text-xs text-[#92928C] leading-normal font-sans">
@@ -157,7 +157,7 @@ export default function LandingScreen({ onGetStarted }: LandingScreenProps) {
             <div className="metric-item text-left space-y-2">
               <div className="flex items-center justify-between">
                 <span className="mono-label">03 / CARTOGRAPHY</span>
-                <ShieldCheck size={16} className="text-[#AEB796]" />
+                <ShieldCheck size={16} className="text-white" />
               </div>
               <div className="text-3xl font-bold text-[#E8E8E5] font-mono-tech">Official SOI</div>
               <p className="text-xs text-[#92928C] leading-normal font-sans">
@@ -168,7 +168,7 @@ export default function LandingScreen({ onGetStarted }: LandingScreenProps) {
             <div className="metric-item text-left space-y-2">
               <div className="flex items-center justify-between">
                 <span className="mono-label">04 / AI ENGINE</span>
-                <Cpu size={16} className="text-[#D6DDA9]" />
+                <Cpu size={16} className="text-white" />
               </div>
               <div className="text-3xl font-bold text-[#E8E8E5] font-mono-tech">LightGBM+XGB</div>
               <p className="text-xs text-[#92928C] leading-normal font-sans">

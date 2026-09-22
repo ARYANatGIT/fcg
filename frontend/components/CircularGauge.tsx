@@ -34,7 +34,7 @@ export default function CircularGauge({
       ? "#ef4444" // Red (High Risk)
       : percentage >= 35
       ? "#f59e0b" // Amber (Moderate Risk)
-      : "#AEB796"); // Sage Accent (Safe/Robust)
+      : "#FFFFFF"); // Pure White (Safe/Robust)
 
   const threatLabel =
     percentage >= 65 ? "CRITICAL RISK" : percentage >= 35 ? "ELEVATED RISK" : "ROBUST FORECAST";

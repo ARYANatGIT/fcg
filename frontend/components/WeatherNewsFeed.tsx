@@ -217,13 +217,13 @@ export default function WeatherNewsFeed() {
         );
       case "ADVISORY":
         return (
-          <span className="px-3 py-0.5 rounded-full text-[11px] font-mono-tech font-semibold tracking-wider bg-[#AEB796]/15 text-[#D6DDA9] border border-[#AEB796]/40">
+          <span className="px-3 py-0.5 rounded-full text-xs font-mono-tech font-semibold tracking-wider bg-white/[0.08] text-[#E8E8E5] border border-white/20">
             ADVISORY
           </span>
         );
       default:
         return (
-          <span className="px-3 py-0.5 rounded-full text-[11px] font-mono-tech font-semibold tracking-wider bg-white/[0.06] text-[#D8D8D3] border border-white/10">
+          <span className="px-3 py-0.5 rounded-full text-xs font-mono-tech font-semibold tracking-wider bg-white/[0.06] text-[#D8D8D3] border border-white/10">
             INFORMATION
           </span>
         );
@@ -240,7 +240,7 @@ export default function WeatherNewsFeed() {
             <h2 className="text-xl font-bold text-[#E8E8E5] tracking-tight">
               Live Meteorological Intelligence &amp; Synoptic Disruptions
             </h2>
-            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono-tech font-semibold bg-white/[0.04] text-[#AEB796] border border-white/10">
+            <span className="px-2.5 py-0.5 rounded-full text-xs font-mono-tech font-semibold bg-white/[0.06] text-[#E8E8E5] border border-white/10">
               {articles.length} ACTIVE BULLETINS
             </span>
           </div>
@@ -251,7 +251,7 @@ export default function WeatherNewsFeed() {
 
         <div className="flex items-center gap-3">
           {lastRefreshed && (
-            <span className="text-[11px] font-mono-tech text-[#8B8B87] hidden sm:inline">
+            <span className="text-xs font-mono-tech text-[#8B8B87] hidden sm:inline">
               Updated: {lastRefreshed}
             </span>
           )}
@@ -260,7 +260,7 @@ export default function WeatherNewsFeed() {
             disabled={loading}
             className="flex items-center gap-2 px-4 py-2 bg-white/[0.04] hover:bg-white/[0.08] text-[#E8E8E5] rounded-full border border-white/10 text-xs font-mono-tech font-semibold transition-all cursor-pointer"
           >
-            <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin text-[#AEB796]" : "text-[#AEB796]"}`} />
+            <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin text-white" : "text-[#E8E8E5]"}`} />
             <span>Sync Feed</span>
           </button>
         </div>
@@ -348,7 +348,7 @@ export default function WeatherNewsFeed() {
       {/* Articles Grid */}
       {loading && articles.length === 0 ? (
         <div className="py-20 text-center text-[#8B8B87] font-mono-tech text-sm">
-          <RefreshCw className="w-6 h-6 animate-spin mx-auto mb-3 text-[#AEB796]" />
+          <RefreshCw className="w-6 h-6 animate-spin mx-auto mb-3 text-white" />
           Fetching live synoptic disruption bulletins...
         </div>
       ) : filteredArticles.length === 0 ? (
@@ -366,7 +366,7 @@ export default function WeatherNewsFeed() {
                 {/* Card Top Badges */}
                 <div className="flex items-center justify-between gap-2 mb-3">
                   <div className="flex items-center gap-2">
-                    <span className="p-1.5 rounded-lg bg-white/[0.04] border border-white/10 text-[#AEB796]">
+                    <span className="p-1.5 rounded-lg bg-white/[0.04] border border-white/10 text-white">
                       {getCategoryIcon(article.category)}
                     </span>
                     <span className="text-xs font-mono-tech text-[#8B8B87] uppercase tracking-wider font-semibold">
@@ -434,8 +434,8 @@ export default function WeatherNewsFeed() {
               {/* Card Footer */}
               <div className="pt-3 border-t border-white/10 flex items-center justify-between text-xs font-mono">
                 <span className="text-white/50">{article.source}</span>
-                <span className="text-emerald-400 font-semibold flex items-center gap-1.5 bg-emerald-950/40 px-2.5 py-1 rounded border border-emerald-500/30">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                <span className="text-[#E8E8E5] font-semibold flex items-center gap-1.5 bg-white/[0.05] px-2.5 py-1 rounded-full border border-white/10">
+                  <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
                   {article.published_at}
                 </span>
               </div>

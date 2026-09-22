@@ -101,8 +101,8 @@ export default function TopRightToolbar({
       activeHighlightedElementRef.current.classList.remove(
         "outline",
         "outline-2",
-        "outline-[#AEB796]",
-        "bg-[#AEB796]/15",
+        "outline-white/60",
+        "bg-white/10",
         "rounded-lg",
         "transition-all"
       );
@@ -192,8 +192,8 @@ export default function TopRightToolbar({
       node.classList.add(
         "outline",
         "outline-2",
-        "outline-[#AEB796]",
-        "bg-[#AEB796]/15",
+        "outline-white/60",
+        "bg-white/10",
         "rounded-lg",
         "transition-all"
       );
@@ -323,9 +323,9 @@ export default function TopRightToolbar({
         className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 text-[#D8D8D3] hover:text-[#E8E8E5] text-xs font-mono-tech transition cursor-pointer shadow-sm"
         title="Quick Jump to any Station or View (Ctrl+K)"
       >
-        <Search size={14} className="text-[#AEB796]" />
+        <Search size={14} className="text-[#E8E8E5]" />
         <span className="hidden md:inline">Search...</span>
-        <kbd className="hidden md:inline-block px-1.5 py-0.5 rounded bg-white/[0.06] text-[10px] font-mono text-[#8B8B87]">
+        <kbd className="hidden md:inline-block px-1.5 py-0.5 rounded bg-white/[0.06] text-xs font-mono text-[#8B8B87]">
           Ctrl+K
         </kbd>
       </button>
@@ -335,14 +335,14 @@ export default function TopRightToolbar({
         onClick={handleToggleSpeak}
         className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full border text-xs font-mono-tech transition cursor-pointer shadow-sm ${
           isSpeaking
-            ? "bg-[#AEB796]/20 text-[#D6DDA9] border-[#AEB796]/50 animate-pulse font-semibold"
+            ? "bg-white/20 text-white border-white/50 animate-pulse font-semibold"
             : "bg-white/[0.04] hover:bg-white/[0.08] text-[#D8D8D3] border-white/10"
         }`}
         title={isSpeaking ? "Click to Stop Reading" : "Click to Read Page Aloud with Word Highlighting"}
       >
         {isSpeaking ? (
           <>
-            <VolumeX size={14} className="text-[#D6DDA9]" />
+            <VolumeX size={14} className="text-white" />
             <span className="font-semibold">Stop Reading</span>
           </>
         ) : (
@@ -361,20 +361,20 @@ export default function TopRightToolbar({
         aria-label="Toggle Theme Mode"
       >
         {theme === "dark" ? (
-          <Sun size={15} className="text-[#AEB796]" />
+          <Sun size={15} className="text-white" />
         ) : (
-          <Moon size={15} className="text-[#AEB796]" />
+          <Moon size={15} className="text-white" />
         )}
       </button>
 
-      {/* Floating Teleprompter HUD: Displays current word in sage highlight while reading */}
+      {/* Floating Teleprompter HUD: Displays current word in highlight while reading */}
       {isSpeaking && (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[9999] max-w-2xl w-[92vw] bg-[#0c0c0c]/95 border border-[#AEB796]/50 text-[#E8E8E5] px-4 py-3 rounded-2xl shadow-2xl backdrop-blur-2xl flex items-center gap-3 font-mono-tech">
-          <div className="w-8 h-8 rounded-full bg-[#AEB796]/20 border border-[#AEB796]/40 flex items-center justify-center text-[#D6DDA9] shrink-0 animate-pulse">
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[9999] max-w-2xl w-[92vw] bg-[#0c0c0c]/95 border border-white/20 text-[#E8E8E5] px-4 py-3 rounded-2xl shadow-2xl backdrop-blur-2xl flex items-center gap-3 font-mono-tech">
+          <div className="w-8 h-8 rounded-full bg-white/10 border border-white/20 flex items-center justify-center text-white shrink-0 animate-pulse">
             <Volume2 size={18} />
           </div>
           <div className="flex-1 min-w-0 text-xs sm:text-sm">
-            <div className="text-[10px] text-[#AEB796] uppercase tracking-wider font-semibold mb-0.5">
+            <div className="text-xs text-[#8B8B87] uppercase tracking-wider font-semibold mb-0.5">
               Reading Page Aloud
             </div>
             <div className="truncate text-[#D8D8D3]">
@@ -420,7 +420,7 @@ export default function TopRightToolbar({
           >
             {/* Search Input Bar */}
             <div className="flex items-center gap-3 px-4 py-3.5 border-b border-white/10 bg-white/[0.02]">
-              <Search size={18} className="text-[#AEB796] shrink-0" />
+              <Search size={18} className="text-white shrink-0" />
               <input
                 ref={searchInputRef}
                 type="text"
@@ -461,7 +461,7 @@ export default function TopRightToolbar({
                       className="w-full px-3 py-2.5 rounded-xl flex items-center justify-between text-left hover:bg-white/[0.06] transition group cursor-pointer border border-transparent hover:border-white/10"
                     >
                       <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-lg bg-white/[0.04] border border-white/10 flex items-center justify-center text-[#AEB796] group-hover:text-[#D6DDA9] transition-colors">
+                        <div className="w-8 h-8 rounded-lg bg-white/[0.04] border border-white/10 flex items-center justify-center text-[#E8E8E5] group-hover:text-white transition-colors">
                           <Icon size={16} />
                         </div>
                         <div>

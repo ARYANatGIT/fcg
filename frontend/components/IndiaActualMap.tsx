@@ -419,7 +419,7 @@ export default function IndiaActualMap({
             ? "bg-white/95 border-black/10 text-[#171716]"
             : "bg-[#080808]/90 border-white/10 text-[#E8E8E5]"
         }`}>
-          <div className="w-2 h-2 rounded-full bg-[#AEB796] animate-pulse" />
+          <div className="w-2 h-2 rounded-full bg-[#171716] dark:bg-white animate-pulse" />
           <span className="font-bold uppercase tracking-wider">SURVEY OF INDIA CARTOGRAPHY</span>
           <span className="opacity-40">|</span>
           <span className="font-semibold text-[#8B8B87]">{stations.length} SYNOPTIC STATIONS</span>
@@ -497,17 +497,17 @@ export default function IndiaActualMap({
               <span className={`text-sm font-bold block leading-tight ${isLightMode ? "text-[#171716]" : "text-[#E8E8E5]"}`}>
                 {hoveredStation.name}
               </span>
-              <span className="text-[11px] text-[#AEB796] font-semibold">
+              <span className="text-xs text-[#8B8B87] font-semibold">
                 {hoveredStation.region}
               </span>
             </div>
             <span
-              className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
+              className={`px-2.5 py-0.5 rounded-full text-xs font-bold ${
                 (hoveredStation.bust_probability ?? 0) >= 0.65
                   ? "bg-red-500/15 text-red-500 border border-red-500/40"
                   : (hoveredStation.bust_probability ?? 0) >= 0.35
                   ? "bg-amber-500/15 text-amber-500 border border-amber-500/40"
-                  : "bg-[#AEB796]/15 text-[#565F45] dark:text-[#D6DDA9] border border-[#AEB796]/40"
+                  : "bg-black/5 dark:bg-white/10 text-black dark:text-white border border-black/10 dark:border-white/20"
               }`}
             >
               {((hoveredStation.bust_probability ?? 0.3) * 100).toFixed(0)}% BUST RISK
@@ -523,7 +523,7 @@ export default function IndiaActualMap({
             </div>
             <div className="flex justify-between">
               <span className="text-[#8B8B87]">Rainfall (24h):</span>
-              <span className="text-[#AEB796] font-bold">{hoveredStation.rainfall ?? 18.5} mm</span>
+              <span className="font-bold">{hoveredStation.rainfall ?? 18.5} mm</span>
             </div>
             <div className="flex justify-between">
               <span className="text-[#8B8B87]">Surface Wind:</span>
@@ -531,7 +531,7 @@ export default function IndiaActualMap({
             </div>
             <div className="flex justify-between">
               <span className="text-[#8B8B87]">Model Confidence:</span>
-              <span className="text-[#D6DDA9] font-bold">
+              <span className="font-bold">
                 {((hoveredStation.confidence ?? 0.78) * 100).toFixed(0)}%
               </span>
             </div>
@@ -540,7 +540,7 @@ export default function IndiaActualMap({
       )}
 
       {/* Map Legend Footer */}
-      <div className={`px-4 py-2.5 border-t flex flex-wrap items-center justify-between gap-3 text-[11px] font-mono-tech z-10 transition-colors ${
+      <div className={`px-4 py-2.5 border-t flex flex-wrap items-center justify-between gap-3 text-xs font-mono-tech z-10 transition-colors ${
         isLightMode
           ? "bg-black/[0.02] border-black/10 text-[#8B8B87]"
           : "bg-white/[0.02] border-white/10 text-[#8B8B87]"
@@ -555,7 +555,7 @@ export default function IndiaActualMap({
             <span>Moderate (35-64%)</span>
           </span>
           <span className="flex items-center gap-1.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-[#AEB796]" />
+            <span className="w-2.5 h-2.5 rounded-full bg-[#71717A] dark:bg-[#A1A1AA]" />
             <span>Low Risk (&lt;35%)</span>
           </span>
           <span className="flex items-center gap-1.5">
