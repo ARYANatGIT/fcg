@@ -681,8 +681,8 @@ export default function Dashboard() {
                   className={`nav-row w-full justify-between cursor-pointer ${isActive ? "is-active" : ""}`}
                 >
                   <div className="flex items-center gap-2.5">
-                    <span className="font-mono-tech text-[10px] opacity-70 tracking-wider">{tab.num}</span>
-                    <span className="truncate text-[13px]">{tab.label}</span>
+                    <span className="noir-number text-[12px] opacity-80">{tab.num}</span>
+                    <span className="truncate text-[13.5px]">{tab.label}</span>
                   </div>
                   <Icon size={14} className={isActive ? "text-[#141414]" : "text-[#AEB796]"} />
                 </button>
@@ -747,6 +747,8 @@ export default function Dashboard() {
             />
           </div>
 
+        {/* Active Tab Content with Smooth Noir Reveal Motion */}
+        <div key={activeTab} className="noir-reveal space-y-6">
         
         {/* ========================================================
             VIEW 1: LIVE OPERATIONAL OVERVIEW
@@ -1378,6 +1380,7 @@ export default function Dashboard() {
           <OpenDataApiHub />
         )}
 
+        </div>
       </main>
 
       {/* 4. Command Center Footer */}

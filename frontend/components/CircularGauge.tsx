@@ -48,13 +48,13 @@ export default function CircularGauge({
           className="transform -rotate-215"
           style={{ overflow: "visible" }}
         >
-          {/* Background Track with Subtle Glow */}
+          {/* Background Track with Subtle Rim */}
           <circle
             cx={size / 2}
             cy={size / 2}
             r={radius}
             fill="transparent"
-            stroke="rgba(255, 255, 255, 0.07)"
+            stroke="var(--noir-border)"
             strokeWidth={strokeWidth}
             strokeDasharray={`${arcLength} ${circumference}`}
             strokeLinecap="round"
@@ -66,11 +66,11 @@ export default function CircularGauge({
             cy={size / 2}
             r={radius}
             fill="transparent"
-            stroke="rgba(255, 255, 255, 0.12)"
+            stroke="var(--noir-border)"
             strokeWidth={strokeWidth + 2}
             strokeDasharray={`2 ${arcLength * 0.35 - 2} 2 ${arcLength * 0.30 - 2} 2 ${circumference}`}
             strokeLinecap="butt"
-            opacity={0.6}
+            opacity={0.8}
           />
 
           {/* Foreground Dynamic Colored Arc */}

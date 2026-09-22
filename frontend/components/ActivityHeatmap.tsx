@@ -34,13 +34,25 @@ export default function ActivityHeatmap({
   stateName = "NCR",
   lat = 28.6139,
   lon = 77.209,
-  isLightMode = false,
 }: ActivityHeatmapProps) {
   const [metricMode, setMetricMode] = useState<MetricMode>("rainfall");
   const [hoveredDay, setHoveredDay] = useState<DayData | null>(null);
   const [tooltipPos, setTooltipPos] = useState<{ x: number; y: number } | null>(null);
   const [liveData, setLiveData] = useState<Map<string, { rain: number; tMax: number; tMin: number; wind: number; rh: number }>>(new Map());
   const [loading, setLoading] = useState(false);
+  const [isLightMode, setIsLightMode] = useState(false);
+
+  // Synchronize with document light-mode class dynamically
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const checkTheme = () => {
+      setIsLightMode(document.documentElement.classList.contains("light-mode"));
+    };
+    checkTheme();
+    const observer = new MutationObserver(checkTheme);
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
+    return () => observer.disconnect();
+  }, []);
 
   // Fetch real-time and recent 365-day meteorological telemetry from Open-Meteo
   useEffect(() => {
