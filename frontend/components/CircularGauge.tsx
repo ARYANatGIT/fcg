@@ -31,10 +31,10 @@ export default function CircularGauge({
   const gaugeColor =
     color ||
     (percentage >= 65
-      ? "#ef4444" // Coral Red (High Risk)
+      ? "#ef4444" // Red (High Risk)
       : percentage >= 35
-      ? "#f59e0b" // Signal Amber (Moderate Risk)
-      : "#22c55e"); // Pulse Green (Safe/Low)
+      ? "#f59e0b" // Amber (Moderate Risk)
+      : "#AEB796"); // Sage Accent (Safe/Robust)
 
   const threatLabel =
     percentage >= 65 ? "CRITICAL RISK" : percentage >= 35 ? "ELEVATED RISK" : "ROBUST FORECAST";
@@ -54,7 +54,7 @@ export default function CircularGauge({
             cy={size / 2}
             r={radius}
             fill="transparent"
-            stroke="#1c212c"
+            stroke="rgba(255, 255, 255, 0.07)"
             strokeWidth={strokeWidth}
             strokeDasharray={`${arcLength} ${circumference}`}
             strokeLinecap="round"
@@ -66,11 +66,11 @@ export default function CircularGauge({
             cy={size / 2}
             r={radius}
             fill="transparent"
-            stroke="#273042"
+            stroke="rgba(255, 255, 255, 0.12)"
             strokeWidth={strokeWidth + 2}
             strokeDasharray={`2 ${arcLength * 0.35 - 2} 2 ${arcLength * 0.30 - 2} 2 ${circumference}`}
             strokeLinecap="butt"
-            opacity={0.7}
+            opacity={0.6}
           />
 
           {/* Foreground Dynamic Colored Arc */}
@@ -86,7 +86,7 @@ export default function CircularGauge({
             strokeLinecap="round"
             className="transition-all duration-700 ease-out"
             style={{
-              filter: `drop-shadow(0 0 10px ${gaugeColor}60)`,
+              filter: `drop-shadow(0 0 12px ${gaugeColor}50)`,
             }}
           />
         </svg>
@@ -95,22 +95,21 @@ export default function CircularGauge({
         <div className="absolute inset-0 flex flex-col items-center justify-center pt-2">
           <div className="flex items-baseline gap-0.5">
             <span
-              className="text-[42px] font-[700] font-sans tracking-[-0.035em] leading-none"
-              style={{ color: gaugeColor }}
+              className="text-[44px] font-bold font-sans tracking-[-0.05em] leading-none text-[#E8E8E5]"
             >
               {percentage.toFixed(1)}
             </span>
-            <span className="text-[18px] font-[600] font-linear-mono text-[#94a3b8]">
+            <span className="text-[16px] font-semibold font-mono-tech text-[#8B8B87]">
               %
             </span>
           </div>
 
-          <span className="text-[12px] font-linear-mono text-[#cbd5e1] font-semibold tracking-wide uppercase mt-1">
+          <span className="text-[11px] font-mono-tech text-[#8B8B87] uppercase tracking-wider mt-1">
             {label}
           </span>
 
           <span
-            className="text-[11px] font-linear-mono font-bold px-2.5 py-0.5 rounded-full border mt-1.5"
+            className="text-[10px] font-mono-tech font-semibold px-2.5 py-0.5 rounded-full border mt-1.5 uppercase tracking-wide"
             style={{
               color: gaugeColor,
               borderColor: `${gaugeColor}40`,
@@ -122,11 +121,11 @@ export default function CircularGauge({
         </div>
       </div>
 
-      {/* Dedicated Model Confidence Pill - Rendered Cleanly Below Gauge to Prevent Any Text Overlap */}
+      {/* Dedicated Model Confidence Pill */}
       {sublabel && (
-        <div className="mt-2.5 flex items-center gap-2 bg-[#151820] px-3.5 py-1.5 rounded-full border border-[#232732] shadow-sm">
-          <span className="w-2 h-2 rounded-full bg-[#38bdf8] animate-pulse" />
-          <span className="text-[13px] font-linear-mono text-[#e2e8f0] font-semibold tracking-wide">
+        <div className="mt-2.5 flex items-center gap-2 bg-white/[0.04] px-3.5 py-1 rounded-full border border-white/10 shadow-sm">
+          <span className="status-dot-active" />
+          <span className="text-[12px] font-mono-tech text-[#D8D8D3] font-medium tracking-wide">
             {sublabel}
           </span>
         </div>

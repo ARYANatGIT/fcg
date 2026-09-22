@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { 
   Compass, 
-  ChevronRight, 
+  ArrowUpRight, 
   Activity, 
   Radio, 
   Cpu, 
@@ -15,7 +15,8 @@ import {
   CloudRain,
   TrendingUp,
   MapPin,
-  CheckCircle2
+  CheckCircle2,
+  ChevronRight
 } from "lucide-react";
 
 interface LandingScreenProps {
@@ -33,28 +34,22 @@ export default function LandingScreen({ onGetStarted }: LandingScreenProps) {
   }, []);
 
   return (
-    <div className="min-h-screen w-full bg-[#06080c] text-white flex flex-col justify-between p-6 md:p-12 relative overflow-hidden select-none animate-in fade-in duration-300">
-      {/* Dynamic Cinematic Background Grid & Glow */}
-      <div 
-        className="absolute inset-0 pointer-events-none opacity-30"
-        style={{
-          backgroundImage: `
-            radial-gradient(circle at 50% 30%, rgba(56, 189, 248, 0.18) 0%, transparent 70%),
-            linear-gradient(to right, rgba(35, 47, 66, 0.25) 1px, transparent 1px),
-            linear-gradient(to bottom, rgba(35, 47, 66, 0.25) 1px, transparent 1px)
-          `,
-          backgroundSize: "100% 100%, 64px 64px, 64px 64px"
-        }}
-      />
+    <div className="noir-app min-h-screen w-full flex flex-col justify-between p-5 md:p-12 relative overflow-hidden select-none animate-in fade-in duration-300">
+      {/* 1. Ambient Glow Orbs */}
+      <div className="ambient-glow glow-left" />
+      <div className="ambient-glow glow-right" />
 
-      {/* Atmospheric Radar Wave Animation in Background */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] md:w-[1000px] md:h-[1000px] pointer-events-none flex items-center justify-center opacity-40">
-        <div className="absolute w-full h-full rounded-full border border-cyan-500/10 animate-ping" style={{ animationDuration: "8s" }} />
-        <div className="absolute w-3/4 h-3/4 rounded-full border border-cyan-500/15 animate-pulse" style={{ animationDuration: "5s" }} />
-        <div className="absolute w-1/2 h-1/2 rounded-full border border-cyan-500/20" />
-        <div className="absolute w-1/4 h-1/4 rounded-full border border-[#e4f222]/20" />
+      {/* 2. SVG Film Grain Overlay */}
+      <div className="grain" />
+
+      {/* 3. Concentric Radar Rings Atmosphere (Animated Focus Pulse) */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[720px] h-[720px] md:w-[1100px] md:h-[1100px] pointer-events-none flex items-center justify-center opacity-30 z-0">
+        <div className="absolute w-full h-full rounded-full border border-white/[0.04]" />
+        <div className="absolute w-3/4 h-3/4 rounded-full border border-white/[0.06]" />
+        <div className="absolute w-1/2 h-1/2 rounded-full border border-white/[0.08]" />
+        <div className="absolute w-1/4 h-1/4 rounded-full border border-[#AEB796]/20" />
         <div 
-          className="absolute w-1/2 h-[2px] bg-gradient-to-r from-transparent via-cyan-400/30 to-cyan-300 origin-left"
+          className="absolute w-1/2 h-[1px] bg-gradient-to-r from-transparent via-[#D6DDA9]/40 to-[#AEB796] origin-left"
           style={{
             left: "50%",
             transform: `rotate(${pulseCount * 36}deg)`,
@@ -63,120 +58,130 @@ export default function LandingScreen({ onGetStarted }: LandingScreenProps) {
         />
       </div>
 
-      {/* Top Navbar */}
-      <header className="relative z-10 w-full max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4 border-b border-[#232f42]/80 pb-6">
+      {/* 4. Top Navigation Bar (Floating Glass Shell) */}
+      <header className="relative z-10 w-full max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4 py-4 px-6 rounded-full glass border border-white/10 backdrop-blur-2xl">
         <div className="flex items-center gap-3.5">
-          <div className="w-12 h-12 rounded-xl bg-[#121722] border border-[#232f42] flex items-center justify-center text-[#e4f222] shadow-xl">
-            <Compass size={28} strokeWidth={2.2} />
+          <div className="w-10 h-10 rounded-full bg-white/[0.06] border border-white/10 flex items-center justify-center text-[#AEB796] shadow-sm">
+            <Compass size={22} strokeWidth={2} />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <span className="text-2xl font-extrabold text-white tracking-tight">ForecastGuard</span>
-              <span className="px-2 py-0.5 rounded-full text-[11px] font-linear-mono bg-cyan-950 border border-cyan-500/40 text-cyan-300">
+              <span className="text-lg font-bold text-[#E8E8E5] tracking-tight">ForecastGuard</span>
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-mono-tech uppercase bg-white/[0.06] border border-white/10 text-[#AEB796]">
                 v1.0-moes
               </span>
             </div>
-            <span className="text-xs text-[#94a3b8] font-linear-mono block">
+            <span className="text-[11px] text-[#8B8B87] font-mono-tech tracking-wide block">
               Ministry of Earth Sciences · NCMRWF
             </span>
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#121722] border border-[#232f42] text-xs font-linear-mono text-[#cbd5e1]">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-            <span>NCUM 9km Global Ensemble · OPERATIONAL</span>
+        {/* Numbered Category Tabs (Noir Index Style) */}
+        <div className="hidden lg:flex items-center gap-1 text-[11px] font-mono-tech text-[#8B8B87]">
+          <span className="px-3 py-1 rounded-full bg-white/[0.04] text-[#E8E8E5] border border-white/10">01 COCKPIT</span>
+          <span className="px-3 py-1 rounded-full hover:text-[#E8E8E5] transition">02 CARTOGRAPHY</span>
+          <span className="px-3 py-1 rounded-full hover:text-[#E8E8E5] transition">03 DIAGNOSTICS</span>
+          <span className="px-3 py-1 rounded-full hover:text-[#E8E8E5] transition">04 SIMULATION</span>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-black/40 border border-white/10 text-[11px] font-mono-tech text-[#D8D8D3]">
+            <span className="status-dot-active" />
+            <span className="hidden sm:inline">NCUM 9km Global Ensemble · OPERATIONAL</span>
           </div>
         </div>
       </header>
 
-      {/* Full-Screen Expansive Hero Section */}
-      <main className="relative z-10 w-full max-w-6xl mx-auto my-auto py-12 flex flex-col items-center text-center space-y-8">
+      {/* 5. Expansive Editorial Hero Section */}
+      <main className="relative z-10 w-full max-w-5xl mx-auto my-auto py-12 md:py-16 flex flex-col items-center text-center space-y-8">
         
-        {/* System Category Badge */}
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#121722]/90 border border-cyan-500/40 text-cyan-300 text-xs font-linear-mono tracking-wider shadow-lg">
-          <Radio size={14} className="animate-pulse text-[#e4f222]" />
-          <span className="font-semibold uppercase">MEDIUM-RANGE NWP FORECAST BUST DETECTION SYSTEM</span>
+        {/* Monospace Metadata Micro-Label */}
+        <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-white/[0.04] border border-white/10 text-[#AEB796] text-[11px] font-mono-tech tracking-widest uppercase shadow-sm">
+          <Radio size={13} className="animate-pulse text-[#D6DDA9]" />
+          <span>01 / MEDIUM-RANGE NWP FORECAST BUST DETECTION</span>
         </div>
 
-        {/* Hero Title */}
-        <div className="space-y-4 max-w-4xl">
-          <h1 className="text-4xl sm:text-6xl md:text-7xl font-black text-white tracking-tight leading-[1.08]">
+        {/* Hero Title with Dramatic Manrope Typography & Muted Sage Emphasis */}
+        <div className="space-y-5 max-w-4xl">
+          <h1 className="text-4xl sm:text-6xl md:text-7xl lg:text-[5rem] font-bold text-[#E8E8E5] tracking-[-0.075em] leading-[0.92]">
             Operational Medium-Range <br className="hidden sm:inline" />
-            <span className="bg-gradient-to-r from-cyan-400 via-sky-300 to-[#e4f222] bg-clip-text text-transparent">
-              NWP Forecast Bust Detection
-            </span>
+            <em>NWP Forecast Bust Detection</em>
           </h1>
-          <p className="text-base sm:text-xl text-[#94a3b8] max-w-3xl mx-auto font-normal leading-relaxed">
+          <p className="text-sm sm:text-base md:text-lg text-[#92928C] max-w-2xl mx-auto font-normal leading-relaxed">
             Machine learning early-warning platform alerting forecasters to medium-range forecast busts across India with physics-grounded SHAP attributions, run-to-run drift tracking, and official Survey of India cartography.
           </p>
         </div>
 
-        {/* Primary Action Button: "GET STARTED" */}
-        <div className="pt-4 flex flex-col items-center gap-3">
+        {/* Primary Action Button: Noir Index Circle CTA */}
+        <div className="pt-2 flex flex-col items-center gap-3">
           <button
             onClick={onGetStarted}
-            className="group px-12 py-5 rounded-2xl bg-gradient-to-r from-cyan-400 via-blue-500 to-[#e4f222] text-[#06080c] font-black text-lg tracking-wider uppercase font-linear-mono hover:opacity-95 shadow-[0_0_40px_rgba(56,189,248,0.35)] flex items-center justify-center gap-3 transition transform hover:scale-[1.04] active:scale-[0.98] cursor-pointer"
+            className="circle-cta group"
           >
-            <span>GET STARTED</span>
-            <ChevronRight size={22} strokeWidth={3} className="transition-transform group-hover:translate-x-1" />
+            <span>ENTER OPERATIONAL COCKPIT</span>
+            <div className="circle-icon">
+              <ArrowUpRight size={18} strokeWidth={2.4} className="transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+            </div>
           </button>
-          <span className="text-xs font-linear-mono text-[#64748b]">
+          <span className="text-[11px] font-mono-tech text-[#8B8B87] tracking-wider uppercase">
             Click above to launch the Live Overview &amp; Synoptic Matrix
           </span>
         </div>
 
-        {/* 4-Column Mission Telemetry Strip */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 w-full pt-8">
-          <div className="bg-[#0c1017]/80 backdrop-blur-md p-5 rounded-2xl border border-[#232f42] text-left space-y-2 shadow-xl hover:border-cyan-500/50 transition">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-linear-mono text-cyan-400 uppercase font-bold">Coverage</span>
-              <MapPin size={18} className="text-cyan-400" />
+        {/* 6. 4-Column Mission Telemetry (Hairline-Divided Metric Strip) */}
+        <div className="w-full pt-8">
+          <div className="metric-strip">
+            <div className="metric-item text-left space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="mono-label">01 / COVERAGE</span>
+                <MapPin size={16} className="text-[#AEB796]" />
+              </div>
+              <div className="text-3xl font-bold text-[#E8E8E5] font-mono-tech">43</div>
+              <p className="text-xs text-[#92928C] leading-normal font-sans">
+                Synoptic observation stations monitored across all Indian climatic regimes.
+              </p>
             </div>
-            <div className="text-3xl font-black text-white font-linear-mono">43</div>
-            <p className="text-xs text-[#94a3b8] leading-normal">
-              Synoptic observation stations monitored across all Indian climatic regimes.
-            </p>
-          </div>
 
-          <div className="bg-[#0c1017]/80 backdrop-blur-md p-5 rounded-2xl border border-[#232f42] text-left space-y-2 shadow-xl hover:border-cyan-500/50 transition">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-linear-mono text-[#e4f222] uppercase font-bold">Lead Horizon</span>
-              <TrendingUp size={18} className="text-[#e4f222]" />
+            <div className="metric-item text-left space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="mono-label">02 / LEAD HORIZON</span>
+                <TrendingUp size={16} className="text-[#D6DDA9]" />
+              </div>
+              <div className="text-3xl font-bold text-[#E8E8E5] font-mono-tech">10-Day</div>
+              <p className="text-xs text-[#92928C] leading-normal font-sans">
+                Continuous medium-range verification tracking model drift from Day 1 to Day 10.
+              </p>
             </div>
-            <div className="text-3xl font-black text-[#e4f222] font-linear-mono">10-Day</div>
-            <p className="text-xs text-[#94a3b8] leading-normal">
-              Continuous medium-range verification tracking model drift from Day 1 to Day 10.
-            </p>
-          </div>
 
-          <div className="bg-[#0c1017]/80 backdrop-blur-md p-5 rounded-2xl border border-[#232f42] text-left space-y-2 shadow-xl hover:border-cyan-500/50 transition">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-linear-mono text-emerald-400 uppercase font-bold">Cartography</span>
-              <ShieldCheck size={18} className="text-emerald-400" />
+            <div className="metric-item text-left space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="mono-label">03 / CARTOGRAPHY</span>
+                <ShieldCheck size={16} className="text-[#AEB796]" />
+              </div>
+              <div className="text-3xl font-bold text-[#E8E8E5] font-mono-tech">Official SOI</div>
+              <p className="text-xs text-[#92928C] leading-normal font-sans">
+                Official Survey of India boundaries with Leaflet &amp; CARTO Basemaps integration.
+              </p>
             </div>
-            <div className="text-3xl font-black text-emerald-400 font-linear-mono">Official SOI</div>
-            <p className="text-xs text-[#94a3b8] leading-normal">
-              Official Survey of India boundaries with Leaflet &amp; CARTO Basemaps integration.
-            </p>
-          </div>
 
-          <div className="bg-[#0c1017]/80 backdrop-blur-md p-5 rounded-2xl border border-[#232f42] text-left space-y-2 shadow-xl hover:border-cyan-500/50 transition">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-linear-mono text-sky-400 uppercase font-bold">AI Engine</span>
-              <Cpu size={18} className="text-sky-400" />
+            <div className="metric-item text-left space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="mono-label">04 / AI ENGINE</span>
+                <Cpu size={16} className="text-[#D6DDA9]" />
+              </div>
+              <div className="text-3xl font-bold text-[#E8E8E5] font-mono-tech">LightGBM+XGB</div>
+              <p className="text-xs text-[#92928C] leading-normal font-sans">
+                Calibrated ensemble with real-time SHAP feature attribution &amp; physics checks.
+              </p>
             </div>
-            <div className="text-3xl font-black text-sky-400 font-linear-mono">LightGBM+XGB</div>
-            <p className="text-xs text-[#94a3b8] leading-normal">
-              Calibrated ensemble with real-time SHAP feature attribution &amp; physics checks.
-            </p>
           </div>
         </div>
 
       </main>
 
-      {/* Footer */}
-      <footer className="relative z-10 w-full max-w-7xl mx-auto pt-6 border-t border-[#232f42]/80 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs font-linear-mono text-[#64748b]">
+      {/* 7. Footer */}
+      <footer className="relative z-10 w-full max-w-7xl mx-auto pt-6 border-t border-white/[0.08] flex flex-col sm:flex-row items-center justify-between gap-3 text-[11px] font-mono-tech text-[#8B8B87]">
         <div>
           ForecastGuard · Ministry of Earth Sciences (MoES) / NCMRWF
         </div>

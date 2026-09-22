@@ -582,30 +582,37 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-[#08090a] text-[#f1f5f9] font-sans antialiased selection:bg-[#e4f222] selection:text-[#08090a] flex flex-col lg:flex-row">
+    <div className="noir-app min-h-screen text-[#E8E8E5] font-sans antialiased flex flex-col lg:flex-row relative">
+      {/* 1. Ambient Glow Orbs */}
+      <div className="ambient-glow glow-left" />
+      <div className="ambient-glow glow-right" />
+
+      {/* 2. SVG Film Grain Overlay */}
+      <div className="grain" />
+
       {/* Mobile Top Header (Visible on screen < lg) */}
-      <header className="lg:hidden flex items-center justify-between px-4 py-3 bg-[#0c0e12] border-b border-[#232732] sticky top-0 z-40 shadow-md">
+      <header className="lg:hidden flex items-center justify-between px-4 py-3 bg-[#080808]/90 border-b border-white/10 sticky top-0 z-40 backdrop-blur-2xl shadow-md">
         <div className="flex items-center gap-3">
           <button
             onClick={() => setSidebarOpen((prev) => !prev)}
-            className="p-2 rounded-lg bg-[#151820] text-white/80 hover:text-white border border-[#232732] transition cursor-pointer"
+            className="p-2 rounded-full bg-white/[0.06] text-white/80 hover:text-white border border-white/10 transition cursor-pointer"
             aria-label="Toggle Navigation Sidebar"
           >
-            {sidebarOpen ? <CloseIcon size={20} /> : <Menu size={20} />}
+            {sidebarOpen ? <CloseIcon size={18} /> : <Menu size={18} />}
           </button>
           <div className="flex items-center gap-2">
-            <h1 className="text-base font-bold text-white tracking-tight">ForecastGuard</h1>
+            <h1 className="text-base font-bold text-[#E8E8E5] tracking-tight">ForecastGuard</h1>
           </div>
         </div>
 
         <div className="flex items-center gap-2">
-          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#151820] border border-[#232732] text-xs font-linear-mono">
-            <span className={`w-2 h-2 rounded-full ${apiHealth ? "bg-[#22c55e] animate-pulse" : "bg-[#22c55e]"}`} />
-            <span className="text-[#cbd5e1] hidden sm:inline">{apiHealth ? "CONNECTED" : "ONLINE"}</span>
+          <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/[0.04] border border-white/10 text-xs font-mono-tech">
+            <span className={`status-dot-active`} />
+            <span className="text-[#D8D8D3] hidden sm:inline">{apiHealth ? "CONNECTED" : "ONLINE"}</span>
           </div>
           <button
             onClick={() => setIsAdvisoryOpen(true)}
-            className="p-2 rounded-lg bg-[#151820] text-[#38bdf8] border border-[#232732] hover:bg-[#1c222e] transition cursor-pointer"
+            className="p-2 rounded-full bg-white/[0.04] text-[#AEB796] border border-white/10 hover:bg-white/[0.08] transition cursor-pointer"
             title="Advisory Bulletin"
           >
             <FileText size={16} />
@@ -617,50 +624,50 @@ export default function Dashboard() {
       {sidebarOpen && (
         <div
           onClick={() => setSidebarOpen(false)}
-          className="lg:hidden fixed inset-0 z-40 bg-black/75 backdrop-blur-sm transition-opacity"
+          className="lg:hidden fixed inset-0 z-40 bg-black/80 backdrop-blur-sm transition-opacity"
         />
       )}
 
       {/* Left Sidebar Navigation (Docked on Desktop/Laptop, Slide-out on Mobile/Tablet) */}
-      <aside className={`fixed lg:sticky top-0 left-0 z-50 h-screen w-72 bg-[#0c0e12] border-r border-[#232732] flex flex-col justify-between transition-transform duration-200 shrink-0 ${
+      <aside className={`fixed lg:sticky top-0 left-0 z-50 h-screen w-72 lg:w-64 lg:my-3 lg:ml-3 lg:h-[calc(100vh-24px)] noir-sidebar flex flex-col justify-between transition-transform duration-200 shrink-0 ${
         sidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
       }`}>
         <div className="flex flex-col flex-1 overflow-y-auto">
           {/* Logo & Platform Metadata */}
-          <div className="p-4 border-b border-[#232732]">
+          <div className="p-4 border-b border-white/10">
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-2.5">
-                <div className="w-9 h-9 rounded-[10px] bg-[#151820] border border-[#232732] flex items-center justify-center text-[#e4f222] shadow-sm shrink-0">
-                  <Compass size={20} strokeWidth={2.2} />
+                <div className="w-8 h-8 rounded-full bg-white/[0.06] border border-white/10 flex items-center justify-center text-[#AEB796] shadow-sm shrink-0">
+                  <Compass size={18} strokeWidth={2} />
                 </div>
                 <div>
-                  <h1 className="text-[17px] font-[700] text-[#ffffff] tracking-tight leading-none">
+                  <h1 className="text-[16px] font-bold text-[#E8E8E5] tracking-tight leading-none">
                     ForecastGuard
                   </h1>
-                  <span className="text-[11px] text-[#94a3b8] font-linear-mono">v1.0-moes</span>
+                  <span className="text-[10px] text-[#8B8B87] font-mono-tech">v1.0-moes</span>
                 </div>
               </div>
             </div>
-            <p className="text-[12px] text-[#94a3b8] font-normal leading-snug">
+            <p className="text-[11px] text-[#92928C] font-normal leading-snug">
               Medium-Range NWP Forecast Bust Detection &amp; Explainability Platform
             </p>
           </div>
 
-          {/* Vertical Navigation Items */}
-          <nav className="p-3 space-y-1" aria-label="Operational Views">
-            <div className="text-[11px] text-[#64748b] font-linear-mono uppercase tracking-wider px-3 py-1 font-bold">
+          {/* Vertical Navigation Items with Numbered Step Indices */}
+          <nav className="p-3 space-y-1.5" aria-label="Operational Views">
+            <div className="mono-label px-3 py-1 font-semibold">
               OPERATIONAL VIEWS
             </div>
             {[
-              { id: "cockpit", label: "Live Overview", icon: Navigation, key: "1" },
-              { id: "windy", label: "Wind & Radar", icon: Wind, key: "2" },
-              { id: "news", label: "Weather Alerts", icon: AlertTriangle, key: "3" },
-              { id: "insights", label: "Diagnostics", icon: Activity, key: "4" },
-              { id: "sandbox", label: "Simulation", icon: Sliders, key: "5" },
-              { id: "regimes", label: "Threat Matrix", icon: CloudRain, key: "6" },
-              { id: "model", label: "Model Benchmarks", icon: Cpu, key: "7" },
-              { id: "archive", label: "Bust Archive", icon: Archive, key: "8" },
-              { id: "opendata", label: "Developer API", icon: Database, key: "9" },
+              { id: "cockpit", label: "Live Overview", icon: Navigation, num: "01" },
+              { id: "windy", label: "Wind & Radar", icon: Wind, num: "02" },
+              { id: "news", label: "Weather Alerts", icon: AlertTriangle, num: "03" },
+              { id: "insights", label: "Diagnostics", icon: Activity, num: "04" },
+              { id: "sandbox", label: "Simulation", icon: Sliders, num: "05" },
+              { id: "regimes", label: "Threat Matrix", icon: CloudRain, num: "06" },
+              { id: "model", label: "Model Benchmarks", icon: Cpu, num: "07" },
+              { id: "archive", label: "Bust Archive", icon: Archive, num: "08" },
+              { id: "opendata", label: "Developer API", icon: Database, num: "09" },
             ].map((tab) => {
               const Icon = tab.icon;
               const isActive = activeTab === tab.id;
@@ -671,21 +678,13 @@ export default function Dashboard() {
                     handleTabChange(tab.id as ActiveTab);
                     setSidebarOpen(false);
                   }}
-                  className={`w-full px-3 py-2.5 rounded-[8px] text-[13px] font-medium transition cursor-pointer flex items-center justify-between border ${
-                    isActive
-                      ? "bg-[#181c24] text-[#ffffff] border-[#384256] shadow-sm font-semibold"
-                      : "border-transparent text-[#94a3b8] hover:text-[#ffffff] hover:bg-[#151820]/60"
-                  }`}
+                  className={`nav-row w-full justify-between cursor-pointer ${isActive ? "is-active" : ""}`}
                 >
                   <div className="flex items-center gap-2.5">
-                    <Icon size={16} className={isActive ? "text-[#e4f222]" : "text-[#64748b]"} />
-                    <span className="truncate">{tab.label}</span>
+                    <span className="font-mono-tech text-[10px] opacity-70 tracking-wider">{tab.num}</span>
+                    <span className="truncate text-[13px]">{tab.label}</span>
                   </div>
-                  <span className={`text-[11px] font-linear-mono px-1.5 py-0.5 rounded ${
-                    isActive ? "bg-[#232732] text-[#e4f222]" : "text-[#64748b]"
-                  }`}>
-                    [{tab.key}]
-                  </span>
+                  <Icon size={14} className={isActive ? "text-[#141414]" : "text-[#AEB796]"} />
                 </button>
               );
             })}
@@ -694,47 +693,47 @@ export default function Dashboard() {
             <div className="pt-2">
               <Link
                 href="/live-prediction"
-                className="w-full px-3 py-2.5 rounded-[8px] text-[13px] font-medium transition cursor-pointer flex items-center justify-between border border-cyan-500/40 bg-cyan-950/30 text-cyan-300 hover:bg-cyan-900/40 hover:text-white"
+                className="w-full px-3.5 py-2 rounded-full text-[12px] font-medium transition cursor-pointer flex items-center justify-between border border-white/10 bg-white/[0.04] text-[#D8D8D3] hover:bg-white/[0.08] hover:text-white"
               >
-                <div className="flex items-center gap-2.5">
-                  <Sparkles size={16} className="text-cyan-400" />
-                  <span>Live Inference Engine</span>
+                <div className="flex items-center gap-2">
+                  <Sparkles size={14} className="text-[#AEB796]" />
+                  <span className="font-mono-tech">Live Inference</span>
                 </div>
-                <ChevronRight size={14} />
+                <ChevronRight size={13} />
               </Link>
             </div>
           </nav>
         </div>
 
         {/* Sidebar Footer: Official Advisory Bulletin Button & MoES Attribution */}
-        <div className="p-3 border-t border-[#232732] space-y-2 bg-[#090b0f]">
+        <div className="p-3 border-t border-white/10 space-y-2 bg-transparent">
           <button
             onClick={() => setIsAdvisoryOpen(true)}
-            className="w-full py-2.5 px-3 rounded-lg bg-[#151820] hover:bg-[#1c222e] border border-[#232732] text-white text-[13px] font-medium flex items-center justify-between transition cursor-pointer"
+            className="w-full py-2 px-3 rounded-full bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 text-[#E8E8E5] text-[12px] font-medium flex items-center justify-between transition cursor-pointer"
             title="Generate MoES/NCMRWF Operational Forecast Bust Advisory Bulletin (Key: B)"
           >
-            <div className="flex items-center gap-2 text-[#38bdf8]">
-              <FileText size={16} />
-              <span>Advisory Bulletin</span>
+            <div className="flex items-center gap-2 text-[#AEB796]">
+              <FileText size={14} />
+              <span className="font-mono-tech">Advisory Bulletin</span>
             </div>
-            <kbd className="px-1.5 py-0.5 rounded bg-[#232732] text-xs font-linear-mono text-[#94a3b8]">
+            <kbd className="px-1.5 py-0.5 rounded bg-white/[0.06] text-[10px] font-mono text-[#8B8B87]">
               B
             </kbd>
           </button>
-          <div className="text-[11px] text-[#64748b] text-center font-linear-mono">
+          <div className="text-[10px] text-[#8B8B87] text-center font-mono-tech uppercase tracking-wider">
             MoES / NCMRWF Operational Deck
           </div>
         </div>
       </aside>
 
       {/* Main Operational Content Body Container */}
-      <div className="flex-1 flex flex-col min-w-0 overflow-x-hidden">
+      <div className="flex-1 flex flex-col min-w-0 overflow-x-hidden relative z-10">
         <main className="max-w-[1600px] w-full mx-auto p-3 sm:p-5 md:p-8 space-y-6 flex-1">
           
           {/* Global Top-Right Toolbar (TTS Read Aloud, Theme Toggle, Global Search) */}
-          <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-[#232732]">
-            <div className="text-sm font-semibold text-white font-linear-mono tracking-tight flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-[#e4f222] animate-pulse" />
+          <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-white/10">
+            <div className="text-xs sm:text-sm font-semibold text-[#E8E8E5] font-mono-tech tracking-tight flex items-center gap-2">
+              <span className="status-dot-active" />
               <span>Operational Medium-Range NWP Verification System</span>
             </div>
             <TopRightToolbar
@@ -747,6 +746,7 @@ export default function Dashboard() {
               stations={REGIONS}
             />
           </div>
+
         
         {/* ========================================================
             VIEW 1: LIVE OPERATIONAL OVERVIEW
@@ -755,12 +755,12 @@ export default function Dashboard() {
           <div className="space-y-6">
             
             {/* Top Control Bar: Station Selector & Sleek 10-Day Progression Scrubber */}
-            <section className="linear-card flex flex-col xl:flex-row items-stretch xl:items-center justify-between gap-5">
+            <section className="glass-feature p-4 sm:p-5 flex flex-col xl:flex-row items-stretch xl:items-center justify-between gap-4 border border-white/10">
               
               {/* Left: Station Selection Dropdown */}
               <div className="flex flex-col sm:flex-row sm:items-center gap-3">
-                <label htmlFor="station-select" className="flex items-center gap-2 text-[14px] font-linear-mono text-[#cbd5e1] font-semibold uppercase tracking-wider shrink-0">
-                  <MapPin size={16} className="text-[#e4f222]" /> Station Target:
+                <label htmlFor="station-select" className="flex items-center gap-2 text-[12px] font-mono-tech text-[#D8D8D3] font-semibold uppercase tracking-wider shrink-0">
+                  <MapPin size={15} className="text-[#AEB796]" /> Station Target:
                 </label>
                 
                 <select
@@ -770,10 +770,10 @@ export default function Dashboard() {
                     const r = REGIONS.find(item => item.id === e.target.value) || REGIONS[0];
                     setSelectedRegion(r);
                   }}
-                  className="h-11 bg-[#151820] border border-[#232732] text-[#ffffff] text-[14px] font-semibold rounded-[8px] px-3.5 py-2 focus:outline-none focus:border-[#e4f222] transition min-w-[320px] shadow-sm cursor-pointer"
+                  className="h-10 bg-white/[0.04] border border-white/10 text-[#E8E8E5] text-[13px] font-medium rounded-full px-4 py-1.5 focus:outline-none focus:border-white/30 transition min-w-[300px] shadow-sm cursor-pointer font-mono-tech"
                 >
                   {REGIONS.map(r => (
-                    <option key={r.id} value={r.id} className="bg-[#151820] text-white py-1.5">
+                    <option key={r.id} value={r.id} className="bg-[#121212] text-white py-1">
                       {r.name} — {r.state} ({r.lat.toFixed(1)}°N, {r.lon.toFixed(1)}°E)
                     </option>
                   ))}
@@ -782,38 +782,33 @@ export default function Dashboard() {
 
               {/* Right: Sleek Non-Wrapping 10-Day Scrubber + Auto-Play Button */}
               <div className="flex items-center gap-3 overflow-x-auto">
-                <div className="flex items-center gap-1.5 text-[14px] font-linear-mono text-[#cbd5e1] font-semibold uppercase tracking-wider shrink-0">
-                  <Clock size={16} className="text-[#e4f222]" /> Lead Day:
+                <div className="flex items-center gap-1.5 text-[12px] font-mono-tech text-[#D8D8D3] font-semibold uppercase tracking-wider shrink-0">
+                  <Clock size={15} className="text-[#AEB796]" /> Lead Day:
                 </div>
                 
                 {/* 10 Days in ONE Clean Horizontal Line */}
-                <div className="flex items-center gap-1 bg-[#12151c] p-1.5 rounded-[10px] border border-[#232732] shrink-0">
+                <div className="flex items-center gap-1 bg-black/40 p-1.5 rounded-2xl border border-white/10 shrink-0">
                   {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(d => {
                     const isSelected = leadDay === d;
                     const dayPoint = leadCurve.find(pt => pt.lead_day === d);
                     const dayRiskPct = dayPoint ? dayPoint.bust_probability : (d >= 6 ? 70 : d >= 4 ? 45 : 15);
                     const isHigh = dayRiskPct >= 65;
                     const isMod = dayRiskPct >= 35 && dayRiskPct < 65;
-                    const dotColor = isHigh ? "#ef4444" : isMod ? "#f59e0b" : "#22c55e";
+                    const dotColor = isHigh ? "#ef4444" : isMod ? "#f59e0b" : "#AEB796";
 
                     return (
                       <button
                         key={d}
                         onClick={() => setLeadDay(d)}
-                        className={`h-10 min-w-[42px] px-2 rounded-[6px] text-[13px] font-linear-mono font-bold transition cursor-pointer flex flex-col items-center justify-center gap-1 ${
-                          isSelected
-                            ? "bg-[#1e2330] text-[#ffffff] shadow-md ring-2 ring-[#e4f222] border border-[#e4f222]/60"
-                            : "text-[#94a3b8] hover:text-[#ffffff] hover:bg-[#1a1e27]"
-                        }`}
+                        className={`scrubber-btn min-w-[40px] h-10 ${isSelected ? "is-active" : ""}`}
                         title={`Select Forecast Lead Day ${d} (${dayRiskPct}% Bust Risk)`}
                       >
-                        <span className="leading-none">D{d}</span>
+                        <span className="leading-none text-[12px]">D{d}</span>
                         <span
-                          className="w-2 h-2 rounded-full transition-transform"
+                          className="w-1.5 h-1.5 rounded-full transition-transform"
                           style={{
-                            backgroundColor: dotColor,
-                            boxShadow: isSelected ? `0 0 8px ${dotColor}` : "none",
-                            transform: isSelected ? "scale(1.2)" : "scale(1)"
+                            backgroundColor: isSelected ? "#141414" : dotColor,
+                            boxShadow: isSelected ? "none" : `0 0 8px ${dotColor}`,
                           }}
                         />
                       </button>
@@ -824,23 +819,23 @@ export default function Dashboard() {
                 {/* Play / Pause Scrubber Control */}
                 <button
                   onClick={toggleAutoPlay}
-                  className={`h-11 px-4 rounded-[8px] border border-[#232732] flex items-center gap-2 text-[13px] font-linear-mono font-semibold transition cursor-pointer shrink-0 ${
+                  className={`h-10 px-4 rounded-full border border-white/10 flex items-center gap-2 text-[12px] font-mono-tech font-semibold transition cursor-pointer shrink-0 ${
                     isPlayingProgression
-                      ? "bg-[#e4f222]/20 text-[#e4f222] border-[#e4f222]/50 shadow-glow-lime"
-                      : "bg-[#151820] text-[#cbd5e1] hover:text-[#ffffff] hover:bg-[#1c212c]"
+                      ? "bg-[#AEB796]/20 text-[#D6DDA9] border-[#AEB796]/50 shadow-sm"
+                      : "bg-white/[0.04] text-[#D8D8D3] hover:text-[#E8E8E5] hover:bg-white/[0.08]"
                   }`}
                   title={isPlayingProgression ? "Pause auto-advance (Space)" : "Auto-advance D1–D10 (Space)"}
                 >
-                  {isPlayingProgression ? <Pause size={16} /> : <Play size={16} />}
-                  <span>{isPlayingProgression ? "Pause" : "Play Progression"}</span>
+                  {isPlayingProgression ? <Pause size={14} className="text-[#D6DDA9]" /> : <Play size={14} className="text-[#AEB796]" />}
+                  <span>{isPlayingProgression ? "Pause" : "Play D1–D10"}</span>
                 </button>
               </div>
             </section>
 
             {/* Error Banner (if any) */}
             {error && (
-              <div className="p-4 rounded-[10px] bg-[#1a0e0e] border border-[#ef4444]/50 text-[#ef4444] text-[14px] flex items-center gap-3 font-linear-mono">
-                <AlertTriangle size={18} className="shrink-0" />
+              <div className="p-4 rounded-2xl bg-red-950/40 border border-red-500/30 text-red-300 text-[13px] flex items-center gap-3 font-mono-tech">
+                <AlertTriangle size={18} className="shrink-0 text-red-400" />
                 <span>{error}</span>
               </div>
             )}
@@ -849,21 +844,21 @@ export default function Dashboard() {
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
               
               {/* Left Hero: India Geospatial Vector Deck (7 Cols) */}
-              <div className="lg:col-span-7 linear-card p-0 overflow-hidden flex flex-col min-h-[500px]">
+              <div className="lg:col-span-7 glass-feature p-0 overflow-hidden flex flex-col min-h-[500px] border border-white/10">
                 
                 {/* Map Control Toolbar */}
-                <div className="px-5 py-3 border-b border-[#232732] flex flex-wrap justify-between items-center bg-[#0c0e12] gap-3">
-                  <div className="flex items-center gap-2 text-[14px] font-[600] text-[#ffffff]">
-                    <LayersIcon size={17} className="text-[#e4f222]" />
+                <div className="px-5 py-3 border-b border-white/10 flex flex-wrap justify-between items-center bg-white/[0.02] gap-3">
+                  <div className="flex items-center gap-2 text-[13px] font-semibold text-[#E8E8E5]">
+                    <LayersIcon size={16} className="text-[#AEB796]" />
                     <span>Official Survey of India Cartography &amp; Synoptic Nodes</span>
                   </div>
                   
                   <div className="flex items-center gap-2">
-                    <span className="text-[10px] text-cyan-400 font-bold bg-cyan-950/60 px-2.5 py-1 rounded border border-cyan-500/30">
+                    <span className="text-[10px] text-[#AEB796] font-mono-tech uppercase bg-white/[0.04] px-2.5 py-0.5 rounded-full border border-white/10">
                       OFFICIAL BOUNDARIES
                     </span>
-                    <span className="text-[10px] text-emerald-400 font-bold bg-emerald-950/60 px-2.5 py-1 rounded border border-emerald-500/30">
-                      LIVE RADAR TELEMETRY
+                    <span className="text-[10px] text-[#D6DDA9] font-mono-tech uppercase bg-white/[0.04] px-2.5 py-0.5 rounded-full border border-white/10">
+                      LIVE RADAR
                     </span>
                   </div>
                 </div>
@@ -891,25 +886,25 @@ export default function Dashboard() {
 
               {/* Right Hero: Calibrated Risk & Reliability Instrument (5 Cols) */}
               <div className="lg:col-span-5 flex flex-col gap-4">
-                <div className="linear-card flex-1 flex flex-col justify-between">
+                <div className="glass-feature flex-1 flex flex-col justify-between p-5 border border-white/10">
                   <div>
                     {/* Header with Risk Badge */}
-                    <div className="flex justify-between items-start border-b border-[#232732] pb-3.5 mb-3">
+                    <div className="flex justify-between items-start border-b border-white/10 pb-3.5 mb-3">
                       <div>
-                        <span className="text-[12px] font-linear-mono text-[#94a3b8] uppercase tracking-wider block mb-0.5 font-semibold">
-                          Operational Evaluation
+                        <span className="mono-label block mb-1">
+                          02 / OPERATIONAL EVALUATION
                         </span>
-                        <h2 className="text-[22px] font-[600] text-[#ffffff] tracking-[-0.025em]">
+                        <h2 className="text-[20px] font-bold text-[#E8E8E5] tracking-tight">
                           {selectedRegion.name}, {selectedRegion.state}
                         </h2>
                       </div>
 
-                      <span className={`linear-badge font-linear-mono text-[13px] px-3.5 py-1.5 border font-bold ${
+                      <span className={`font-mono-tech text-[11px] px-3.5 py-1 rounded-full border font-semibold tracking-wider uppercase ${
                         isHighRisk
-                          ? "bg-[#ef4444]/15 text-[#ef4444] border-[#ef4444]/50 animate-pulse"
+                          ? "bg-red-500/15 text-red-400 border-red-500/40 animate-pulse"
                           : isModRisk
-                          ? "bg-[#f59e0b]/15 text-[#f59e0b] border-[#f59e0b]/50"
-                          : "bg-[#22c55e]/15 text-[#22c55e] border-[#22c55e]/50"
+                          ? "bg-amber-500/15 text-amber-300 border-amber-500/40"
+                          : "bg-[#AEB796]/15 text-[#D6DDA9] border-[#AEB796]/40"
                       }`}>
                         {riskCategory} BUST RISK
                       </span>
@@ -917,8 +912,8 @@ export default function Dashboard() {
 
                     <div className="relative flex flex-col items-center justify-center py-2">
                       {loading && (
-                        <div className="absolute top-0 right-0 flex items-center gap-1.5 text-xs font-linear-mono text-[#e4f222] bg-[#151820] px-2.5 py-1 rounded-[6px] border border-[#e4f222]/30 shadow-md z-10">
-                          <RefreshCw className="animate-spin text-[#e4f222]" size={12} />
+                        <div className="absolute top-0 right-0 flex items-center gap-1.5 text-xs font-mono-tech text-[#AEB796] bg-black/60 px-3 py-1 rounded-full border border-white/10 shadow-md z-10 backdrop-blur-md">
+                          <RefreshCw className="animate-spin text-[#AEB796]" size={12} />
                           <span>CALIBRATING...</span>
                         </div>
                       )}
@@ -934,70 +929,70 @@ export default function Dashboard() {
 
                       {/* Meteorological Domain Explanation */}
                       <div className="mt-2.5 text-center px-2">
-                        <p className="text-[14px] text-[#ffffff] font-medium leading-relaxed">
+                        <p className="text-[13.5px] text-[#E8E8E5] font-normal leading-relaxed">
                           {isHighRisk
                             ? "Severe forecast failure likely. Strong convective precipitation under-catch and multi-cycle model divergence detected."
                             : isModRisk
                             ? "Moderate forecast sensitivity. Boundary layer moisture fluctuations warrant ensemble cluster verification."
                             : "High numerical model agreement. Synoptic regime remains dynamically stable across consecutive cycles."}
                         </p>
-                        <span className="text-[12px] font-linear-mono text-[#94a3b8] block mt-1">
-                          Primary Trigger: High atmospheric moisture & convective boundary layer turbulence
+                        <span className="text-[11px] font-mono-tech text-[#8B8B87] block mt-1 tracking-wide">
+                          Primary Trigger: High atmospheric moisture &amp; convective boundary layer turbulence
                         </span>
                       </div>
                     </div>
                   </div>
 
                   {/* Secondary Operational Intelligence Strip (Fills dead space cleanly) */}
-                  <div className="my-2.5 grid grid-cols-3 gap-2 bg-[#12151c] p-2.5 rounded-[8px] border border-[#232732] text-[12px] font-linear-mono">
+                  <div className="my-2.5 grid grid-cols-3 gap-2 bg-white/[0.02] p-2.5 rounded-xl border border-white/10 text-[11px] font-mono-tech">
                     <div className="text-center">
-                      <span className="text-[#94a3b8] block text-[11px] uppercase font-semibold">Model Engine</span>
-                      <span className="text-white font-bold">ECMWF 9km / NCUM</span>
+                      <span className="text-[#8B8B87] block text-[10px] uppercase font-semibold">Model Engine</span>
+                      <span className="text-[#E8E8E5] font-bold">ECMWF / NCUM</span>
                     </div>
-                    <div className="text-center border-x border-[#232732]">
-                      <span className="text-[#94a3b8] block text-[11px] uppercase font-semibold">Forecast Horizon</span>
-                      <span className="text-[#e4f222] font-bold">T+{(leadDay * 24)}h (Day {leadDay})</span>
+                    <div className="text-center border-x border-white/10">
+                      <span className="text-[#8B8B87] block text-[10px] uppercase font-semibold">Horizon</span>
+                      <span className="text-[#D6DDA9] font-bold">T+{(leadDay * 24)}h (D{leadDay})</span>
                     </div>
                     <div className="text-center">
-                      <span className="text-[#94a3b8] block text-[11px] uppercase font-semibold">MoES Alert Tier</span>
-                      <span className={`font-bold ${isHighRisk ? "text-[#ef4444]" : isModRisk ? "text-[#f59e0b]" : "text-[#22c55e]"}`}>
-                        {isHighRisk ? "LEVEL 3 (RED)" : isModRisk ? "LEVEL 2 (ORANGE)" : "LEVEL 1 (GREEN)"}
+                      <span className="text-[#8B8B87] block text-[10px] uppercase font-semibold">Alert Tier</span>
+                      <span className={`font-bold ${isHighRisk ? "text-red-400" : isModRisk ? "text-amber-300" : "text-[#D6DDA9]"}`}>
+                        {isHighRisk ? "TIER 3 (RED)" : isModRisk ? "TIER 2 (AMBER)" : "TIER 1 (STABLE)"}
                       </span>
                     </div>
                   </div>
 
                   {/* Prominent Atmospheric Telemetry Strip (4 Metrics) */}
-                  <div className="border-t border-[#232732] pt-3.5 grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
-                    <div className="bg-[#151820] p-3 rounded-[8px] border border-[#232732]">
-                      <div className="flex items-center justify-center gap-1.5 text-[#38bdf8] mb-1">
-                        <CloudRain size={16} />
-                        <span className="text-[12px] font-linear-mono uppercase font-semibold">Precipitation</span>
+                  <div className="border-t border-white/10 pt-3.5 grid grid-cols-2 sm:grid-cols-4 gap-2.5 text-center">
+                    <div className="bg-white/[0.03] p-2.5 rounded-xl border border-white/10">
+                      <div className="flex items-center justify-center gap-1.5 text-[#AEB796] mb-1">
+                        <CloudRain size={15} />
+                        <span className="text-[11px] font-mono-tech uppercase font-semibold">Precip</span>
                       </div>
-                      <span className="text-[#ffffff] text-[16px] font-[600] font-linear-mono">{telemetry.rainfall} mm</span>
+                      <span className="text-[#E8E8E5] text-[15px] font-bold font-mono-tech">{telemetry.rainfall} mm</span>
                     </div>
 
-                    <div className="bg-[#151820] p-3 rounded-[8px] border border-[#232732]">
-                      <div className="flex items-center justify-center gap-1.5 text-[#e4f222] mb-1">
-                        <Wind size={16} />
-                        <span className="text-[12px] font-linear-mono uppercase font-semibold">10m Wind</span>
+                    <div className="bg-white/[0.03] p-2.5 rounded-xl border border-white/10">
+                      <div className="flex items-center justify-center gap-1.5 text-[#D6DDA9] mb-1">
+                        <Wind size={15} />
+                        <span className="text-[11px] font-mono-tech uppercase font-semibold">10m Wind</span>
                       </div>
-                      <span className="text-[#ffffff] text-[16px] font-[600] font-linear-mono">{telemetry.windSpeed} m/s</span>
+                      <span className="text-[#E8E8E5] text-[15px] font-bold font-mono-tech">{telemetry.windSpeed} m/s</span>
                     </div>
 
-                    <div className="bg-[#151820] p-3 rounded-[8px] border border-[#232732]">
-                      <div className="flex items-center justify-center gap-1.5 text-[#f59e0b] mb-1">
-                        <Sun size={16} />
-                        <span className="text-[12px] font-linear-mono uppercase font-semibold">2m Temp</span>
+                    <div className="bg-white/[0.03] p-2.5 rounded-xl border border-white/10">
+                      <div className="flex items-center justify-center gap-1.5 text-[#AEB796] mb-1">
+                        <Sun size={15} />
+                        <span className="text-[11px] font-mono-tech uppercase font-semibold">2m Temp</span>
                       </div>
-                      <span className="text-[#ffffff] text-[16px] font-[600] font-linear-mono">{telemetry.temp} °C</span>
+                      <span className="text-[#E8E8E5] text-[15px] font-bold font-mono-tech">{telemetry.temp} °C</span>
                     </div>
 
-                    <div className="bg-[#151820] p-3 rounded-[8px] border border-[#232732]">
-                      <div className="flex items-center justify-center gap-1.5 text-[#a78bfa] mb-1">
-                        <Gauge size={16} />
-                        <span className="text-[12px] font-linear-mono uppercase font-semibold">Pressure</span>
+                    <div className="bg-white/[0.03] p-2.5 rounded-xl border border-white/10">
+                      <div className="flex items-center justify-center gap-1.5 text-[#D6DDA9] mb-1">
+                        <Gauge size={15} />
+                        <span className="text-[11px] font-mono-tech uppercase font-semibold">Pressure</span>
                       </div>
-                      <span className="text-[#ffffff] text-[16px] font-[600] font-linear-mono">{telemetry.pressure.toFixed(1)} hPa</span>
+                      <span className="text-[#E8E8E5] text-[15px] font-bold font-mono-tech">{telemetry.pressure.toFixed(1)} hPa</span>
                     </div>
                   </div>
                 </div>
@@ -1016,24 +1011,24 @@ export default function Dashboard() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               
               {/* Card 1: SHAP Local Explainability */}
-              <div className="linear-card flex flex-col justify-between">
+              <div className="detail-card flex flex-col justify-between">
                 <div>
-                  <div className="flex items-center justify-between mb-4 border-b border-[#232732] pb-3">
-                    <h3 className="text-[16px] font-[600] text-[#ffffff] flex items-center gap-2">
-                      <Info size={18} className="text-[#e4f222]" /> Why is this forecast at risk?
+                  <div className="flex items-center justify-between mb-4 border-b border-white/10 pb-3">
+                    <h3 className="text-[15px] font-bold text-[#E8E8E5] flex items-center gap-2">
+                      <Info size={16} className="text-[#AEB796]" /> Why is this forecast at risk?
                     </h3>
-                    <span className="linear-badge font-linear-mono text-[12px]">SHAP LOCAL</span>
+                    <span className="mono-label">03 / SHAP LOCAL</span>
                   </div>
 
-                  <div className="space-y-3">
+                  <div className="space-y-2.5">
                     {shapReasons.slice(0, 4).map((r, i) => (
-                      <div key={i} className="bg-[#151820] p-3 rounded-[8px] border border-[#232732] flex items-start justify-between gap-3">
+                      <div key={i} className="bg-white/[0.03] p-2.5 rounded-xl border border-white/10 flex items-start justify-between gap-3">
                         <div className="flex-1">
-                          <div className="font-semibold text-[#ffffff] text-[14px]">{r.code.replace(/_/g, " ")}</div>
-                          <div className="text-[12px] text-[#94a3b8] mt-0.5 leading-snug">{r.text}</div>
+                          <div className="font-semibold text-[#E8E8E5] text-[13px]">{r.code.replace(/_/g, " ")}</div>
+                          <div className="text-[11px] text-[#92928C] mt-0.5 leading-snug">{r.text}</div>
                         </div>
-                        <div className={`font-linear-mono text-[15px] font-bold shrink-0 ${
-                          r.contribution >= 0 ? "text-[#ef4444]" : "text-[#22c55e]"
+                        <div className={`font-mono-tech text-[14px] font-bold shrink-0 ${
+                          r.contribution >= 0 ? "text-red-400" : "text-[#D6DDA9]"
                         }`}>
                           {r.contribution >= 0 ? `+${r.contribution.toFixed(2)}` : r.contribution.toFixed(2)}
                         </div>
@@ -1042,71 +1037,71 @@ export default function Dashboard() {
                   </div>
                 </div>
 
-                <div className="text-[12px] text-[#94a3b8] italic mt-4 pt-3 border-t border-[#232732]">
+                <div className="text-[11px] font-mono-tech text-[#8B8B87] mt-4 pt-3 border-t border-white/10">
                   SHAP reflects additive statistical feature attributions, not absolute physical causality.
                 </div>
               </div>
 
               {/* Card 2: Run-to-Run Forecast Revision Tracking */}
-              <div className="linear-card flex flex-col justify-between">
+              <div className="detail-card flex flex-col justify-between">
                 <div>
-                  <div className="flex items-center justify-between mb-4 border-b border-[#232732] pb-3">
-                    <h3 className="text-[16px] font-[600] text-[#ffffff] flex items-center gap-2">
-                      <TrendingUp size={18} className="text-[#e4f222]" /> Run-to-Run Forecast Evolution
+                  <div className="flex items-center justify-between mb-4 border-b border-white/10 pb-3">
+                    <h3 className="text-[15px] font-bold text-[#E8E8E5] flex items-center gap-2">
+                      <TrendingUp size={16} className="text-[#D6DDA9]" /> Run-to-Run Forecast Evolution
                     </h3>
-                    <span className="linear-badge font-linear-mono text-[12px]">MULTI-RUN</span>
+                    <span className="mono-label">04 / MULTI-RUN</span>
                   </div>
 
-                  <div className="space-y-3.5">
+                  <div className="space-y-3">
                     <div className="flex items-center justify-between">
-                      <span className="text-[14px] text-[#cbd5e1] font-medium">Inter-cycle Consistency:</span>
-                      <span className={`linear-badge font-linear-mono text-[12px] px-3 py-1 border font-bold ${
+                      <span className="text-[13px] text-[#D8D8D3] font-medium">Inter-cycle Consistency:</span>
+                      <span className={`font-mono-tech text-[11px] px-2.5 py-0.5 rounded-full border font-semibold ${
                         revisions?.large_revision
-                          ? "bg-[#ef4444]/15 text-[#ef4444] border-[#ef4444]/50"
-                          : "bg-[#22c55e]/15 text-[#22c55e] border-[#22c55e]/50"
+                          ? "bg-red-500/15 text-red-400 border-red-500/40"
+                          : "bg-[#AEB796]/15 text-[#D6DDA9] border-[#AEB796]/40"
                       }`}>
-                        {revisions?.large_revision ? "⚠ VOLATILE SHIFT" : "✓ STABLE GUIDANCE"}
+                        {revisions?.large_revision ? "VOLATILE SHIFT" : "STABLE GUIDANCE"}
                       </span>
                     </div>
 
                     {/* Multi-cycle run progression rows */}
                     <div className="space-y-2">
                       {dynamicRuns.map((r: any, idx: number) => (
-                        <div key={idx} className="bg-[#151820] p-2.5 rounded-[8px] border border-[#232732] flex items-center justify-between text-[13px] font-linear-mono">
-                          <span className="text-[#ffffff] font-semibold">{r.run}</span>
-                          <span className="text-[#38bdf8] font-bold">{r.rainfall_mm} mm</span>
-                          <span className="text-[#94a3b8]">{r.wind_speed_ms} m/s</span>
-                          <span className="text-[#cbd5e1]">{r.temperature_c ?? r.temp_c ?? 25}°C</span>
+                        <div key={idx} className="bg-white/[0.03] p-2.5 rounded-xl border border-white/10 flex items-center justify-between text-[12px] font-mono-tech">
+                          <span className="text-[#E8E8E5] font-semibold">{r.run}</span>
+                          <span className="text-[#D6DDA9] font-bold">{r.rainfall_mm} mm</span>
+                          <span className="text-[#8B8B87]">{r.wind_speed_ms} m/s</span>
+                          <span className="text-[#D8D8D3]">{r.temperature_c ?? r.temp_c ?? 25}°C</span>
                         </div>
                       ))}
                     </div>
 
-                    <div className="text-[13px] font-linear-mono flex justify-between text-[#cbd5e1] bg-[#151820] p-3 rounded-[8px] border border-[#232732]">
+                    <div className="text-[12px] font-mono-tech flex justify-between text-[#D8D8D3] bg-white/[0.02] p-2.5 rounded-xl border border-white/10">
                       <span>COMBINED VOLATILITY SCORE:</span>
-                      <span className="text-[#ffffff] font-bold">{dynamicVolatilityScore}</span>
+                      <span className="text-[#E8E8E5] font-bold">{dynamicVolatilityScore}</span>
                     </div>
                   </div>
                 </div>
 
-                <div className="text-[12px] text-[#94a3b8] italic mt-4 pt-3 border-t border-[#232732]">
+                <div className="text-[11px] font-mono-tech text-[#8B8B87] mt-4 pt-3 border-t border-white/10">
                   Run-to-run divergence across cycles reveals numerical model boundary instability.
                 </div>
               </div>
 
               {/* Card 3: Historical Analogs */}
-              <div className="linear-card flex flex-col justify-between">
+              <div className="detail-card flex flex-col justify-between">
                 <div>
-                  <div className="flex items-center justify-between mb-4 border-b border-[#232732] pb-3">
-                    <h3 className="text-[16px] font-[600] text-[#ffffff] flex items-center gap-2">
-                      <Activity size={18} className="text-[#e4f222]" /> Nearest Historical Analogs
+                  <div className="flex items-center justify-between mb-4 border-b border-white/10 pb-3">
+                    <h3 className="text-[15px] font-bold text-[#E8E8E5] flex items-center gap-2">
+                      <Activity size={16} className="text-[#AEB796]" /> Nearest Historical Analogs
                     </h3>
-                    <span className="linear-badge font-linear-mono text-[12px]">TOP 5 CASES</span>
+                    <span className="mono-label">05 / TOP 5 CASES</span>
                   </div>
 
                   <div>
-                    <div className="flex items-baseline justify-between mb-3 text-[14px]">
-                      <span className="text-[#cbd5e1] font-medium">Historical Bust Rate:</span>
-                      <span className="font-linear-mono text-[16px] font-bold text-[#ffffff]">
+                    <div className="flex items-baseline justify-between mb-3 text-[13px]">
+                      <span className="text-[#D8D8D3] font-medium">Historical Bust Rate:</span>
+                      <span className="font-mono-tech text-[15px] font-bold text-[#E8E8E5]">
                         {analogSummary ? `${Math.round(analogSummary.historical_analog_bust_rate * 5)} / 5 (${(analogSummary.historical_analog_bust_rate * 100).toFixed(0)}%)` : "2 / 5 (40%)"}
                       </span>
                     </div>
@@ -1117,15 +1112,15 @@ export default function Dashboard() {
                         const dist = a.similarity_distance ?? a.similarity_score ?? (0.35 + i * 0.12);
                         const isBust = a.bust === 1 || a.bust_occurred === true;
                         return (
-                          <div key={i} className="flex justify-between items-center text-[13px] font-linear-mono bg-[#151820] p-2.5 rounded-[8px] border border-[#232732]">
-                            <span className="text-[#ffffff] font-semibold">
+                          <div key={i} className="flex justify-between items-center text-[12px] font-mono-tech bg-white/[0.03] p-2 rounded-xl border border-white/10">
+                            <span className="text-[#E8E8E5] font-medium">
                               #{i + 1} {String(initTime).split(" ")[0]}
                             </span>
-                            <span className="text-[#94a3b8]">
+                            <span className="text-[#8B8B87]">
                               dist={Number(dist).toFixed(2)}
                             </span>
-                            <span className={`px-2.5 py-0.5 rounded-[6px] text-[12px] font-bold ${
-                              isBust ? "bg-[#ef4444]/15 text-[#ef4444] border border-[#ef4444]/50" : "bg-[#22c55e]/15 text-[#22c55e] border border-[#22c55e]/50"
+                            <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${
+                              isBust ? "bg-red-500/15 text-red-400 border border-red-500/40" : "bg-[#AEB796]/15 text-[#D6DDA9] border border-[#AEB796]/40"
                             }`}>
                               {isBust ? "BUST" : "VERIFIED"}
                             </span>
@@ -1136,18 +1131,18 @@ export default function Dashboard() {
                   </div>
                 </div>
 
-                <div className="text-[12px] text-[#94a3b8] italic mt-4 pt-3 border-t border-[#232732]">
+                <div className="text-[11px] font-mono-tech text-[#8B8B87] mt-4 pt-3 border-t border-white/10">
                   Strictly filtered to dates preceding current forecast initialization (t &lt; T₀).
                 </div>
               </div>
             </div>
 
             {/* Advanced Analytics Visualizer: Lead Progression Curve vs Multi-Model Consensus vs SHAP Waterfall */}
-            <div className="linear-card space-y-4">
-              <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#232732] pb-3.5">
+            <div className="glass-feature p-5 border border-white/10 space-y-4">
+              <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 pb-3.5">
                 <div className="flex items-center gap-2">
-                  <BarChart3 size={18} className="text-[#e4f222]" />
-                  <h3 className="text-[16px] font-[600] text-[#ffffff]">
+                  <BarChart3 size={17} className="text-[#AEB796]" />
+                  <h3 className="text-[15px] font-bold text-[#E8E8E5]">
                     {chartMode === "lead_curve" && "Bust Probability Progression Curve (Day 1 to Day 10)"}
                     {chartMode === "multi_model" && "Multi-Model Consensus & Bust Risk (NCUM vs ECMWF vs GFS)"}
                     {chartMode === "shap_waterfall" && "Local SHAP Feature Attribution Hierarchy"}
@@ -1155,27 +1150,27 @@ export default function Dashboard() {
                 </div>
 
                 {/* Chart Mode Switcher */}
-                <div className="flex items-center gap-1.5 bg-[#151820] p-1 rounded-[8px] border border-[#232732]">
+                <div className="flex items-center gap-1 bg-black/40 p-1 rounded-full border border-white/10">
                   <button
                     onClick={() => setChartMode("lead_curve")}
-                    className={`px-3 py-1.5 text-[13px] font-linear-mono rounded-[6px] transition cursor-pointer ${
-                      chartMode === "lead_curve" ? "bg-[#232732] text-[#ffffff] font-bold" : "text-[#94a3b8] hover:text-white"
+                    className={`px-3 py-1 text-[12px] font-mono-tech rounded-full transition cursor-pointer ${
+                      chartMode === "lead_curve" ? "bg-[#E8E8E4] text-[#141414] font-semibold shadow-sm" : "text-[#8B8B87] hover:text-white"
                     }`}
                   >
                     10-Day Lead Curve
                   </button>
                   <button
                     onClick={() => setChartMode("multi_model")}
-                    className={`px-3 py-1.5 text-[13px] font-linear-mono rounded-[6px] transition cursor-pointer ${
-                      chartMode === "multi_model" ? "bg-[#232732] text-[#ffffff] font-bold" : "text-[#94a3b8] hover:text-white"
+                    className={`px-3 py-1 text-[12px] font-mono-tech rounded-full transition cursor-pointer ${
+                      chartMode === "multi_model" ? "bg-[#E8E8E4] text-[#141414] font-semibold shadow-sm" : "text-[#8B8B87] hover:text-white"
                     }`}
                   >
                     Ensemble Consensus
                   </button>
                   <button
                     onClick={() => setChartMode("shap_waterfall")}
-                    className={`px-3 py-1.5 text-[13px] font-linear-mono rounded-[6px] transition cursor-pointer ${
-                      chartMode === "shap_waterfall" ? "bg-[#232732] text-[#ffffff] font-bold" : "text-[#94a3b8] hover:text-white"
+                    className={`px-3 py-1 text-[12px] font-mono-tech rounded-full transition cursor-pointer ${
+                      chartMode === "shap_waterfall" ? "bg-[#E8E8E4] text-[#141414] font-semibold shadow-sm" : "text-[#8B8B87] hover:text-white"
                     }`}
                   >
                     SHAP Waterfall
@@ -1194,27 +1189,28 @@ export default function Dashboard() {
                           <stop offset="95%" stopColor="#ef4444" stopOpacity={0.0} />
                         </linearGradient>
                       </defs>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#232732" opacity={0.8} />
+                      <CartesianGrid strokeDasharray="3 3" stroke="rgba(255, 255, 255, 0.08)" />
                       <XAxis 
                         dataKey="lead_day" 
-                        tick={{ fill: "#94a3b8", fontSize: 13, fontFamily: "var(--font-berkeley-mono)" }} 
+                        tick={{ fill: "#8B8B87", fontSize: 12, fontFamily: "var(--font-mono-var)" }} 
                         tickFormatter={(val) => `D${val}`} 
                       />
                       <YAxis 
                         type="number"
                         domain={[0, 100]}
-                        tick={{ fill: "#94a3b8", fontSize: 13, fontFamily: "var(--font-berkeley-mono)" }} 
+                        tick={{ fill: "#8B8B87", fontSize: 12, fontFamily: "var(--font-mono-var)" }} 
                         tickFormatter={(val) => `${val}%`} 
                       />
                       <Tooltip
                         contentStyle={{ 
-                          backgroundColor: "#0c0e12", 
-                          borderColor: "#384256", 
-                          borderRadius: "10px", 
-                          fontSize: "13px", 
-                          fontFamily: "var(--font-berkeley-mono)",
+                          backgroundColor: "rgba(14, 14, 14, 0.95)", 
+                          borderColor: "rgba(255, 255, 255, 0.12)", 
+                          borderRadius: "14px", 
+                          fontSize: "12px", 
+                          fontFamily: "var(--font-mono-var)",
                           padding: "12px 16px",
-                          color: "#ffffff"
+                          color: "#E8E8E5",
+                          boxShadow: "0 20px 40px rgba(0, 0, 0, 0.5)"
                         }}
                         formatter={(val: any) => [`${val}%`, "Bust Probability"]}
                         labelFormatter={(label) => `Lead Day ${label}`}
@@ -1223,14 +1219,14 @@ export default function Dashboard() {
                         y={65} 
                         stroke="#ef4444" 
                         strokeDasharray="4 4" 
-                        label={{ value: "High Risk Threshold (65%)", fill: "#ef4444", fontSize: 13, position: "top" }} 
+                        label={{ value: "High Risk Threshold (65%)", fill: "#ef4444", fontSize: 12, position: "top" }} 
                       />
                       <Area 
                         isAnimationActive={false}
                         type="monotone" 
                         dataKey="bust_probability" 
                         stroke="#ef4444" 
-                        strokeWidth={3} 
+                        strokeWidth={2.5} 
                         fillOpacity={1} 
                         fill="url(#linearColorBust)" 
                       />
@@ -1241,38 +1237,38 @@ export default function Dashboard() {
                 {chartMode === "multi_model" && (
                   <ResponsiveContainer width="100%" height={300}>
                     <BarChart data={multiModelData} margin={{ top: 15, right: 25, left: 15, bottom: 5 }}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#232732" opacity={0.8} />
+                      <CartesianGrid strokeDasharray="3 3" stroke="rgba(255, 255, 255, 0.08)" />
                       <XAxis 
                         dataKey="model" 
-                        tick={{ fill: "#ffffff", fontSize: 13, fontFamily: "var(--font-inter-variable)" }} 
+                        tick={{ fill: "#E8E8E5", fontSize: 12, fontFamily: "var(--font-display)" }} 
                       />
                       <YAxis 
                         yAxisId="left"
-                        tick={{ fill: "#94a3b8", fontSize: 13, fontFamily: "var(--font-berkeley-mono)" }} 
+                        tick={{ fill: "#8B8B87", fontSize: 12, fontFamily: "var(--font-mono-var)" }} 
                         tickFormatter={(val) => `${val}`}
                       />
                       <YAxis 
                         yAxisId="right"
                         orientation="right"
                         domain={[0, 100]}
-                        tick={{ fill: "#94a3b8", fontSize: 13, fontFamily: "var(--font-berkeley-mono)" }} 
+                        tick={{ fill: "#8B8B87", fontSize: 12, fontFamily: "var(--font-mono-var)" }} 
                         tickFormatter={(val) => `${val}%`}
                       />
                       <Tooltip
                         contentStyle={{ 
-                          backgroundColor: "#0c0e12", 
-                          borderColor: "#384256", 
-                          borderRadius: "10px", 
-                          fontSize: "13px", 
-                          fontFamily: "var(--font-berkeley-mono)",
+                          backgroundColor: "rgba(14, 14, 14, 0.95)", 
+                          borderColor: "rgba(255, 255, 255, 0.12)", 
+                          borderRadius: "14px", 
+                          fontSize: "12px", 
+                          fontFamily: "var(--font-mono-var)",
                           padding: "12px 16px",
-                          color: "#ffffff"
+                          color: "#E8E8E5"
                         }}
                       />
-                      <Legend wrapperStyle={{ fontSize: 13, fontFamily: "var(--font-berkeley-mono)" }} />
-                      <Bar isAnimationActive={false} yAxisId="left" dataKey="rainfall" fill="#38bdf8" name="Precipitation (mm)" radius={[6, 6, 0, 0]} />
-                      <Bar isAnimationActive={false} yAxisId="left" dataKey="wind_speed" fill="#a78bfa" name="10m Wind (m/s)" radius={[6, 6, 0, 0]} />
-                      <Bar isAnimationActive={false} yAxisId="right" dataKey="bust_risk" fill="#e4f222" name="Bust Risk (%)" radius={[6, 6, 0, 0]} />
+                      <Legend wrapperStyle={{ fontSize: 12, fontFamily: "var(--font-mono-var)" }} />
+                      <Bar isAnimationActive={false} yAxisId="left" dataKey="rainfall" fill="#AEB796" name="Precipitation (mm)" radius={[6, 6, 0, 0]} />
+                      <Bar isAnimationActive={false} yAxisId="left" dataKey="wind_speed" fill="#D6DDA9" name="10m Wind (m/s)" radius={[6, 6, 0, 0]} />
+                      <Bar isAnimationActive={false} yAxisId="right" dataKey="bust_risk" fill="#E8E8E4" name="Bust Risk (%)" radius={[6, 6, 0, 0]} />
                     </BarChart>
                   </ResponsiveContainer>
                 )}
@@ -1280,32 +1276,32 @@ export default function Dashboard() {
                 {chartMode === "shap_waterfall" && (
                   <ResponsiveContainer width="100%" height={300}>
                     <BarChart data={shapChartData} layout="vertical" margin={{ top: 10, right: 30, left: 55, bottom: 5 }}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#232732" opacity={0.8} />
+                      <CartesianGrid strokeDasharray="3 3" stroke="rgba(255, 255, 255, 0.08)" />
                       <XAxis 
                         type="number" 
-                        tick={{ fill: "#94a3b8", fontSize: 13, fontFamily: "var(--font-berkeley-mono)" }} 
+                        tick={{ fill: "#8B8B87", fontSize: 12, fontFamily: "var(--font-mono-var)" }} 
                       />
                       <YAxis 
                         type="category" 
                         dataKey="feature" 
-                        tick={{ fill: "#ffffff", fontSize: 13, fontFamily: "var(--font-berkeley-mono)" }} 
+                        tick={{ fill: "#E8E8E5", fontSize: 12, fontFamily: "var(--font-mono-var)" }} 
                         width={120} 
                       />
                       <Tooltip
                         contentStyle={{ 
-                          backgroundColor: "#0c0e12", 
-                          borderColor: "#384256", 
-                          borderRadius: "10px", 
-                          fontSize: "13px", 
-                          fontFamily: "var(--font-berkeley-mono)",
+                          backgroundColor: "rgba(14, 14, 14, 0.95)", 
+                          borderColor: "rgba(255, 255, 255, 0.12)", 
+                          borderRadius: "14px", 
+                          fontSize: "12px", 
+                          fontFamily: "var(--font-mono-var)",
                           padding: "12px 16px",
-                          color: "#ffffff"
+                          color: "#E8E8E5"
                         }}
                         formatter={(val: any) => [Number(val).toFixed(3), "SHAP Contribution"]}
                       />
                       <Bar isAnimationActive={false} dataKey="contribution" radius={[0, 6, 6, 0]}>
                         {shapChartData.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={entry.contribution >= 0 ? "#ef4444" : "#22c55e"} />
+                          <Cell key={`cell-${index}`} fill={entry.contribution >= 0 ? "#ef4444" : "#D6DDA9"} />
                         ))}
                       </Bar>
                     </BarChart>
@@ -1385,13 +1381,13 @@ export default function Dashboard() {
       </main>
 
       {/* 4. Command Center Footer */}
-      <footer className="border-t border-[#232732] mt-16 py-8 px-4 md:px-8 text-[#94a3b8] text-[14px] font-linear-mono bg-[#0c0e12]">
+      <footer className="border-t border-white/10 mt-16 py-8 px-4 md:px-8 text-[#8B8B87] text-[12px] font-mono-tech bg-transparent">
         <div className="max-w-[1440px] mx-auto flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div className="flex items-center gap-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-[#e4f222]" />
+            <span className="status-dot" />
             <span>ForecastGuard · Ministry of Earth Sciences (MoES) / NCMRWF</span>
           </div>
-          <div className="text-[13px] text-[#64748b]">
+          <div className="text-[11px] text-[#5E5E5B]">
             * Operational research prototype. Calibrated bust probabilities assist duty forecasters and do not replace official IMD bulletins.
           </div>
         </div>

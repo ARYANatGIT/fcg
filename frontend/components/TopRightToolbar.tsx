@@ -320,12 +320,12 @@ export default function TopRightToolbar({
       {/* 1. Global Search Trigger (Ctrl+K) */}
       <button
         onClick={() => setSearchOpen(true)}
-        className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[#151820] hover:bg-[#1e2330] border border-[#232732] text-[#cbd5e1] hover:text-white text-xs font-linear-mono transition cursor-pointer shadow-sm"
+        className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 text-[#D8D8D3] hover:text-[#E8E8E5] text-xs font-mono-tech transition cursor-pointer shadow-sm"
         title="Quick Jump to any Station or View (Ctrl+K)"
       >
-        <Search size={14} className="text-cyan-400" />
+        <Search size={14} className="text-[#AEB796]" />
         <span className="hidden md:inline">Search...</span>
-        <kbd className="hidden md:inline-block px-1.5 py-0.5 rounded bg-[#232732] text-[10px] font-mono text-[#94a3b8]">
+        <kbd className="hidden md:inline-block px-1.5 py-0.5 rounded bg-white/[0.06] text-[10px] font-mono text-[#8B8B87]">
           Ctrl+K
         </kbd>
       </button>
@@ -333,21 +333,21 @@ export default function TopRightToolbar({
       {/* 2. Read Page Aloud (1-Click Toggle: Start / Stop with Word Highlighting) */}
       <button
         onClick={handleToggleSpeak}
-        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-linear-mono transition cursor-pointer shadow-sm ${
+        className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full border text-xs font-mono-tech transition cursor-pointer shadow-sm ${
           isSpeaking
-            ? "bg-[#e4f222]/20 text-[#e4f222] border-[#e4f222]/60 animate-pulse font-bold"
-            : "bg-[#151820] hover:bg-[#1e2330] text-[#cbd5e1] border-[#232732]"
+            ? "bg-[#AEB796]/20 text-[#D6DDA9] border-[#AEB796]/50 animate-pulse font-semibold"
+            : "bg-white/[0.04] hover:bg-white/[0.08] text-[#D8D8D3] border-white/10"
         }`}
         title={isSpeaking ? "Click to Stop Reading" : "Click to Read Page Aloud with Word Highlighting"}
       >
         {isSpeaking ? (
           <>
-            <VolumeX size={14} className="text-[#e4f222]" />
+            <VolumeX size={14} className="text-[#D6DDA9]" />
             <span className="font-semibold">Stop Reading</span>
           </>
         ) : (
           <>
-            <Volume2 size={14} className="text-[#94a3b8]" />
+            <Volume2 size={14} className="text-[#8B8B87]" />
             <span className="hidden sm:inline font-medium">Read Aloud</span>
           </>
         )}
@@ -356,34 +356,34 @@ export default function TopRightToolbar({
       {/* 3. Light / Dark Mode Toggle */}
       <button
         onClick={toggleTheme}
-        className="p-2 rounded-lg bg-[#151820] hover:bg-[#1e2330] border border-[#232732] text-[#cbd5e1] hover:text-white transition cursor-pointer shadow-sm"
+        className="p-2 rounded-full bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 text-[#D8D8D3] hover:text-white transition cursor-pointer shadow-sm"
         title={theme === "dark" ? "Switch to Light Mode" : "Switch to Dark Mode"}
         aria-label="Toggle Theme Mode"
       >
         {theme === "dark" ? (
-          <Sun size={15} className="text-[#e4f222]" />
+          <Sun size={15} className="text-[#AEB796]" />
         ) : (
-          <Moon size={15} className="text-cyan-400" />
+          <Moon size={15} className="text-[#AEB796]" />
         )}
       </button>
 
-      {/* Floating Teleprompter HUD: Displays current word in neon yellow while reading */}
+      {/* Floating Teleprompter HUD: Displays current word in sage highlight while reading */}
       {isSpeaking && (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[9999] max-w-2xl w-[92vw] bg-[#0c1017]/95 border-2 border-[#e4f222]/80 text-white px-4 py-3 rounded-2xl shadow-2xl backdrop-blur-xl flex items-center gap-3 font-linear-mono">
-          <div className="w-8 h-8 rounded-xl bg-[#e4f222]/20 border border-[#e4f222]/50 flex items-center justify-center text-[#e4f222] shrink-0 animate-pulse">
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[9999] max-w-2xl w-[92vw] bg-[#0c0c0c]/95 border border-[#AEB796]/50 text-[#E8E8E5] px-4 py-3 rounded-2xl shadow-2xl backdrop-blur-2xl flex items-center gap-3 font-mono-tech">
+          <div className="w-8 h-8 rounded-full bg-[#AEB796]/20 border border-[#AEB796]/40 flex items-center justify-center text-[#D6DDA9] shrink-0 animate-pulse">
             <Volume2 size={18} />
           </div>
           <div className="flex-1 min-w-0 text-xs sm:text-sm">
-            <div className="text-[10px] text-[#e4f222] uppercase tracking-wider font-bold mb-0.5">
+            <div className="text-[10px] text-[#AEB796] uppercase tracking-wider font-semibold mb-0.5">
               Reading Page Aloud
             </div>
-            <div className="truncate text-slate-200">
+            <div className="truncate text-[#D8D8D3]">
               {speakingSentence ? (
                 <span>
                   {currentWord ? (
                     <>
                       <span>{speakingSentence.split(currentWord)[0]}</span>
-                      <span className="bg-[#e4f222] text-black font-bold px-1.5 py-0.5 rounded shadow-sm">
+                      <span className="bg-[#E8E8E4] text-[#141414] font-bold px-1.5 py-0.5 rounded shadow-sm">
                         {currentWord}
                       </span>
                       <span>{speakingSentence.split(currentWord).slice(1).join(currentWord)}</span>
@@ -399,7 +399,7 @@ export default function TopRightToolbar({
           </div>
           <button
             onClick={handleStopSpeaking}
-            className="px-3 py-1 bg-red-500/20 hover:bg-red-500/30 border border-red-500/40 text-red-400 hover:text-red-300 rounded-lg text-xs font-bold transition shrink-0 cursor-pointer"
+            className="px-3 py-1 bg-red-500/20 hover:bg-red-500/30 border border-red-500/40 text-red-400 hover:text-red-300 rounded-full text-xs font-semibold transition shrink-0 cursor-pointer"
           >
             Stop
           </button>
@@ -411,33 +411,33 @@ export default function TopRightToolbar({
           ======================================================== */}
       {searchOpen && (
         <div 
-          className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-start justify-center pt-20 px-4 animate-in fade-in duration-150"
+          className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-start justify-center pt-20 px-4 animate-in fade-in duration-150"
           onClick={() => setSearchOpen(false)}
         >
           <div 
-            className="w-full max-w-xl bg-[#0e1219] border border-[#232e42] rounded-xl shadow-2xl overflow-hidden flex flex-col"
+            className="w-full max-w-xl glass-feature border border-white/10 rounded-2xl shadow-2xl overflow-hidden flex flex-col bg-[#0c0c0c]/95"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Search Input Bar */}
-            <div className="flex items-center gap-3 px-4 py-3.5 border-b border-[#232e42] bg-[#121722]">
-              <Search size={18} className="text-cyan-400 shrink-0" />
+            <div className="flex items-center gap-3 px-4 py-3.5 border-b border-white/10 bg-white/[0.02]">
+              <Search size={18} className="text-[#AEB796] shrink-0" />
               <input
                 ref={searchInputRef}
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Jump to any Station (Delhi, Mumbai...), View, or Synoptic Regime..."
-                className="w-full bg-transparent text-sm text-white placeholder-[#64748b] focus:outline-none font-linear-mono"
+                className="w-full bg-transparent text-sm text-[#E8E8E5] placeholder-[#8B8B87] focus:outline-none font-mono-tech"
               />
               {searchQuery && (
                 <button
                   onClick={() => setSearchQuery("")}
-                  className="p-1 rounded text-[#64748b] hover:text-white transition"
+                  className="p-1 rounded text-[#8B8B87] hover:text-[#E8E8E5] transition cursor-pointer"
                 >
                   <X size={16} />
                 </button>
               )}
-              <kbd className="px-1.5 py-0.5 rounded bg-[#1e2738] text-xs font-mono text-[#94a3b8]">
+              <kbd className="px-1.5 py-0.5 rounded bg-white/[0.06] text-xs font-mono text-[#8B8B87]">
                 ESC
               </kbd>
             </div>
@@ -458,36 +458,36 @@ export default function TopRightToolbar({
                         }
                         setSearchOpen(false);
                       }}
-                      className="w-full px-3 py-2.5 rounded-lg flex items-center justify-between text-left hover:bg-[#182130] transition group cursor-pointer border border-transparent hover:border-[#283850]"
+                      className="w-full px-3 py-2.5 rounded-xl flex items-center justify-between text-left hover:bg-white/[0.06] transition group cursor-pointer border border-transparent hover:border-white/10"
                     >
                       <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-lg bg-[#151c28] border border-[#232e42] flex items-center justify-center text-cyan-400 group-hover:text-[#e4f222] transition-colors">
+                        <div className="w-8 h-8 rounded-lg bg-white/[0.04] border border-white/10 flex items-center justify-center text-[#AEB796] group-hover:text-[#D6DDA9] transition-colors">
                           <Icon size={16} />
                         </div>
                         <div>
-                          <div className="text-sm font-semibold text-white group-hover:text-cyan-200 transition-colors">
+                          <div className="text-sm font-semibold text-[#E8E8E5] group-hover:text-white transition-colors">
                             {item.title}
                           </div>
-                          <div className="text-xs text-[#94a3b8] font-linear-mono">
+                          <div className="text-xs text-[#8B8B87] font-mono-tech">
                             {item.subtitle}
                           </div>
                         </div>
                       </div>
-                      <span className="text-[10px] font-mono uppercase px-2 py-0.5 rounded bg-[#1e2738] text-[#94a3b8]">
+                      <span className="text-[10px] font-mono uppercase px-2 py-0.5 rounded bg-white/[0.06] text-[#8B8B87]">
                         {item.type}
                       </span>
                     </button>
                   );
                 })
               ) : (
-                <div className="py-8 text-center text-[#64748b] text-xs font-mono">
+                <div className="py-8 text-center text-[#8B8B87] text-xs font-mono">
                   {searchQuery ? "No matching stations, views, or regimes found." : "Type station name (e.g. Kolkata, Goa) or view name to jump immediately."}
                 </div>
               )}
             </div>
 
             {/* Modal Footer */}
-            <div className="px-4 py-2 bg-[#0a0d14] border-t border-[#1e2738] flex items-center justify-between text-[11px] font-mono text-[#64748b]">
+            <div className="px-4 py-2 bg-black/40 border-t border-white/10 flex items-center justify-between text-[11px] font-mono text-[#8B8B87]">
               <span>Use &uarr; &darr; to navigate, Enter to select</span>
               <span>43 Synoptic Meteorological Hubs Indexed</span>
             </div>
@@ -496,4 +496,5 @@ export default function TopRightToolbar({
       )}
     </div>
   );
+
 }

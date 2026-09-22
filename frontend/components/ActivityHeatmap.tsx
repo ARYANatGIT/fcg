@@ -282,24 +282,24 @@ export default function ActivityHeatmap({
     return { weeks: weekCols, monthLabels: months, summaryStat: statText };
   }, [cityName, lat, lon, metricMode, liveData]);
 
-  // Color mapping matching the GitHub contribution matrix palette in the user's screenshot
+  // Color mapping matching the Noir Index sage palette
   const getCellColor = (level: number) => {
     if (isLightMode) {
       switch (level) {
-        case 4: return "bg-[#216e39]";
-        case 3: return "bg-[#30a14e]";
-        case 2: return "bg-[#40c463]";
-        case 1: return "bg-[#9be9a8]";
-        default: return "bg-[#ebedf0]";
+        case 4: return "bg-[#546247]";
+        case 3: return "bg-[#777B63]";
+        case 2: return "bg-[#AEB796]";
+        case 1: return "bg-[#D6DDA9]";
+        default: return "bg-[#e2e8f0]";
       }
     } else {
-      // Dark Mode Palette
+      // Noir Index Sage Dark Mode Scale
       switch (level) {
-        case 4: return "bg-[#39d353]"; // Bright vibrant green
-        case 3: return "bg-[#26a641]";
-        case 2: return "bg-[#006d32]";
-        case 1: return "bg-[#0e4429]";
-        default: return "bg-[#161b22]"; // Inactive dark cell
+        case 4: return "bg-[#D6DDA9]"; // Active glowing sage
+        case 3: return "bg-[#AEB796]"; // Base sage
+        case 2: return "bg-[#68745C]"; // Deep ambient sage
+        case 1: return "bg-[#292A27]"; // Muted atmospheric olive
+        default: return "bg-white/[0.04]"; // Translucent inactive cell
       }
     }
   };
@@ -319,71 +319,65 @@ export default function ActivityHeatmap({
   };
 
   return (
-    <div className={`p-5 rounded-xl border transition-colors ${
-      isLightMode ? "bg-white border-slate-200 text-slate-900" : "bg-[#0d1117] border-[#30363d] text-[#c9d1d9]"
-    }`}>
+    <div className="glass-feature p-5 border border-white/10 text-[#E8E8E5]">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-200 dark:border-[#21262d]">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-white/10">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <CloudRain size={18} className="text-[#39d353]" />
-            <h3 className="text-base font-semibold tracking-tight">
+            <CloudRain size={16} className="text-[#AEB796]" />
+            <h3 className="text-base font-bold tracking-tight text-[#E8E8E5]">
               365-Day Meteorological Observation &amp; Forecast Heatmap
             </h3>
-            <span className={`text-[11px] font-mono px-2.5 py-0.5 rounded-full border flex items-center gap-1 ${
-              isLightMode 
-                ? "bg-emerald-50 text-emerald-700 border-emerald-300" 
-                : "bg-[#238636]/20 text-[#39d353] border-[#238636]/40"
-            }`}>
+            <span className="text-[11px] font-mono-tech px-2.5 py-0.5 rounded-full border border-white/10 bg-white/[0.04] text-[#AEB796] flex items-center gap-1">
               <MapPin size={10} /> {cityName}, {stateName}
             </span>
             {loading && (
-              <RefreshCw size={12} className="animate-spin text-[#39d353]" />
+              <RefreshCw size={12} className="animate-spin text-[#AEB796]" />
             )}
           </div>
-          <p className="text-xs text-slate-500 dark:text-[#8b949e]">
+          <p className="text-xs text-[#92928C]">
             Daily synoptic weather distribution across 52 weeks, dynamically synchronized with live station telemetry and official historical records.
           </p>
         </div>
 
         {/* Metric Selector Tabs */}
-        <div className="flex items-center gap-1.5 bg-slate-100 dark:bg-[#161b22] p-1 rounded-lg border border-slate-200 dark:border-[#30363d]">
+        <div className="flex items-center gap-1 bg-black/40 p-1 rounded-full border border-white/10">
           <button
             onClick={() => setMetricMode("rainfall")}
-            className={`px-2.5 py-1 text-xs font-mono rounded transition-colors flex items-center gap-1.5 ${
+            className={`px-3 py-1 text-xs font-mono-tech rounded-full transition-colors flex items-center gap-1.5 cursor-pointer ${
               metricMode === "rainfall"
-                ? "bg-[#238636] text-white font-semibold shadow-sm"
-                : "text-slate-600 dark:text-[#8b949e] hover:text-slate-900 dark:hover:text-white"
+                ? "bg-[#E8E8E4] text-[#141414] font-semibold shadow-sm"
+                : "text-[#8B8B87] hover:text-white"
             }`}
           >
             <CloudRain size={12} /> Precipitation
           </button>
           <button
             onClick={() => setMetricMode("temperature")}
-            className={`px-2.5 py-1 text-xs font-mono rounded transition-colors flex items-center gap-1.5 ${
+            className={`px-3 py-1 text-xs font-mono-tech rounded-full transition-colors flex items-center gap-1.5 cursor-pointer ${
               metricMode === "temperature"
-                ? "bg-[#238636] text-white font-semibold shadow-sm"
-                : "text-slate-600 dark:text-[#8b949e] hover:text-slate-900 dark:hover:text-white"
+                ? "bg-[#E8E8E4] text-[#141414] font-semibold shadow-sm"
+                : "text-[#8B8B87] hover:text-white"
             }`}
           >
             <Sun size={12} /> Max Temp
           </button>
           <button
             onClick={() => setMetricMode("wind")}
-            className={`px-2.5 py-1 text-xs font-mono rounded transition-colors flex items-center gap-1.5 ${
+            className={`px-3 py-1 text-xs font-mono-tech rounded-full transition-colors flex items-center gap-1.5 cursor-pointer ${
               metricMode === "wind"
-                ? "bg-[#238636] text-white font-semibold shadow-sm"
-                : "text-slate-600 dark:text-[#8b949e] hover:text-slate-900 dark:hover:text-white"
+                ? "bg-[#E8E8E4] text-[#141414] font-semibold shadow-sm"
+                : "text-[#8B8B87] hover:text-white"
             }`}
           >
             <Wind size={12} /> Peak Wind
           </button>
           <button
             onClick={() => setMetricMode("humidity")}
-            className={`px-2.5 py-1 text-xs font-mono rounded transition-colors flex items-center gap-1.5 ${
+            className={`px-3 py-1 text-xs font-mono-tech rounded-full transition-colors flex items-center gap-1.5 cursor-pointer ${
               metricMode === "humidity"
-                ? "bg-[#238636] text-white font-semibold shadow-sm"
-                : "text-slate-600 dark:text-[#8b949e] hover:text-slate-900 dark:hover:text-white"
+                ? "bg-[#E8E8E4] text-[#141414] font-semibold shadow-sm"
+                : "text-[#8B8B87] hover:text-white"
             }`}
           >
             <Droplets size={12} /> Humidity
@@ -395,7 +389,7 @@ export default function ActivityHeatmap({
       <div className="overflow-x-auto py-4">
         <div className="min-w-[780px]">
           {/* Months Row */}
-          <div className="flex text-[11px] font-mono text-slate-400 dark:text-[#8b949e] mb-2 pl-8 relative h-4">
+          <div className="flex text-[11px] font-mono-tech text-[#8B8B87] mb-2 pl-8 relative h-4">
             {monthLabels.map((m, idx) => (
               <span
                 key={idx}
@@ -410,7 +404,7 @@ export default function ActivityHeatmap({
           {/* Days of Week + 52 Weeks Columns */}
           <div className="flex gap-2 items-start">
             {/* Day of week labels (Mon, Wed, Fri) */}
-            <div className="flex flex-col justify-between h-[98px] text-[10px] font-mono text-slate-400 dark:text-[#8b949e] pr-2 pt-0.5 select-none">
+            <div className="flex flex-col justify-between h-[98px] text-[10px] font-mono-tech text-[#8B8B87] pr-2 pt-0.5 select-none">
               <span>Mon</span>
               <span>Wed</span>
               <span>Fri</span>
@@ -427,7 +421,7 @@ export default function ActivityHeatmap({
                       onMouseLeave={handleMouseLeave}
                       className={`w-[11px] h-[11px] rounded-[2px] transition-all duration-100 cursor-pointer ${getCellColor(
                         day.level
-                      )} hover:ring-2 hover:ring-[#39d353] hover:scale-125 z-0 hover:z-20`}
+                      )} hover:ring-2 hover:ring-[#D6DDA9] hover:scale-125 z-0 hover:z-20`}
                     />
                   ))}
                 </div>
@@ -440,37 +434,37 @@ export default function ActivityHeatmap({
       {/* Floating Tooltip */}
       {hoveredDay && tooltipPos && (
         <div
-          className="fixed z-50 pointer-events-none transform -translate-x-1/2 -translate-y-full mb-2 px-3.5 py-2.5 rounded-md shadow-2xl text-xs font-mono border backdrop-blur-md bg-[#161b22]/95 border-[#30363d] text-[#c9d1d9]"
+          className="fixed z-50 pointer-events-none transform -translate-x-1/2 -translate-y-full mb-2 px-3.5 py-2.5 rounded-xl shadow-2xl text-xs font-mono-tech border backdrop-blur-2xl bg-[#0c0c0c]/95 border-white/10 text-[#E8E8E5]"
           style={{ left: `${tooltipPos.x}px`, top: `${tooltipPos.y}px` }}
         >
           <div className="font-semibold text-white mb-1 border-b border-white/10 pb-1 flex justify-between gap-3">
             <span>{hoveredDay.displayDate}</span>
-            <span className="text-[#39d353] font-bold">{hoveredDay.details.condition}</span>
+            <span className="text-[#D6DDA9] font-bold">{hoveredDay.details.condition}</span>
           </div>
           <div className="space-y-1 text-[11px]">
             {metricMode === "rainfall" && (
-              <div className="text-[#39d353] font-bold">
+              <div className="text-[#D6DDA9] font-bold">
                 {hoveredDay.details.rainfall} mm Daily Rainfall
               </div>
             )}
             {metricMode === "temperature" && (
-              <div className="text-[#39d353] font-bold">
+              <div className="text-[#D6DDA9] font-bold">
                 {hoveredDay.details.tempMax} °C Maximum Temperature
               </div>
             )}
             {metricMode === "wind" && (
-              <div className="text-[#39d353] font-bold">
+              <div className="text-[#D6DDA9] font-bold">
                 {hoveredDay.details.windSpeed} km/h Peak Surface Wind
               </div>
             )}
             {metricMode === "humidity" && (
-              <div className="text-[#39d353] font-bold">
+              <div className="text-[#D6DDA9] font-bold">
                 {hoveredDay.details.humidity}% Relative Humidity
               </div>
             )}
 
-            <div className="text-slate-400 pt-0.5 border-t border-white/5 flex gap-2">
-              <span>Min Temp: <span className="text-white">{hoveredDay.details.tempMin}°C</span></span>
+            <div className="text-[#8B8B87] pt-0.5 border-t border-white/10 flex gap-2">
+              <span>Min: <span className="text-white">{hoveredDay.details.tempMin}°C</span></span>
               <span>·</span>
               <span>Wind: <span className="text-white">{hoveredDay.details.windSpeed} km/h</span></span>
               <span>·</span>
@@ -480,10 +474,10 @@ export default function ActivityHeatmap({
         </div>
       )}
 
-      {/* Bottom Bar: Total Summary + Less / More Legend (Matching User Image) */}
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-3 border-t border-slate-200 dark:border-[#21262d] text-xs font-mono text-slate-500 dark:text-[#8b949e]">
+      {/* Bottom Bar: Total Summary + Less / More Legend */}
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-3 border-t border-white/10 text-xs font-mono-tech text-[#8B8B87]">
         <div className="flex items-center gap-2">
-          <span className="text-slate-700 dark:text-[#c9d1d9] font-medium">
+          <span className="text-[#D8D8D3] font-medium">
             {summaryStat}
           </span>
         </div>

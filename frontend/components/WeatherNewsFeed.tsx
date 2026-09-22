@@ -205,25 +205,25 @@ export default function WeatherNewsFeed() {
     switch (severity) {
       case "WARNING":
         return (
-          <span className="px-3 py-1 rounded-full text-xs font-mono font-bold tracking-wider bg-rose-500/20 text-rose-300 border border-rose-500/40 shadow-sm shadow-rose-950/50">
+          <span className="px-3 py-0.5 rounded-full text-[11px] font-mono-tech font-semibold tracking-wider bg-red-500/15 text-red-400 border border-red-500/40">
             SEVERE WARNING
           </span>
         );
       case "WATCH":
         return (
-          <span className="px-3 py-1 rounded-full text-xs font-mono font-bold tracking-wider bg-amber-500/20 text-amber-300 border border-amber-500/40 shadow-sm shadow-amber-950/50">
+          <span className="px-3 py-0.5 rounded-full text-[11px] font-mono-tech font-semibold tracking-wider bg-amber-500/15 text-amber-300 border border-amber-500/40">
             WEATHER WATCH
           </span>
         );
       case "ADVISORY":
         return (
-          <span className="px-3 py-1 rounded-full text-xs font-mono font-bold tracking-wider bg-yellow-500/20 text-yellow-300 border border-yellow-500/40">
+          <span className="px-3 py-0.5 rounded-full text-[11px] font-mono-tech font-semibold tracking-wider bg-[#AEB796]/15 text-[#D6DDA9] border border-[#AEB796]/40">
             ADVISORY
           </span>
         );
       default:
         return (
-          <span className="px-3 py-1 rounded-full text-xs font-mono font-bold tracking-wider bg-blue-500/20 text-blue-300 border border-blue-500/40">
+          <span className="px-3 py-0.5 rounded-full text-[11px] font-mono-tech font-semibold tracking-wider bg-white/[0.06] text-[#D8D8D3] border border-white/10">
             INFORMATION
           </span>
         );
@@ -233,41 +233,34 @@ export default function WeatherNewsFeed() {
   return (
     <div className="space-y-6">
       {/* Header Bar */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-[#0e1424]/80 backdrop-blur-md p-5 rounded-2xl border border-white/10 shadow-xl">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 glass-feature p-5 border border-white/10">
         <div>
           <div className="flex items-center gap-2.5 mb-1.5">
-            <span className="relative flex h-3 w-3">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-3 w-3 bg-rose-500"></span>
-            </span>
-            <h2 className="text-xl font-bold text-white tracking-wide">
-              Live Meteorological Intelligence & Synoptic Disruptions
+            <span className="status-dot-active" />
+            <h2 className="text-xl font-bold text-[#E8E8E5] tracking-tight">
+              Live Meteorological Intelligence &amp; Synoptic Disruptions
             </h2>
-            <span className="px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
+            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono-tech font-semibold bg-white/[0.04] text-[#AEB796] border border-white/10">
               {articles.length} ACTIVE BULLETINS
             </span>
-            <span className="px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-              STRICTLY WITHIN PAST 10 DAYS
-            </span>
           </div>
-          <p className="text-xs text-white/60 font-mono">
-            Dynamic alerts and synoptic advisories compiled from IMD, NCMRWF, and MoES National Bulletins (max 10 days old)
+          <p className="text-xs text-[#8B8B87] font-mono-tech">
+            Dynamic alerts and synoptic advisories compiled from IMD, NCMRWF, and MoES National Bulletins (strictly past 10 days)
           </p>
         </div>
 
         <div className="flex items-center gap-3">
           {lastRefreshed && (
-            <span className="text-xs font-mono text-white/50 hidden sm:inline">
+            <span className="text-[11px] font-mono-tech text-[#8B8B87] hidden sm:inline">
               Updated: {lastRefreshed}
             </span>
           )}
           <button
             onClick={fetchNews}
             disabled={loading}
-            className="flex items-center gap-2 px-4 py-2.5 bg-white/5 hover:bg-white/10 active:scale-95 text-white/90 hover:text-white rounded-xl border border-white/10 text-xs font-semibold transition-all cursor-pointer"
+            className="flex items-center gap-2 px-4 py-2 bg-white/[0.04] hover:bg-white/[0.08] text-[#E8E8E5] rounded-full border border-white/10 text-xs font-mono-tech font-semibold transition-all cursor-pointer"
           >
-            <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin text-cyan-400" : ""}`} />
+            <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin text-[#AEB796]" : "text-[#AEB796]"}`} />
             <span>Sync Feed</span>
           </button>
         </div>
@@ -287,10 +280,10 @@ export default function WeatherNewsFeed() {
           <button
             key={cat.id}
             onClick={() => setSelectedCategory(cat.id)}
-            className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer border ${
+            className={`px-3.5 py-1.5 rounded-full text-xs font-mono-tech transition-all cursor-pointer border ${
               selectedCategory === cat.id
-                ? "bg-cyan-500 text-black border-cyan-400 font-bold shadow-md shadow-cyan-500/20"
-                : "bg-[#0e1424]/80 text-white/70 border-white/10 hover:text-white hover:border-white/20"
+                ? "bg-[#E8E8E4] text-[#141414] border-white font-semibold shadow-sm"
+                : "bg-white/[0.03] text-[#8B8B87] border-white/10 hover:text-white hover:border-white/20"
             }`}
           >
             {cat.label}
@@ -302,18 +295,18 @@ export default function WeatherNewsFeed() {
       <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
         {/* Search Bar */}
         <div className="md:col-span-5 relative">
-          <Search className="w-4 h-4 text-white/40 absolute left-3.5 top-1/2 -translate-y-1/2" />
+          <Search className="w-4 h-4 text-[#8B8B87] absolute left-3.5 top-1/2 -translate-y-1/2" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search by state, city, phenomena, or keyword..."
-            className="w-full pl-10 pr-4 py-2.5 bg-[#0e1424]/80 border border-white/10 rounded-xl text-xs text-white placeholder-white/40 focus:outline-none focus:border-cyan-500/50 transition-colors font-medium"
+            className="w-full pl-10 pr-4 py-2 bg-white/[0.04] border border-white/10 rounded-full text-xs text-[#E8E8E5] placeholder-[#8B8B87] focus:outline-none focus:border-white/30 transition-colors font-mono-tech"
           />
         </div>
 
         {/* Severity Filter Tabs */}
-        <div className="md:col-span-4 flex items-center gap-1 bg-[#0e1424]/80 p-1 rounded-xl border border-white/10">
+        <div className="md:col-span-4 flex items-center gap-1 bg-black/40 p-1 rounded-full border border-white/10">
           {[
             { id: "ALL", label: "All" },
             { id: "WARNING", label: "Warnings" },
@@ -323,10 +316,10 @@ export default function WeatherNewsFeed() {
             <button
               key={tab.id}
               onClick={() => setSelectedSeverity(tab.id)}
-              className={`flex-1 py-1.5 px-2 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+              className={`flex-1 py-1 px-2 rounded-full text-xs font-mono-tech transition-all cursor-pointer ${
                 selectedSeverity === tab.id
-                  ? "bg-white/15 text-white font-bold shadow-sm"
-                  : "text-white/60 hover:text-white"
+                  ? "bg-[#E8E8E4] text-[#141414] font-semibold shadow-sm"
+                  : "text-[#8B8B87] hover:text-white"
               }`}
             >
               {tab.label}
@@ -339,27 +332,27 @@ export default function WeatherNewsFeed() {
           <select
             value={selectedRegion}
             onChange={(e) => setSelectedRegion(e.target.value)}
-            className="w-full py-2.5 px-3.5 bg-[#0e1424]/80 border border-white/10 rounded-xl text-xs font-medium text-white focus:outline-none focus:border-cyan-500/50 cursor-pointer"
+            className="w-full py-2 px-3.5 bg-white/[0.04] border border-white/10 rounded-full text-xs font-mono-tech text-[#E8E8E5] focus:outline-none focus:border-white/30 cursor-pointer"
           >
-            <option value="ALL">All Regions (43 Stations)</option>
-            <option value="North">North (Western Himalayas & Plains)</option>
-            <option value="West">West (Konkan, Gujarat & Arabian Sea)</option>
-            <option value="Central">Central (Vidarbha & Malwa)</option>
-            <option value="South">South (Peninsula & Bay of Bengal)</option>
-            <option value="East">East (Gangetic Delta & Odisha)</option>
-            <option value="Northeast">Northeast (Brahmaputra Valley)</option>
+            <option value="ALL" className="bg-[#121212]">All Regions (43 Stations)</option>
+            <option value="North" className="bg-[#121212]">North (Western Himalayas &amp; Plains)</option>
+            <option value="West" className="bg-[#121212]">West (Konkan, Gujarat &amp; Arabian Sea)</option>
+            <option value="Central" className="bg-[#121212]">Central (Vidarbha &amp; Malwa)</option>
+            <option value="South" className="bg-[#121212]">South (Peninsula &amp; Bay of Bengal)</option>
+            <option value="East" className="bg-[#121212]">East (Gangetic Delta &amp; Odisha)</option>
+            <option value="Northeast" className="bg-[#121212]">Northeast (Brahmaputra Valley)</option>
           </select>
         </div>
       </div>
 
       {/* Articles Grid */}
       {loading && articles.length === 0 ? (
-        <div className="py-20 text-center text-white/50 font-mono text-sm">
-          <RefreshCw className="w-6 h-6 animate-spin mx-auto mb-3 text-cyan-400" />
+        <div className="py-20 text-center text-[#8B8B87] font-mono-tech text-sm">
+          <RefreshCw className="w-6 h-6 animate-spin mx-auto mb-3 text-[#AEB796]" />
           Fetching live synoptic disruption bulletins...
         </div>
       ) : filteredArticles.length === 0 ? (
-        <div className="py-16 text-center text-white/50 font-mono text-sm bg-[#0e1424]/40 rounded-2xl border border-white/5">
+        <div className="py-16 text-center text-[#8B8B87] font-mono-tech text-sm bg-white/[0.02] rounded-2xl border border-white/5">
           No disruption alerts matching current filter parameters ({articles.length} total in database).
         </div>
       ) : (
@@ -367,16 +360,16 @@ export default function WeatherNewsFeed() {
           {filteredArticles.map((article) => (
             <div
               key={article.id}
-              className="bg-[#0e1424]/90 backdrop-blur-sm p-5 rounded-2xl border border-white/10 hover:border-white/20 transition-all flex flex-col justify-between shadow-lg hover:shadow-cyan-950/20 group"
+              className="detail-card flex flex-col justify-between"
             >
               <div>
                 {/* Card Top Badges */}
                 <div className="flex items-center justify-between gap-2 mb-3">
                   <div className="flex items-center gap-2">
-                    <span className="p-1.5 rounded-lg bg-white/5 border border-white/5">
+                    <span className="p-1.5 rounded-lg bg-white/[0.04] border border-white/10 text-[#AEB796]">
                       {getCategoryIcon(article.category)}
                     </span>
-                    <span className="text-xs font-mono text-white/70 uppercase tracking-wider font-semibold">
+                    <span className="text-xs font-mono-tech text-[#8B8B87] uppercase tracking-wider font-semibold">
                       {article.region} Zone
                     </span>
                   </div>
@@ -384,25 +377,25 @@ export default function WeatherNewsFeed() {
                 </div>
 
                 {/* Title */}
-                <h3 className="text-base font-bold text-white group-hover:text-cyan-300 transition-colors leading-snug mb-2.5">
+                <h3 className="text-[15px] font-bold text-[#E8E8E5] transition-colors leading-snug mb-2.5">
                   {article.title}
                 </h3>
 
                 {/* Summary */}
-                <p className="text-sm text-white/80 leading-relaxed mb-4">
+                <p className="text-[13px] text-[#92928C] leading-relaxed mb-4">
                   {article.summary}
                 </p>
 
                 {/* Affected States */}
                 <div className="mb-4">
-                  <span className="text-xs font-mono uppercase text-white/50 block mb-1.5 font-semibold">
+                  <span className="mono-label block mb-1.5">
                     Impacted States / Subdivisions:
                   </span>
                   <div className="flex flex-wrap gap-1.5">
                     {article.affected_states.map((state) => (
                       <span
                         key={state}
-                        className="px-2.5 py-1 rounded-md bg-white/5 border border-white/10 text-xs text-white/90 font-mono font-medium"
+                        className="px-2.5 py-0.5 rounded-full bg-white/[0.04] border border-white/10 text-xs text-[#D8D8D3] font-mono-tech"
                       >
                         {state}
                       </span>
@@ -411,14 +404,14 @@ export default function WeatherNewsFeed() {
                 </div>
 
                 {/* Medium-Range Bust Impact Diagnostic Box */}
-                <div className="bg-white/[0.03] p-3.5 rounded-xl border border-white/5 mb-4 space-y-2">
+                <div className="bg-white/[0.02] p-3 rounded-xl border border-white/10 mb-4 space-y-2">
                   <div className="flex items-start gap-2 text-xs">
-                    <TrendingUp className="w-4 h-4 text-rose-400 mt-0.5 shrink-0" />
+                    <TrendingUp className="w-4 h-4 text-red-400 mt-0.5 shrink-0" />
                     <div>
-                      <span className="text-white/50 font-mono uppercase text-xs block font-semibold">
+                      <span className="mono-label block">
                         Forecast Bust Risk Driver:
                       </span>
-                      <span className="text-white/90 font-medium text-xs">
+                      <span className="text-[#E8E8E5] font-medium text-xs">
                         {article.bust_risk_factor}
                       </span>
                     </div>
@@ -427,7 +420,7 @@ export default function WeatherNewsFeed() {
                   <div className="flex items-start gap-2 text-xs">
                     <ShieldAlert className="w-4 h-4 text-amber-400 mt-0.5 shrink-0" />
                     <div>
-                      <span className="text-white/50 font-mono uppercase text-xs block font-semibold">
+                      <span className="mono-label block">
                         Confidence Impact:
                       </span>
                       <span className="text-amber-200/90 font-mono text-xs">
