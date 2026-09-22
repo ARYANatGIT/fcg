@@ -557,11 +557,11 @@ export default function WindyWeatherMap() {
         {/* Right Column: Comparative Multi-Model Telemetry HUD */}
         <div className="xl:col-span-4 flex flex-col gap-3">
           {/* Comparative Model Discrepancy & Bust Evaluation Card */}
-          <div className="detail-card space-y-3 flex-1 flex flex-col justify-between min-w-0 overflow-hidden">
+          <div className="detail-card p-5 sm:p-6 space-y-4 flex-1 flex flex-col justify-between min-w-0 overflow-hidden">
             <div className="min-w-0">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-white/10 gap-2 min-w-0">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3.5 border-b border-white/10 gap-2 min-w-0">
                 <div className="flex items-center gap-2.5 min-w-0 flex-1">
-                  <div className="p-1.5 rounded-full bg-white/[0.04] text-white border border-white/10 shrink-0">
+                  <div className="p-2 rounded-full bg-white/[0.04] text-white border border-white/10 shrink-0">
                     <Scale className="w-4 h-4" />
                   </div>
                   <div className="min-w-0 flex-1">
@@ -575,7 +575,7 @@ export default function WindyWeatherMap() {
                 </div>
 
                 {/* Bust Risk Badge */}
-                <div className={`px-2.5 py-1 rounded-full text-xs font-mono-tech font-bold tracking-wider border shrink-0 ${
+                <div className={`px-3 py-1 rounded-full text-xs font-mono-tech font-bold tracking-wider border shrink-0 ${
                   isHighRisk
                     ? "bg-red-500/15 text-red-400 border-red-500/40 animate-pulse"
                     : isModRisk
@@ -587,10 +587,10 @@ export default function WindyWeatherMap() {
               </div>
 
               {/* Side-by-Side Model Comparison Grid */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs font-mono-tech mt-3 min-w-0">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs font-mono-tech mt-3.5 min-w-0">
                 {/* Temperature Comparison */}
-                <div className="bg-white/[0.03] p-2.5 rounded-xl border border-white/10 min-w-0 overflow-hidden">
-                  <div className="flex justify-between text-[#A3A3A3] mb-1 gap-1 min-w-0">
+                <div className="bg-white/[0.03] p-3 sm:p-3.5 rounded-xl border border-white/10 min-w-0 overflow-hidden">
+                  <div className="flex justify-between text-[#A3A3A3] mb-1.5 gap-1 min-w-0">
                     <span className="font-semibold truncate">Temperature</span>
                     <span className={`shrink-0 font-bold ${windyAnalysis.tempBias > 0 ? "text-red-400" : "text-white"}`}>
                       Δ {windyAnalysis.tempBias > 0 ? `+${windyAnalysis.tempBias}` : windyAnalysis.tempBias}°C
@@ -609,19 +609,19 @@ export default function WindyWeatherMap() {
                 </div>
 
                 {/* Barometric MSL Pressure Comparison */}
-                <div className="bg-white/[0.03] p-2.5 rounded-xl border border-white/10">
-                  <div className="flex justify-between text-[#A3A3A3] mb-1">
-                    <span className="font-semibold">MSL Pressure</span>
-                    <span className={Math.abs(windyAnalysis.presDiff) > 3 ? "text-red-400 font-bold" : "text-white font-bold"}>
+                <div className="bg-white/[0.03] p-3 sm:p-3.5 rounded-xl border border-white/10 min-w-0 overflow-hidden">
+                  <div className="flex justify-between text-[#A3A3A3] mb-1.5 gap-1 min-w-0">
+                    <span className="font-semibold truncate">MSL Pressure</span>
+                    <span className={Math.abs(windyAnalysis.presDiff) > 3 ? "text-red-400 font-bold shrink-0" : "text-white font-bold shrink-0"}>
                       Δ {windyAnalysis.presDiff > 0 ? `+${windyAnalysis.presDiff}` : windyAnalysis.presDiff} hPa
                     </span>
                   </div>
-                  <div className="flex justify-between items-baseline">
-                    <div>
-                      <span className="text-xs text-[#A3A3A3] block mb-0.5">Windy ECMWF</span>
-                      <span className="text-sm font-bold text-[#E5E5E5]">{windyAnalysis.windyForecast.surface_pressure_msl}</span>
+                  <div className="flex justify-between items-baseline gap-1 min-w-0">
+                    <div className="min-w-0">
+                      <span className="text-xs text-[#A3A3A3] block mb-0.5 truncate">Windy ECMWF</span>
+                      <span className="text-sm font-bold text-[#E5E5E5] truncate">{windyAnalysis.windyForecast.surface_pressure_msl}</span>
                     </div>
-                    <div className="text-right">
+                    <div className="text-right shrink-0">
                       <span className="text-xs text-[#A3A3A3] block mb-0.5">Observed</span>
                       <span className="text-sm font-bold text-white">{weather.pressureMsl}</span>
                     </div>
@@ -629,19 +629,19 @@ export default function WindyWeatherMap() {
                 </div>
 
                 {/* Wind Speed Comparison */}
-                <div className="bg-white/[0.03] p-2.5 rounded-xl border border-white/10">
-                  <div className="flex justify-between text-[#A3A3A3] mb-1">
-                    <span className="font-semibold">Wind Velocity</span>
-                    <span className="text-white font-bold">
+                <div className="bg-white/[0.03] p-3 sm:p-3.5 rounded-xl border border-white/10 min-w-0 overflow-hidden">
+                  <div className="flex justify-between text-[#A3A3A3] mb-1.5 gap-1 min-w-0">
+                    <span className="font-semibold truncate">Wind Velocity</span>
+                    <span className="text-white font-bold shrink-0">
                       Δ {windyAnalysis.windDiff > 0 ? `+${windyAnalysis.windDiff}` : windyAnalysis.windDiff} m/s
                     </span>
                   </div>
-                  <div className="flex justify-between items-baseline">
-                    <div>
-                      <span className="text-xs text-[#A3A3A3] block mb-0.5">Windy ECMWF</span>
-                      <span className="text-sm font-bold text-[#E5E5E5]">{windyAnalysis.windyForecast.wind_speed_10m} m/s</span>
+                  <div className="flex justify-between items-baseline gap-1 min-w-0">
+                    <div className="min-w-0">
+                      <span className="text-xs text-[#A3A3A3] block mb-0.5 truncate">Windy ECMWF</span>
+                      <span className="text-sm font-bold text-[#E5E5E5] truncate">{windyAnalysis.windyForecast.wind_speed_10m} m/s</span>
                     </div>
-                    <div className="text-right">
+                    <div className="text-right shrink-0">
                       <span className="text-xs text-[#A3A3A3] block mb-0.5">Observed</span>
                       <span className="text-sm font-bold text-white">{weather.windSpeed} m/s</span>
                     </div>
@@ -649,19 +649,19 @@ export default function WindyWeatherMap() {
                 </div>
 
                 {/* Precipitation Comparison */}
-                <div className="bg-white/[0.03] p-2.5 rounded-xl border border-white/10">
-                  <div className="flex justify-between text-[#A3A3A3] mb-1">
-                    <span className="font-semibold">Rainfall Rate</span>
-                    <span className={windyAnalysis.rainDiff !== 0 ? "text-amber-400 font-bold" : "text-white font-bold"}>
+                <div className="bg-white/[0.03] p-3 sm:p-3.5 rounded-xl border border-white/10 min-w-0 overflow-hidden">
+                  <div className="flex justify-between text-[#A3A3A3] mb-1.5 gap-1 min-w-0">
+                    <span className="font-semibold truncate">Rainfall Rate</span>
+                    <span className={windyAnalysis.rainDiff !== 0 ? "text-amber-400 font-bold shrink-0" : "text-white font-bold shrink-0"}>
                       Δ {windyAnalysis.rainDiff > 0 ? `+${windyAnalysis.rainDiff}` : windyAnalysis.rainDiff} mm
                     </span>
                   </div>
-                  <div className="flex justify-between items-baseline">
-                    <div>
-                      <span className="text-xs text-[#A3A3A3] block mb-0.5">Windy ECMWF</span>
-                      <span className="text-sm font-bold text-[#E5E5E5]">{windyAnalysis.windyForecast.precipitation_rate} mm</span>
+                  <div className="flex justify-between items-baseline gap-1 min-w-0">
+                    <div className="min-w-0">
+                      <span className="text-xs text-[#A3A3A3] block mb-0.5 truncate">Windy ECMWF</span>
+                      <span className="text-sm font-bold text-[#E5E5E5] truncate">{windyAnalysis.windyForecast.precipitation_rate} mm</span>
                     </div>
-                    <div className="text-right">
+                    <div className="text-right shrink-0">
                       <span className="text-xs text-[#A3A3A3] block mb-0.5">Observed</span>
                       <span className="text-sm font-bold text-white">{weather.precipitation} mm</span>
                     </div>
@@ -670,13 +670,13 @@ export default function WindyWeatherMap() {
               </div>
 
               {/* Model Diagnostic Narrative */}
-              <div className="bg-white/[0.02] p-3 rounded-xl border border-white/10 text-xs text-[#A3A3A3] leading-relaxed font-mono-tech mt-3">
+              <div className="bg-white/[0.02] p-3.5 sm:p-4 rounded-xl border border-white/10 text-xs text-[#A3A3A3] leading-relaxed font-mono-tech mt-3.5">
                 <span className="text-white font-bold block mb-1">Physical Diagnostic:</span>
                 {windyAnalysis.diagnostic}
               </div>
 
               {/* Multi-Level Vertical Wind Shear Profile */}
-              <div className="bg-white/[0.02] p-3 rounded-xl border border-white/10 space-y-2 mt-3">
+              <div className="bg-white/[0.02] p-3.5 sm:p-4 rounded-xl border border-white/10 space-y-2.5 mt-3.5">
                 <span className="text-xs font-mono-tech uppercase text-[#A3A3A3] font-semibold block flex items-center justify-between">
                   <span>Vertical Atmospheric Profile</span>
                   <span className="text-white font-semibold">ECMWF 9km Grid</span>

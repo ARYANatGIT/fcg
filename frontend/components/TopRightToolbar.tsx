@@ -34,6 +34,7 @@ export default function TopRightToolbar({
   const [isSpeaking, setIsSpeaking] = useState<boolean>(false);
   const [isPaused, setIsPaused] = useState<boolean>(false);
   const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
+  const isSpeakingRef = useRef<boolean>(false);
   const activeHighlightedElementRef = useRef<HTMLElement | null>(null);
 
   // Theme State
@@ -56,6 +57,16 @@ export default function TopRightToolbar({
         document.documentElement.classList.remove("light-mode");
       }
     }
+  }, []);
+
+  // Cleanup TTS on unmount
+  useEffect(() => {
+    return () => {
+      isSpeakingRef.current = false;
+      if (typeof window !== "undefined" && "speechSynthesis" in window) {
+        window.speechSynthesis.cancel();
+      }
+    };
   }, []);
 
   const toggleTheme = () => {
@@ -113,6 +124,7 @@ export default function TopRightToolbar({
   };
 
   const handleStopSpeaking = () => {
+    isSpeakingRef.current = false;
     if (typeof window !== "undefined" && "speechSynthesis" in window) {
       window.speechSynthesis.cancel();
     }
@@ -129,7 +141,7 @@ export default function TopRightToolbar({
     }
 
     // If currently speaking or active, clicking again immediately stops reading
-    if (isSpeaking || window.speechSynthesis.speaking) {
+    if (isSpeaking || isSpeakingRef.current || window.speechSynthesis.speaking) {
       handleStopSpeaking();
       return;
     }
@@ -167,12 +179,16 @@ export default function TopRightToolbar({
     }
 
     let currentIndex = 0;
+    isSpeakingRef.current = true;
     setIsSpeaking(true);
     setIsPaused(false);
 
     const speakNextBlock = () => {
+      if (!isSpeakingRef.current) return;
+
       if (currentIndex >= readableBlocks.length) {
         clearHighlight();
+        isSpeakingRef.current = false;
         setIsSpeaking(false);
         setIsPaused(false);
         return;
@@ -207,6 +223,7 @@ export default function TopRightToolbar({
 
       // Track exact spoken word via boundary event
       utterance.onboundary = (event: SpeechSynthesisEvent) => {
+        if (!isSpeakingRef.current) return;
         if (event.name === "word" && typeof event.charIndex === "number") {
           const charIndex = event.charIndex;
           const charLength = event.charLength || (text.slice(charIndex).match(/^\S+/)?.[0]?.length ?? 5);
@@ -216,11 +233,13 @@ export default function TopRightToolbar({
       };
 
       utterance.onend = () => {
+        if (!isSpeakingRef.current) return;
         currentIndex++;
         speakNextBlock();
       };
 
       utterance.onerror = (e) => {
+        if (!isSpeakingRef.current) return;
         console.warn("TTS Error:", e);
         currentIndex++;
         speakNextBlock();
@@ -316,15 +335,15 @@ export default function TopRightToolbar({
   }, [searchQuery, stations]);
 
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex items-center gap-2.5">
       {/* 1. Global Search Trigger (Ctrl+K) */}
       <button
         onClick={() => setSearchOpen(true)}
-        className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 text-[#D8D8D3] hover:text-[#E8E8E5] text-xs font-mono-tech transition cursor-pointer shadow-sm"
+        className="flex items-center gap-2.5 h-10 px-4 py-2 rounded-full bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 text-[#D8D8D3] hover:text-[#E8E8E5] text-xs font-mono-tech transition cursor-pointer shadow-sm"
         title="Quick Jump to any Station or View (Ctrl+K)"
       >
-        <Search size={14} className="text-[#E8E8E5]" />
-        <span className="hidden md:inline">Search...</span>
+        <Search size={15} className="text-[#E8E8E5]" />
+        <span className="hidden md:inline font-semibold">Search...</span>
         <kbd className="hidden md:inline-block px-1.5 py-0.5 rounded bg-white/[0.06] text-xs font-mono text-[#8B8B87]">
           Ctrl+K
         </kbd>
@@ -333,39 +352,70 @@ export default function TopRightToolbar({
       {/* 2. Read Page Aloud (1-Click Toggle: Start / Stop with Word Highlighting) */}
       <button
         onClick={handleToggleSpeak}
-        className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full border text-xs font-mono-tech transition cursor-pointer shadow-sm ${
+        className={`flex items-center gap-2 h-10 px-4 py-2 rounded-full border text-xs font-mono-tech transition cursor-pointer shadow-sm ${
           isSpeaking
-            ? "bg-white/20 text-white border-white/50 animate-pulse font-semibold"
+            ? "bg-white/20 text-white border-white/50 animate-pulse font-bold"
             : "bg-white/[0.04] hover:bg-white/[0.08] text-[#D8D8D3] border-white/10"
         }`}
         title={isSpeaking ? "Click to Stop Reading" : "Click to Read Page Aloud with Word Highlighting"}
       >
         {isSpeaking ? (
           <>
-            <VolumeX size={14} className="text-white" />
-            <span className="font-semibold">Stop Reading</span>
+            <VolumeX size={16} className="text-white" />
+            <span className="font-bold">Stop Reading</span>
           </>
         ) : (
           <>
-            <Volume2 size={14} className="text-[#8B8B87]" />
-            <span className="hidden sm:inline font-medium">Read Aloud</span>
+            <Volume2 size={16} className="text-[#8B8B87]" />
+            <span className="hidden sm:inline font-semibold">Read Aloud</span>
           </>
         )}
       </button>
 
-      {/* 3. Light / Dark Mode Toggle */}
-      <button
-        onClick={toggleTheme}
-        className="p-2 rounded-full bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 text-[#D8D8D3] hover:text-white transition cursor-pointer shadow-sm"
-        title={theme === "dark" ? "Switch to Light Mode" : "Switch to Dark Mode"}
-        aria-label="Toggle Theme Mode"
+      {/* 3. Dual-Segment Light / Dark Mode Toggle with Animated Gliding Capsule */}
+      <div 
+        className="relative flex items-center bg-white/[0.06] p-1 rounded-full border border-white/12 shadow-inner h-10 select-none backdrop-blur-xl"
+        title={`Currently in ${theme === "dark" ? "Dark" : "Light"} Mode`}
       >
-        {theme === "dark" ? (
-          <Sun size={15} className="text-white" />
-        ) : (
-          <Moon size={15} className="text-white" />
-        )}
-      </button>
+        {/* Animated Sliding Glider Capsule */}
+        <div 
+          className={`absolute top-1 bottom-1 w-[calc(50%-4px)] rounded-full transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] shadow-md pointer-events-none ${
+            theme === "dark"
+              ? "left-[calc(50%+2px)] bg-white text-black"
+              : "left-1 bg-black text-white"
+          }`}
+        />
+
+        {/* Light Option Button */}
+        <button
+          type="button"
+          onClick={() => { if (theme !== "light") toggleTheme(); }}
+          className={`relative z-10 flex items-center justify-center gap-1.5 px-3 py-1 text-xs font-mono-tech font-bold rounded-full transition-colors duration-200 cursor-pointer ${
+            theme === "light"
+              ? "text-white"
+              : "text-[#8B8B87] hover:text-white"
+          }`}
+          aria-label="Switch to Light Mode"
+        >
+          <Sun size={14} className={theme === "light" ? "text-amber-400" : "text-[#8B8B87]"} />
+          <span>Light</span>
+        </button>
+
+        {/* Dark Option Button */}
+        <button
+          type="button"
+          onClick={() => { if (theme !== "dark") toggleTheme(); }}
+          className={`relative z-10 flex items-center justify-center gap-1.5 px-3 py-1 text-xs font-mono-tech font-bold rounded-full transition-colors duration-200 cursor-pointer ${
+            theme === "dark"
+              ? "text-black"
+              : "text-[#8B8B87] hover:text-white"
+          }`}
+          aria-label="Switch to Dark Mode"
+        >
+          <Moon size={14} className={theme === "dark" ? "text-black" : "text-[#8B8B87]"} />
+          <span>Dark</span>
+        </button>
+      </div>
 
       {/* Floating Teleprompter HUD: Displays current word in highlight while reading */}
       {isSpeaking && (

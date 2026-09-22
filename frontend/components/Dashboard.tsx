@@ -1039,7 +1039,7 @@ export default function Dashboard() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 min-w-0 [&>*]:min-w-0">
               
               {/* Card 1: SHAP Local Explainability */}
-              <div className="detail-card flex flex-col justify-between min-w-0 overflow-hidden">
+              <div className="detail-card p-5 sm:p-6 flex flex-col justify-between min-w-0 overflow-hidden">
                 <div className="min-w-0">
                   <div className="flex items-center justify-between mb-4 border-b border-white/10 pb-3 gap-2 min-w-0">
                     <h3 className="text-base font-bold text-white flex items-center gap-2 truncate">
@@ -1049,12 +1049,12 @@ export default function Dashboard() {
                     <span className="mono-label shrink-0">03 / SHAP</span>
                   </div>
 
-                  <div className="space-y-2.5 min-w-0">
+                  <div className="space-y-3 min-w-0">
                     {shapReasons.slice(0, 4).map((r, i) => (
-                      <div key={i} className="bg-white/[0.03] p-3 rounded-xl border border-white/10 flex items-start justify-between gap-3 min-w-0">
+                      <div key={i} className="bg-white/[0.03] p-3.5 sm:p-4 rounded-xl border border-white/10 flex items-start justify-between gap-3 min-w-0">
                         <div className="flex-1 min-w-0">
                           <div className="font-semibold text-white text-sm truncate">{r.code.replace(/_/g, " ")}</div>
-                          <div className="text-xs text-[#A3A3A3] mt-0.5 leading-snug break-words">{r.text}</div>
+                          <div className="text-xs text-[#A3A3A3] mt-0.5 leading-relaxed break-words">{r.text}</div>
                         </div>
                         <div className={`font-mono-tech text-sm font-bold shrink-0 ${
                           r.contribution >= 0 ? "text-red-400" : "text-[#A3A3A3]"
@@ -1066,13 +1066,13 @@ export default function Dashboard() {
                   </div>
                 </div>
 
-                <div className="text-xs font-mono-tech text-[#A3A3A3] mt-4 pt-3 border-t border-white/10 break-words">
+                <div className="text-xs font-mono-tech text-[#A3A3A3] mt-4 pt-3 border-t border-white/10 break-words leading-relaxed">
                   SHAP reflects additive statistical feature attributions, not absolute physical causality.
                 </div>
               </div>
 
               {/* Card 2: Run-to-Run Forecast Revision Tracking */}
-              <div className="detail-card flex flex-col justify-between min-w-0 overflow-hidden">
+              <div className="detail-card p-5 sm:p-6 flex flex-col justify-between min-w-0 overflow-hidden">
                 <div className="min-w-0">
                   <div className="flex items-center justify-between mb-4 border-b border-white/10 pb-3 gap-2 min-w-0">
                     <h3 className="text-base font-bold text-white flex items-center gap-2 truncate">
@@ -1083,7 +1083,7 @@ export default function Dashboard() {
                   </div>
 
                   <div className="space-y-3 min-w-0">
-                    <div className="flex items-center justify-between gap-2 min-w-0">
+                    <div className="flex items-center justify-between gap-2 min-w-0 px-1">
                       <span className="text-sm text-white/90 font-medium truncate">Consistency:</span>
                       <span className={`font-mono-tech text-xs px-2.5 py-0.5 rounded-full border font-semibold shrink-0 ${
                         revisions?.large_revision
@@ -1095,9 +1095,9 @@ export default function Dashboard() {
                     </div>
 
                     {/* Multi-cycle run progression rows - clean responsive 2-column formatting */}
-                    <div className="space-y-2 min-w-0">
+                    <div className="space-y-2.5 min-w-0">
                       {dynamicRuns.map((r: any, idx: number) => (
-                        <div key={idx} className="bg-white/[0.03] p-2.5 rounded-xl border border-white/10 flex flex-col sm:flex-row sm:items-center justify-between text-xs font-mono-tech gap-1.5 min-w-0">
+                        <div key={idx} className="bg-white/[0.03] p-3 sm:p-3.5 rounded-xl border border-white/10 flex flex-col sm:flex-row sm:items-center justify-between text-xs font-mono-tech gap-2 min-w-0">
                           <span className="text-white font-semibold truncate">{r.run}</span>
                           <div className="flex items-center gap-2 text-right shrink-0">
                             <span className="text-white font-bold">{r.rainfall_mm}mm</span>
@@ -1108,20 +1108,20 @@ export default function Dashboard() {
                       ))}
                     </div>
 
-                    <div className="text-xs font-mono-tech flex justify-between text-white/90 bg-white/[0.02] p-2.5 rounded-xl border border-white/10 gap-2 min-w-0">
+                    <div className="text-xs font-mono-tech flex justify-between text-white/90 bg-white/[0.02] p-3 rounded-xl border border-white/10 gap-2 min-w-0">
                       <span className="truncate">VOLATILITY SCORE:</span>
                       <span className="text-white font-bold shrink-0">{dynamicVolatilityScore}</span>
                     </div>
                   </div>
                 </div>
 
-                <div className="text-xs font-mono-tech text-[#A3A3A3] mt-4 pt-3 border-t border-white/10 break-words">
+                <div className="text-xs font-mono-tech text-[#A3A3A3] mt-4 pt-3 border-t border-white/10 break-words leading-relaxed">
                   Run-to-run divergence across cycles reveals numerical model boundary instability.
                 </div>
               </div>
 
               {/* Card 3: Historical Analogs */}
-              <div className="detail-card flex flex-col justify-between min-w-0 overflow-hidden">
+              <div className="detail-card p-5 sm:p-6 flex flex-col justify-between min-w-0 overflow-hidden">
                 <div className="min-w-0">
                   <div className="flex items-center justify-between mb-4 border-b border-white/10 pb-3 gap-2 min-w-0">
                     <h3 className="text-base font-bold text-white flex items-center gap-2 truncate">
@@ -1132,20 +1132,20 @@ export default function Dashboard() {
                   </div>
 
                   <div className="min-w-0">
-                    <div className="flex items-baseline justify-between mb-3 text-sm gap-2 min-w-0">
+                    <div className="flex items-baseline justify-between mb-3 text-sm gap-2 min-w-0 px-1">
                       <span className="text-white/90 font-medium truncate">Historical Bust Rate:</span>
                       <span className="font-mono-tech text-base font-bold text-white shrink-0">
                         {analogSummary ? `${Math.round(analogSummary.historical_analog_bust_rate * 5)} / 5 (${(analogSummary.historical_analog_bust_rate * 100).toFixed(0)}%)` : "2 / 5 (40%)"}
                       </span>
                     </div>
 
-                    <div className="space-y-2 min-w-0">
+                    <div className="space-y-2.5 min-w-0">
                       {dynamicAnalogs.slice(0, 4).map((a: any, i: number) => {
                         const initTime = a.initialization_time || a.analog_date || `2024-0${8 - i}-15`;
                         const dist = a.similarity_distance ?? a.similarity_score ?? (0.35 + i * 0.12);
                         const isBust = a.bust === 1 || a.bust_occurred === true;
                         return (
-                          <div key={i} className="flex justify-between items-center text-xs font-mono-tech bg-white/[0.03] p-2.5 rounded-xl border border-white/10 gap-2 min-w-0">
+                          <div key={i} className="flex justify-between items-center text-xs font-mono-tech bg-white/[0.03] p-3 sm:p-3.5 rounded-xl border border-white/10 gap-2 min-w-0">
                             <div className="flex items-center gap-1.5 min-w-0 truncate">
                               <span className="text-[#A3A3A3] shrink-0 font-bold">#{i + 1}</span>
                               <span className="text-white font-medium truncate">{String(initTime).split(" ")[0]}</span>
@@ -1165,7 +1165,7 @@ export default function Dashboard() {
                   </div>
                 </div>
 
-                <div className="text-xs font-mono-tech text-[#A3A3A3] mt-4 pt-3 border-t border-white/10 break-words">
+                <div className="text-xs font-mono-tech text-[#A3A3A3] mt-4 pt-3 border-t border-white/10 break-words leading-relaxed">
                   Strictly filtered to dates preceding current forecast initialization (t &lt; T₀).
                 </div>
               </div>

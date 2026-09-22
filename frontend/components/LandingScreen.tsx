@@ -18,6 +18,7 @@ import {
   CheckCircle2,
   ChevronRight
 } from "lucide-react";
+import TopRightToolbar from "./TopRightToolbar";
 
 interface LandingScreenProps {
   onGetStarted: () => void;
@@ -86,11 +87,12 @@ export default function LandingScreen({ onGetStarted }: LandingScreenProps) {
           <span className="px-3 py-1 rounded-full hover:text-[#E8E8E5] transition">04 SIMULATION</span>
         </div>
 
-        <div className="flex items-center gap-2">
-          <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-black/40 border border-white/10 text-xs font-mono-tech text-[#D8D8D3]">
+        <div className="flex items-center gap-3">
+          <div className="hidden xl:flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-black/40 border border-white/10 text-xs font-mono-tech text-[#D8D8D3]">
             <span className="status-dot-active" />
-            <span className="hidden sm:inline">NCUM 9km Global Ensemble · OPERATIONAL</span>
+            <span>NCUM 9km Global Ensemble</span>
           </div>
+          <TopRightToolbar onSelectTab={() => onGetStarted()} />
         </div>
       </header>
 

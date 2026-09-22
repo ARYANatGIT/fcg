@@ -310,27 +310,31 @@ Click any quick prompt below or ask any question about stations, bust detection,
 
   return (
     <>
-      {/* 1. Floating Circular Button in Bottom Right */}
+      {/* 1. Floating Distinguished Pill in Bottom Right */}
       {!isOpen && (
-        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-3">
-          {/* Subtle Hint Capsule */}
-          <div className="hidden sm:flex items-center gap-2 bg-[#111210]/90 border border-white/10 text-[#D8D8D3] px-3.5 py-1.5 rounded-full shadow-[0_10px_30px_rgba(0,0,0,0.5)] backdrop-blur-md text-xs font-mono-tech tracking-wider">
-            <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
-            <span>AI COPILOT</span>
-          </div>
-
+        <div className="fixed bottom-6 right-6 z-50 flex items-center">
           <button
             onClick={() => {
               setIsOpen(true);
               setIsMinimized(false);
             }}
-            className="w-14 h-14 rounded-full bg-[#111210]/85 hover:bg-[#181916] text-[#E8E8E5] shadow-[0_20px_50px_rgba(0,0,0,0.6)] flex items-center justify-center border border-white/15 hover:border-white/30 cursor-pointer transition-all duration-200 hover:scale-105 active:scale-95 relative group backdrop-blur-xl"
-            title="Open ForecastGuard Copilot"
+            className="copilot-trigger group flex items-center gap-3.5 pl-4 pr-2 py-2 rounded-full bg-gradient-to-r from-white/[0.14] to-white/[0.06] hover:from-white/[0.22] hover:to-white/[0.12] border border-white/25 hover:border-white/50 text-white shadow-[0_14px_45px_rgba(0,0,0,0.65),0_0_24px_rgba(255,255,255,0.16)] hover:shadow-[0_18px_55px_rgba(0,0,0,0.75),0_0_32px_rgba(255,255,255,0.28)] backdrop-blur-2xl transition-all duration-300 hover:scale-[1.03] active:scale-[0.97] cursor-pointer"
+            title="Open ForecastGuard Meteorological AI Copilot"
             aria-label="Open ForecastGuard Copilot"
           >
-            <Bot className="w-6 h-6 text-[#E8E8E5] group-hover:text-white transition-colors" />
-            {/* Active Status Dot */}
-            <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 rounded-full bg-white border-2 border-[#080808]" />
+            <div className="flex flex-col text-left">
+              <span className="text-[11px] font-mono-tech tracking-widest font-bold uppercase text-white flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_rgba(52,211,153,0.8)]" />
+                AI COPILOT
+              </span>
+              <span className="text-[10px] font-mono-tech text-[#A3A3A3] group-hover:text-white/80 transition-colors">
+                Synoptic Intelligence
+              </span>
+            </div>
+
+            <div className="copilot-icon w-10 h-10 rounded-full bg-white text-black flex items-center justify-center shadow-md shrink-0 transition-transform group-hover:rotate-12">
+              <Bot size={20} className="text-black" />
+            </div>
           </button>
         </div>
       )}

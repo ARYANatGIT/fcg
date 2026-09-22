@@ -356,17 +356,17 @@ export default function WeatherNewsFeed() {
           No disruption alerts matching current filter parameters ({articles.length} total in database).
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 [&>*]:min-w-0">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5 [&>*]:min-w-0">
           {filteredArticles.map((article) => (
             <div
               key={article.id}
-              className="detail-card min-w-0 overflow-hidden flex flex-col justify-between"
+              className="detail-card p-5 sm:p-6 min-w-0 overflow-hidden flex flex-col justify-between space-y-4"
             >
-              <div className="min-w-0">
+              <div className="min-w-0 space-y-3">
                 {/* Card Top Badges */}
-                <div className="flex items-center justify-between gap-2 mb-3 min-w-0">
+                <div className="flex items-center justify-between gap-2 mb-2 min-w-0">
                   <div className="flex items-center gap-2 min-w-0">
-                    <span className="p-1.5 rounded-lg bg-white/[0.04] border border-white/10 text-white shrink-0">
+                    <span className="p-2 rounded-lg bg-white/[0.04] border border-white/10 text-white shrink-0">
                       {getCategoryIcon(article.category)}
                     </span>
                     <span className="text-xs font-mono-tech text-[#8B8B87] uppercase tracking-wider font-semibold truncate">
@@ -377,25 +377,25 @@ export default function WeatherNewsFeed() {
                 </div>
 
                 {/* Title */}
-                <h3 className="text-[15px] font-bold text-[#E8E8E5] transition-colors leading-snug mb-2.5 break-words">
+                <h3 className="text-base font-bold text-[#E8E8E5] transition-colors leading-snug break-words">
                   {article.title}
                 </h3>
 
                 {/* Summary */}
-                <p className="text-[13px] text-[#92928C] leading-relaxed mb-4 break-words">
+                <p className="text-[13px] text-[#92928C] leading-relaxed break-words">
                   {article.summary}
                 </p>
 
                 {/* Affected States */}
-                <div className="mb-4 min-w-0">
-                  <span className="mono-label block mb-1.5">
+                <div className="min-w-0 pt-1">
+                  <span className="mono-label block mb-2">
                     Impacted States / Subdivisions:
                   </span>
                   <div className="flex flex-wrap gap-1.5 min-w-0">
                     {article.affected_states.map((state) => (
                       <span
                         key={state}
-                        className="px-2.5 py-0.5 rounded-full bg-white/[0.04] border border-white/10 text-xs text-[#D8D8D3] font-mono-tech truncate max-w-full"
+                        className="px-2.5 py-1 rounded-full bg-white/[0.04] border border-white/10 text-xs text-[#D8D8D3] font-mono-tech truncate max-w-full"
                       >
                         {state}
                       </span>
@@ -404,26 +404,26 @@ export default function WeatherNewsFeed() {
                 </div>
 
                 {/* Medium-Range Bust Impact Diagnostic Box */}
-                <div className="bg-white/[0.02] p-3 rounded-xl border border-white/10 mb-4 space-y-2 min-w-0 overflow-hidden">
-                  <div className="flex items-start gap-2 text-xs min-w-0">
+                <div className="bg-white/[0.02] p-3.5 sm:p-4 rounded-xl border border-white/10 space-y-3 min-w-0 overflow-hidden">
+                  <div className="flex items-start gap-2.5 text-xs min-w-0">
                     <TrendingUp className="w-4 h-4 text-red-400 mt-0.5 shrink-0" />
                     <div className="min-w-0 break-words flex-1">
-                      <span className="mono-label block">
+                      <span className="mono-label block mb-0.5">
                         Forecast Bust Risk Driver:
                       </span>
-                      <span className="text-[#E8E8E5] font-medium text-xs break-words">
+                      <span className="text-[#E8E8E5] font-medium text-xs break-words leading-relaxed">
                         {article.bust_risk_factor}
                       </span>
                     </div>
                   </div>
 
-                  <div className="flex items-start gap-2 text-xs min-w-0">
+                  <div className="flex items-start gap-2.5 text-xs min-w-0">
                     <ShieldAlert className="w-4 h-4 text-amber-400 mt-0.5 shrink-0" />
                     <div className="min-w-0 break-words flex-1">
-                      <span className="mono-label block">
+                      <span className="mono-label block mb-0.5">
                         Confidence Impact:
                       </span>
-                      <span className="text-amber-200/90 font-mono text-xs break-words">
+                      <span className="text-amber-200/90 font-mono text-xs break-words leading-relaxed">
                         {article.confidence_impact}
                       </span>
                     </div>
@@ -432,9 +432,9 @@ export default function WeatherNewsFeed() {
               </div>
 
               {/* Card Footer */}
-              <div className="pt-3 border-t border-white/10 flex flex-wrap sm:flex-nowrap items-center justify-between gap-2 text-xs font-mono min-w-0">
+              <div className="pt-3.5 border-t border-white/10 flex flex-wrap sm:flex-nowrap items-center justify-between gap-2.5 text-xs font-mono min-w-0">
                 <span className="text-white/50 truncate min-w-0 flex-1">{article.source}</span>
-                <span className="text-[#E8E8E5] font-semibold flex items-center gap-1.5 bg-white/[0.05] px-2.5 py-1 rounded-full border border-white/10 shrink-0 whitespace-nowrap">
+                <span className="text-[#E8E8E5] font-semibold flex items-center gap-1.5 bg-white/[0.05] px-3 py-1 rounded-full border border-white/10 shrink-0 whitespace-nowrap">
                   <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse shrink-0" />
                   {article.published_at}
                 </span>
