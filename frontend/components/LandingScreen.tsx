@@ -34,10 +34,11 @@ export default function LandingScreen({ onGetStarted }: LandingScreenProps) {
   }, []);
 
   return (
-    <div className="noir-app min-h-screen w-full flex flex-col justify-between p-5 md:p-12 relative overflow-hidden select-none animate-in fade-in duration-300">
-      {/* 1. Ambient Glow Orbs */}
-      <div className="ambient-glow glow-left" />
-      <div className="ambient-glow glow-right" />
+    <div className="noir-app noise-surface min-h-screen w-full flex flex-col justify-between p-5 md:p-12 relative overflow-hidden select-none animate-in fade-in duration-300">
+      {/* 1. Ambient Grid & Glow Orbs (from Lovable) */}
+      <div className="ambient-grid absolute inset-0 pointer-events-none z-0" aria-hidden="true" />
+      <div className="ambient-glow glow-left pointer-events-none" />
+      <div className="ambient-glow glow-right pointer-events-none" />
 
       {/* 2. SVG Film Grain Overlay */}
       <div className="grain" />

@@ -582,10 +582,11 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="noir-app min-h-screen text-[#E8E8E5] font-sans antialiased flex flex-col lg:flex-row relative">
-      {/* 1. Ambient Glow Orbs */}
-      <div className="ambient-glow glow-left" />
-      <div className="ambient-glow glow-right" />
+    <div className="noir-app noise-surface min-h-screen text-[#E8E8E5] font-sans antialiased flex flex-col lg:flex-row relative overflow-hidden">
+      {/* 1. Ambient Grid & Glow Orbs (from Lovable) */}
+      <div className="ambient-grid absolute inset-0 pointer-events-none z-0" aria-hidden="true" />
+      <div className="ambient-glow glow-left pointer-events-none" />
+      <div className="ambient-glow glow-right pointer-events-none" />
 
       {/* 2. SVG Film Grain Overlay */}
       <div className="grain" />
@@ -653,44 +654,69 @@ export default function Dashboard() {
             </p>
           </div>
 
-          {/* Vertical Navigation Items with Numbered Step Indices */}
-          <nav className="p-4 space-y-2" aria-label="Operational Views">
+          {/* Vertical Navigation Items with Lovable Gliding Silver Capsule */}
+          <nav className="p-3 space-y-2" aria-label="Operational Views">
             <div className="mono-label px-3 py-1 font-bold text-xs tracking-wider text-[#A3A3A3]">
               OPERATIONAL VIEWS
             </div>
-            {[
-              { id: "cockpit", label: "Live Overview", icon: Navigation, num: "01" },
-              { id: "windy", label: "Wind & Radar", icon: Wind, num: "02" },
-              { id: "news", label: "Weather Alerts", icon: AlertTriangle, num: "03" },
-              { id: "insights", label: "Diagnostics", icon: Activity, num: "04" },
-              { id: "sandbox", label: "Simulation", icon: Sliders, num: "05" },
-              { id: "regimes", label: "Threat Matrix", icon: CloudRain, num: "06" },
-              { id: "model", label: "Model Benchmarks", icon: Cpu, num: "07" },
-              { id: "archive", label: "Bust Archive", icon: Archive, num: "08" },
-              { id: "opendata", label: "Developer API", icon: Database, num: "09" },
-            ].map((tab) => {
-              const Icon = tab.icon;
-              const isActive = activeTab === tab.id;
-              return (
-                <button
-                  key={tab.id}
-                  onClick={() => {
-                    handleTabChange(tab.id as ActiveTab);
-                    setSidebarOpen(false);
+            
+            {/* The Lovable Nav Shell Container */}
+            <div className="nav-shell p-2">
+              <ol className="relative grid gap-1 list-none m-0 p-0">
+                {/* The Glider Capsule from Lovable! */}
+                <div
+                  className="nav-glider pointer-events-none absolute left-0 top-0 h-[3rem] w-full rounded-full z-0"
+                  style={{
+                    transform: `translateY(${Math.max(0, [
+                      "cockpit", "windy", "news", "insights", "sandbox", "regimes", "model", "archive", "opendata"
+                    ].indexOf(activeTab)) * 3.25}rem)`
                   }}
-                  className={`nav-row w-full justify-between cursor-pointer py-3 px-4 ${isActive ? "is-active" : ""}`}
-                >
-                  <div className="flex items-center gap-3">
-                    <span className="noir-number text-sm font-mono opacity-85">{tab.num}</span>
-                    <span className="truncate text-sm font-medium">{tab.label}</span>
-                  </div>
-                  <Icon size={16} className={isActive ? "text-black" : "text-[#A3A3A3]"} />
-                </button>
-              );
-            })}
+                  aria-hidden="true"
+                />
+                {[
+                  { id: "cockpit", label: "Live Overview", icon: Navigation, num: "01" },
+                  { id: "windy", label: "Wind & Radar", icon: Wind, num: "02" },
+                  { id: "news", label: "Weather Alerts", icon: AlertTriangle, num: "03" },
+                  { id: "insights", label: "Diagnostics", icon: Activity, num: "04" },
+                  { id: "sandbox", label: "Simulation", icon: Sliders, num: "05" },
+                  { id: "regimes", label: "Threat Matrix", icon: CloudRain, num: "06" },
+                  { id: "model", label: "Model Benchmarks", icon: Cpu, num: "07" },
+                  { id: "archive", label: "Bust Archive", icon: Archive, num: "08" },
+                  { id: "opendata", label: "Developer API", icon: Database, num: "09" },
+                ].map((tab) => {
+                  const Icon = tab.icon;
+                  const isActive = activeTab === tab.id;
+                  return (
+                    <li key={tab.id} className="relative z-10">
+                      <button
+                        type="button"
+                        aria-current={isActive ? "step" : undefined}
+                        onClick={() => {
+                          handleTabChange(tab.id as ActiveTab);
+                          setSidebarOpen(false);
+                        }}
+                        className={`nav-item flex h-[3rem] w-full items-center justify-between rounded-full px-4 text-left transition-colors duration-500 cursor-pointer ${
+                          isActive
+                            ? "bg-transparent text-black dark:text-black font-bold"
+                            : "bg-white/[0.02] text-[#A3A3A3] hover:bg-white/[0.06] hover:text-white"
+                        }`}
+                      >
+                        <div className="flex items-center gap-3">
+                          <span className="w-6 shrink-0 font-mono text-xs tabular-nums opacity-85">
+                            {tab.num}
+                          </span>
+                          <span className="text-sm font-medium">{tab.label}</span>
+                        </div>
+                        <Icon size={16} className={isActive ? "text-black dark:text-black" : "text-[#737373]"} />
+                      </button>
+                    </li>
+                  );
+                })}
+              </ol>
+            </div>
 
             {/* Quick link to Live Prediction Engine */}
-            <div className="pt-3">
+            <div className="pt-2">
               <Link
                 href="/live-prediction"
                 className="w-full px-4 py-2.5 rounded-full text-xs font-semibold transition cursor-pointer flex items-center justify-between border border-white/10 bg-white/[0.04] text-[#E5E5E5] hover:bg-white/[0.08] hover:text-white"
@@ -747,8 +773,8 @@ export default function Dashboard() {
             />
           </div>
 
-        {/* Active Tab Content with Smooth Noir Reveal Motion */}
-        <div key={activeTab} className="noir-reveal space-y-8">
+        {/* Active Tab Content with Lovable Smooth Content Reveal Motion */}
+        <div key={activeTab} className="content-enter space-y-8">
         
         {/* ========================================================
             VIEW 1: LIVE OPERATIONAL OVERVIEW
