@@ -331,68 +331,69 @@ export default function ActivityHeatmap({
   };
 
   return (
-    <div className="glass-feature p-5 border border-white/10 text-[#E8E8E5]">
+    <div className="glass-feature p-5 border border-white/10 text-[var(--noir-text)] min-w-0 overflow-hidden">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-white/10">
-        <div>
-          <div className="flex items-center gap-2 mb-1">
-            <CloudRain size={16} className="text-white" />
-            <h3 className="text-base font-bold tracking-tight text-[#E8E8E5]">
+      <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-4 pb-4 border-b border-white/10 min-w-0">
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-wrap items-center gap-2 mb-1 min-w-0">
+            <CloudRain size={16} className="text-white shrink-0" />
+            <h3 className="text-base font-bold tracking-tight text-[#E8E8E5] shrink-0">
               365-Day Meteorological Observation &amp; Forecast Heatmap
             </h3>
-            <span className="text-xs font-mono-tech px-2.5 py-0.5 rounded-full border border-white/10 bg-white/[0.06] text-[#E8E8E5] flex items-center gap-1">
-              <MapPin size={11} /> {cityName}, {stateName}
+            <span className="text-xs font-mono-tech px-2.5 py-0.5 rounded-full border border-white/10 bg-white/[0.06] text-[#E8E8E5] inline-flex items-center gap-1 max-w-full truncate" title={`${cityName}, ${stateName}`}>
+              <MapPin size={11} className="shrink-0" />
+              <span className="truncate">{cityName}, {stateName}</span>
             </span>
             {loading && (
-              <RefreshCw size={13} className="animate-spin text-white" />
+              <RefreshCw size={13} className="animate-spin text-white shrink-0" />
             )}
           </div>
-          <p className="text-xs text-[#92928C]">
+          <p className="text-xs text-[#92928C] break-words">
             Daily synoptic weather distribution across 52 weeks, dynamically synchronized with live station telemetry and official historical records.
           </p>
         </div>
 
         {/* Metric Selector Tabs */}
-        <div className="flex items-center gap-1 bg-black/40 p-1 rounded-full border border-white/10">
+        <div className="flex flex-wrap items-center gap-1.5 bg-black/40 p-1.5 rounded-2xl sm:rounded-full border border-white/10 shrink-0 max-w-full overflow-x-auto">
           <button
             onClick={() => setMetricMode("rainfall")}
-            className={`px-3 py-1 text-xs font-mono-tech rounded-full transition-colors flex items-center gap-1.5 cursor-pointer ${
+            className={`px-3 py-1.5 text-xs font-mono-tech rounded-full transition-all duration-300 flex items-center gap-1.5 cursor-pointer whitespace-nowrap active:scale-95 ${
               metricMode === "rainfall"
-                ? "bg-[#E8E8E4] text-[#141414] font-semibold shadow-sm"
-                : "text-[#8B8B87] hover:text-white"
+                ? "bg-[#E8E8E4] text-[#141414] font-semibold shadow-md border border-white"
+                : "text-[#8B8B87] hover:text-white hover:bg-white/[0.05]"
             }`}
           >
-            <CloudRain size={12} /> Precipitation
+            <CloudRain size={12} className="shrink-0" /> Precipitation
           </button>
           <button
             onClick={() => setMetricMode("temperature")}
-            className={`px-3 py-1 text-xs font-mono-tech rounded-full transition-colors flex items-center gap-1.5 cursor-pointer ${
+            className={`px-3 py-1.5 text-xs font-mono-tech rounded-full transition-all duration-300 flex items-center gap-1.5 cursor-pointer whitespace-nowrap active:scale-95 ${
               metricMode === "temperature"
-                ? "bg-[#E8E8E4] text-[#141414] font-semibold shadow-sm"
-                : "text-[#8B8B87] hover:text-white"
+                ? "bg-[#E8E8E4] text-[#141414] font-semibold shadow-md border border-white"
+                : "text-[#8B8B87] hover:text-white hover:bg-white/[0.05]"
             }`}
           >
-            <Sun size={12} /> Max Temp
+            <Sun size={12} className="shrink-0" /> Max Temp
           </button>
           <button
             onClick={() => setMetricMode("wind")}
-            className={`px-3 py-1 text-xs font-mono-tech rounded-full transition-colors flex items-center gap-1.5 cursor-pointer ${
+            className={`px-3 py-1.5 text-xs font-mono-tech rounded-full transition-all duration-300 flex items-center gap-1.5 cursor-pointer whitespace-nowrap active:scale-95 ${
               metricMode === "wind"
-                ? "bg-[#E8E8E4] text-[#141414] font-semibold shadow-sm"
-                : "text-[#8B8B87] hover:text-white"
+                ? "bg-[#E8E8E4] text-[#141414] font-semibold shadow-md border border-white"
+                : "text-[#8B8B87] hover:text-white hover:bg-white/[0.05]"
             }`}
           >
-            <Wind size={12} /> Peak Wind
+            <Wind size={12} className="shrink-0" /> Peak Wind
           </button>
           <button
             onClick={() => setMetricMode("humidity")}
-            className={`px-3 py-1 text-xs font-mono-tech rounded-full transition-colors flex items-center gap-1.5 cursor-pointer ${
+            className={`px-3 py-1.5 text-xs font-mono-tech rounded-full transition-all duration-300 flex items-center gap-1.5 cursor-pointer whitespace-nowrap active:scale-95 ${
               metricMode === "humidity"
-                ? "bg-[#E8E8E4] text-[#141414] font-semibold shadow-sm"
-                : "text-[#8B8B87] hover:text-white"
+                ? "bg-[#E8E8E4] text-[#141414] font-semibold shadow-md border border-white"
+                : "text-[#8B8B87] hover:text-white hover:bg-white/[0.05]"
             }`}
           >
-            <Droplets size={12} /> Humidity
+            <Droplets size={12} className="shrink-0" /> Humidity
           </button>
         </div>
       </div>

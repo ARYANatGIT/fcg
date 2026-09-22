@@ -121,32 +121,32 @@ export default function ModelInspector() {
 
       {/* Model Benchmark Table */}
       <div className="detail-card space-y-4 p-6 rounded-2xl">
-        <div className="flex flex-wrap justify-between items-center border-b border-white/10 pb-3.5 gap-2">
-          <div>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/10 pb-4">
+          <div className="min-w-0">
             <h3 className="text-base font-bold text-[#E8E8E5]">
               Model Comparison &amp; Chronological Validation Benchmark
             </h3>
-            <p className="text-xs text-[#92928C] mt-0.5">
+            <p className="text-xs text-[#92928C] mt-0.5 break-words">
               Evaluated strictly on chronological train/val/test splits (PR-AUC prioritized due to ~10% positive bust class imbalance).
             </p>
           </div>
-          <span className="px-3 py-1 rounded-full font-mono-tech text-xs bg-white/[0.05] text-[#D8D8D3] border border-white/10 font-semibold">
+          <span className="px-3 py-1 rounded-full font-mono-tech text-xs bg-white/[0.05] text-[#D8D8D3] border border-white/10 font-semibold whitespace-nowrap shrink-0 self-start sm:self-auto">
             CHRONOLOGICAL SPLIT (70% / 15% / 15%)
           </span>
         </div>
 
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto min-w-0">
           <table className="w-full text-left text-xs font-mono-tech border-collapse">
             <thead>
               <tr className="border-b border-white/10 text-[#8B8B87] uppercase tracking-wider">
-                <th className="py-3 px-4">Architecture</th>
-                <th className="py-3 px-4">Val PR-AUC</th>
-                <th className="py-3 px-4">Val ROC-AUC</th>
-                <th className="py-3 px-4">Test PR-AUC</th>
-                <th className="py-3 px-4">Test ROC-AUC</th>
-                <th className="py-3 px-4">Brier Score</th>
-                <th className="py-3 px-4">F1 Score</th>
-                <th className="py-3 px-4">Status</th>
+                <th className="py-3 px-4 whitespace-nowrap">Architecture</th>
+                <th className="py-3 px-4 whitespace-nowrap">Val PR-AUC</th>
+                <th className="py-3 px-4 whitespace-nowrap">Val ROC-AUC</th>
+                <th className="py-3 px-4 whitespace-nowrap">Test PR-AUC</th>
+                <th className="py-3 px-4 whitespace-nowrap">Test ROC-AUC</th>
+                <th className="py-3 px-4 whitespace-nowrap">Brier Score</th>
+                <th className="py-3 px-4 whitespace-nowrap">F1 Score</th>
+                <th className="py-3 px-4 whitespace-nowrap">Status</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-white/[0.06]">
@@ -157,31 +157,31 @@ export default function ModelInspector() {
                     key={m.model}
                     className={`hover:bg-white/[0.03] transition ${m.isPrimary ? "bg-white/[0.02]" : ""}`}
                   >
-                    <td className="py-3.5 px-4 font-sans">
+                    <td className="py-3.5 px-4 font-sans whitespace-nowrap">
                       <span className="font-semibold text-[#E8E8E5] block text-sm">{m.model}</span>
                       <span className="text-xs text-[#8B8B87] font-mono-tech">
                         {isDynamicLgbm ? `${(livePerf.train_samples + livePerf.test_samples).toLocaleString()}-Sample Synoptic Regressor` : m.type}
                       </span>
                     </td>
-                    <td className="py-3.5 px-4 text-[#E8E8E5] font-bold">
+                    <td className="py-3.5 px-4 text-[#E8E8E5] font-bold whitespace-nowrap">
                       {isDynamicLgbm ? `R² ${livePerf.r2_score.toFixed(3)}` : m.valPrAuc}
                     </td>
-                    <td className="py-3.5 px-4 text-[#D8D8D3]">
+                    <td className="py-3.5 px-4 text-[#D8D8D3] whitespace-nowrap">
                       {isDynamicLgbm ? `MAE ${livePerf.mae.toFixed(2)}°` : m.valRocAuc}
                     </td>
-                    <td className="py-3.5 px-4 text-[#E8E8E5] font-bold">
+                    <td className="py-3.5 px-4 text-[#E8E8E5] font-bold whitespace-nowrap">
                       {isDynamicLgbm ? `RMSE ${livePerf.rmse.toFixed(2)}°` : m.testPrAuc}
                     </td>
-                    <td className="py-3.5 px-4 text-[#D8D8D3]">
+                    <td className="py-3.5 px-4 text-[#D8D8D3] whitespace-nowrap">
                       {isDynamicLgbm ? `${(livePerf.train_samples + livePerf.test_samples).toLocaleString()} N` : m.testRocAuc}
                     </td>
-                    <td className="py-3.5 px-4 text-[#E8E8E5] font-bold">{m.brier}</td>
-                    <td className="py-3.5 px-4 text-[#D8D8D3]">
+                    <td className="py-3.5 px-4 text-[#E8E8E5] font-bold whitespace-nowrap">{m.brier}</td>
+                    <td className="py-3.5 px-4 text-[#D8D8D3] whitespace-nowrap">
                       {isDynamicLgbm ? `${(livePerf.r2_score * 100).toFixed(1)}% Var` : m.f1}
                     </td>
-                    <td className="py-3.5 px-4">
+                    <td className="py-3.5 px-4 whitespace-nowrap">
                       <span
-                        className={`px-2.5 py-0.5 rounded-full text-xs font-mono-tech font-semibold border ${
+                        className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-mono-tech font-semibold border whitespace-nowrap shrink-0 ${
                           m.isPrimary
                             ? "bg-white/[0.08] text-[#E8E8E5] border-white/20"
                             : "text-[#8B8B87] border-white/10"

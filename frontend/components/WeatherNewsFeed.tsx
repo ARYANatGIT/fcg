@@ -205,25 +205,25 @@ export default function WeatherNewsFeed() {
     switch (severity) {
       case "WARNING":
         return (
-          <span className="px-3 py-0.5 rounded-full text-[11px] font-mono-tech font-semibold tracking-wider bg-red-500/15 text-red-400 border border-red-500/40">
+          <span className="px-3 py-0.5 rounded-full text-[11px] font-mono-tech font-semibold tracking-wider bg-red-500/15 text-red-400 border border-red-500/40 whitespace-nowrap shrink-0">
             SEVERE WARNING
           </span>
         );
       case "WATCH":
         return (
-          <span className="px-3 py-0.5 rounded-full text-[11px] font-mono-tech font-semibold tracking-wider bg-amber-500/15 text-amber-300 border border-amber-500/40">
+          <span className="px-3 py-0.5 rounded-full text-[11px] font-mono-tech font-semibold tracking-wider bg-amber-500/15 text-amber-300 border border-amber-500/40 whitespace-nowrap shrink-0">
             WEATHER WATCH
           </span>
         );
       case "ADVISORY":
         return (
-          <span className="px-3 py-0.5 rounded-full text-xs font-mono-tech font-semibold tracking-wider bg-white/[0.08] text-[#E8E8E5] border border-white/20">
+          <span className="px-3 py-0.5 rounded-full text-xs font-mono-tech font-semibold tracking-wider bg-white/[0.08] text-[#E8E8E5] border border-white/20 whitespace-nowrap shrink-0">
             ADVISORY
           </span>
         );
       default:
         return (
-          <span className="px-3 py-0.5 rounded-full text-xs font-mono-tech font-semibold tracking-wider bg-white/[0.06] text-[#D8D8D3] border border-white/10">
+          <span className="px-3 py-0.5 rounded-full text-xs font-mono-tech font-semibold tracking-wider bg-white/[0.06] text-[#D8D8D3] border border-white/10 whitespace-nowrap shrink-0">
             INFORMATION
           </span>
         );
@@ -356,20 +356,20 @@ export default function WeatherNewsFeed() {
           No disruption alerts matching current filter parameters ({articles.length} total in database).
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 [&>*]:min-w-0">
           {filteredArticles.map((article) => (
             <div
               key={article.id}
-              className="detail-card flex flex-col justify-between"
+              className="detail-card min-w-0 overflow-hidden flex flex-col justify-between"
             >
-              <div>
+              <div className="min-w-0">
                 {/* Card Top Badges */}
-                <div className="flex items-center justify-between gap-2 mb-3">
-                  <div className="flex items-center gap-2">
-                    <span className="p-1.5 rounded-lg bg-white/[0.04] border border-white/10 text-white">
+                <div className="flex items-center justify-between gap-2 mb-3 min-w-0">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <span className="p-1.5 rounded-lg bg-white/[0.04] border border-white/10 text-white shrink-0">
                       {getCategoryIcon(article.category)}
                     </span>
-                    <span className="text-xs font-mono-tech text-[#8B8B87] uppercase tracking-wider font-semibold">
+                    <span className="text-xs font-mono-tech text-[#8B8B87] uppercase tracking-wider font-semibold truncate">
                       {article.region} Zone
                     </span>
                   </div>
@@ -377,25 +377,25 @@ export default function WeatherNewsFeed() {
                 </div>
 
                 {/* Title */}
-                <h3 className="text-[15px] font-bold text-[#E8E8E5] transition-colors leading-snug mb-2.5">
+                <h3 className="text-[15px] font-bold text-[#E8E8E5] transition-colors leading-snug mb-2.5 break-words">
                   {article.title}
                 </h3>
 
                 {/* Summary */}
-                <p className="text-[13px] text-[#92928C] leading-relaxed mb-4">
+                <p className="text-[13px] text-[#92928C] leading-relaxed mb-4 break-words">
                   {article.summary}
                 </p>
 
                 {/* Affected States */}
-                <div className="mb-4">
+                <div className="mb-4 min-w-0">
                   <span className="mono-label block mb-1.5">
                     Impacted States / Subdivisions:
                   </span>
-                  <div className="flex flex-wrap gap-1.5">
+                  <div className="flex flex-wrap gap-1.5 min-w-0">
                     {article.affected_states.map((state) => (
                       <span
                         key={state}
-                        className="px-2.5 py-0.5 rounded-full bg-white/[0.04] border border-white/10 text-xs text-[#D8D8D3] font-mono-tech"
+                        className="px-2.5 py-0.5 rounded-full bg-white/[0.04] border border-white/10 text-xs text-[#D8D8D3] font-mono-tech truncate max-w-full"
                       >
                         {state}
                       </span>
@@ -404,26 +404,26 @@ export default function WeatherNewsFeed() {
                 </div>
 
                 {/* Medium-Range Bust Impact Diagnostic Box */}
-                <div className="bg-white/[0.02] p-3 rounded-xl border border-white/10 mb-4 space-y-2">
-                  <div className="flex items-start gap-2 text-xs">
+                <div className="bg-white/[0.02] p-3 rounded-xl border border-white/10 mb-4 space-y-2 min-w-0 overflow-hidden">
+                  <div className="flex items-start gap-2 text-xs min-w-0">
                     <TrendingUp className="w-4 h-4 text-red-400 mt-0.5 shrink-0" />
-                    <div>
+                    <div className="min-w-0 break-words flex-1">
                       <span className="mono-label block">
                         Forecast Bust Risk Driver:
                       </span>
-                      <span className="text-[#E8E8E5] font-medium text-xs">
+                      <span className="text-[#E8E8E5] font-medium text-xs break-words">
                         {article.bust_risk_factor}
                       </span>
                     </div>
                   </div>
 
-                  <div className="flex items-start gap-2 text-xs">
+                  <div className="flex items-start gap-2 text-xs min-w-0">
                     <ShieldAlert className="w-4 h-4 text-amber-400 mt-0.5 shrink-0" />
-                    <div>
+                    <div className="min-w-0 break-words flex-1">
                       <span className="mono-label block">
                         Confidence Impact:
                       </span>
-                      <span className="text-amber-200/90 font-mono text-xs">
+                      <span className="text-amber-200/90 font-mono text-xs break-words">
                         {article.confidence_impact}
                       </span>
                     </div>
@@ -432,10 +432,10 @@ export default function WeatherNewsFeed() {
               </div>
 
               {/* Card Footer */}
-              <div className="pt-3 border-t border-white/10 flex items-center justify-between text-xs font-mono">
-                <span className="text-white/50">{article.source}</span>
-                <span className="text-[#E8E8E5] font-semibold flex items-center gap-1.5 bg-white/[0.05] px-2.5 py-1 rounded-full border border-white/10">
-                  <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+              <div className="pt-3 border-t border-white/10 flex flex-wrap sm:flex-nowrap items-center justify-between gap-2 text-xs font-mono min-w-0">
+                <span className="text-white/50 truncate min-w-0 flex-1">{article.source}</span>
+                <span className="text-[#E8E8E5] font-semibold flex items-center gap-1.5 bg-white/[0.05] px-2.5 py-1 rounded-full border border-white/10 shrink-0 whitespace-nowrap">
+                  <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse shrink-0" />
                   {article.published_at}
                 </span>
               </div>

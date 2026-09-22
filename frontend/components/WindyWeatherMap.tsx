@@ -557,52 +557,52 @@ export default function WindyWeatherMap() {
         {/* Right Column: Comparative Multi-Model Telemetry HUD */}
         <div className="xl:col-span-4 flex flex-col gap-3">
           {/* Comparative Model Discrepancy & Bust Evaluation Card */}
-          <div className="detail-card space-y-3 flex-1 flex flex-col justify-between">
-            <div>
-              <div className="flex items-center justify-between pb-3 border-b border-white/10">
-                <div className="flex items-center gap-2.5">
-                  <div className="p-1.5 rounded-full bg-white/[0.04] text-white border border-white/10">
+          <div className="detail-card space-y-3 flex-1 flex flex-col justify-between min-w-0 overflow-hidden">
+            <div className="min-w-0">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-white/10 gap-2 min-w-0">
+                <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                  <div className="p-1.5 rounded-full bg-white/[0.04] text-white border border-white/10 shrink-0">
                     <Scale className="w-4 h-4" />
                   </div>
-                  <div>
-                    <h3 className="text-sm font-bold text-white tracking-wide font-sans">
-                      ECMWF vs Ground Truth Verification
+                  <div className="min-w-0 flex-1">
+                    <h3 className="text-sm font-bold text-white tracking-wide font-sans truncate" title="ECMWF vs Ground Truth Verification">
+                      ECMWF vs Ground Truth
                     </h3>
-                    <p className="text-xs font-mono-tech text-[#A3A3A3]">
+                    <p className="text-xs font-mono-tech text-[#A3A3A3] truncate">
                       Lead Day +{leadDay} Forecast Validation
                     </p>
                   </div>
                 </div>
 
                 {/* Bust Risk Badge */}
-                <div className={`px-2.5 py-1 rounded-full text-xs font-mono-tech font-bold tracking-wider border ${
+                <div className={`px-2.5 py-1 rounded-full text-xs font-mono-tech font-bold tracking-wider border shrink-0 ${
                   isHighRisk
                     ? "bg-red-500/15 text-red-400 border-red-500/40 animate-pulse"
                     : isModRisk
                     ? "bg-amber-500/15 text-amber-300 border-amber-500/40"
                     : "bg-white/[0.08] text-white border-white/20"
                 }`}>
-                  {(windyAnalysis.calibratedBustProb * 100).toFixed(1)}% BUST RISK
+                  {(windyAnalysis.calibratedBustProb * 100).toFixed(1)}% BUST
                 </div>
               </div>
 
               {/* Side-by-Side Model Comparison Grid */}
-              <div className="grid grid-cols-2 gap-2 text-xs font-mono-tech mt-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs font-mono-tech mt-3 min-w-0">
                 {/* Temperature Comparison */}
-                <div className="bg-white/[0.03] p-2.5 rounded-xl border border-white/10">
-                  <div className="flex justify-between text-[#A3A3A3] mb-1">
-                    <span className="font-semibold">Temperature</span>
-                    <span className={windyAnalysis.tempBias > 0 ? "text-red-400 font-bold" : "text-white font-bold"}>
+                <div className="bg-white/[0.03] p-2.5 rounded-xl border border-white/10 min-w-0 overflow-hidden">
+                  <div className="flex justify-between text-[#A3A3A3] mb-1 gap-1 min-w-0">
+                    <span className="font-semibold truncate">Temperature</span>
+                    <span className={`shrink-0 font-bold ${windyAnalysis.tempBias > 0 ? "text-red-400" : "text-white"}`}>
                       Δ {windyAnalysis.tempBias > 0 ? `+${windyAnalysis.tempBias}` : windyAnalysis.tempBias}°C
                     </span>
                   </div>
-                  <div className="flex justify-between items-baseline">
-                    <div>
-                      <span className="text-xs text-[#A3A3A3] block mb-0.5">Windy ECMWF</span>
-                      <span className="text-sm font-bold text-[#E5E5E5]">{windyAnalysis.windyForecast.temperature_2m}°C</span>
+                  <div className="flex justify-between items-baseline gap-1 min-w-0">
+                    <div className="min-w-0">
+                      <span className="text-[11px] text-[#A3A3A3] block mb-0.5 truncate">ECMWF</span>
+                      <span className="text-sm font-bold text-[#E5E5E5] truncate">{windyAnalysis.windyForecast.temperature_2m}°C</span>
                     </div>
-                    <div className="text-right">
-                      <span className="text-xs text-[#A3A3A3] block mb-0.5">Observed</span>
+                    <div className="text-right shrink-0">
+                      <span className="text-[11px] text-[#A3A3A3] block mb-0.5">Observed</span>
                       <span className="text-sm font-bold text-white">{weather.temp}°C</span>
                     </div>
                   </div>

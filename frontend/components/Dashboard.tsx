@@ -582,7 +582,7 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="noir-app noise-surface h-screen w-screen overflow-hidden text-[#E8E8E5] font-sans antialiased flex flex-col lg:flex-row relative">
+    <div className="noir-app noise-surface h-screen w-screen overflow-hidden text-[var(--noir-text)] font-sans antialiased flex flex-col lg:flex-row relative">
       {/* 1. Ambient Grid & Glow Orbs (from Lovable) */}
       <div className="ambient-grid absolute inset-0 pointer-events-none z-0" aria-hidden="true" />
       <div className="ambient-glow glow-left pointer-events-none" />
@@ -1036,19 +1036,20 @@ export default function Dashboard() {
             />
 
             {/* Diagnostic Layer: 3 Uniform Height Cards with Zero Dead Space */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 min-w-0 [&>*]:min-w-0">
               
               {/* Card 1: SHAP Local Explainability */}
-              <div className="detail-card flex flex-col justify-between">
-                <div>
-                  <div className="flex items-center justify-between mb-4 border-b border-white/10 pb-3">
-                    <h3 className="text-base font-bold text-white flex items-center gap-2">
-                      <Info size={16} className="text-white" /> Why is this forecast at risk?
+              <div className="detail-card flex flex-col justify-between min-w-0 overflow-hidden">
+                <div className="min-w-0">
+                  <div className="flex items-center justify-between mb-4 border-b border-white/10 pb-3 gap-2 min-w-0">
+                    <h3 className="text-base font-bold text-white flex items-center gap-2 truncate">
+                      <Info size={16} className="text-white shrink-0" />
+                      <span className="truncate">Why is this forecast at risk?</span>
                     </h3>
-                    <span className="mono-label">03 / SHAP LOCAL</span>
+                    <span className="mono-label shrink-0">03 / SHAP</span>
                   </div>
 
-                  <div className="space-y-2.5">
+                  <div className="space-y-2.5 min-w-0">
                     {shapReasons.slice(0, 4).map((r, i) => (
                       <div key={i} className="bg-white/[0.03] p-3 rounded-xl border border-white/10 flex items-start justify-between gap-3 min-w-0">
                         <div className="flex-1 min-w-0">
@@ -1065,25 +1066,26 @@ export default function Dashboard() {
                   </div>
                 </div>
 
-                <div className="text-xs font-mono-tech text-[#A3A3A3] mt-4 pt-3 border-t border-white/10">
+                <div className="text-xs font-mono-tech text-[#A3A3A3] mt-4 pt-3 border-t border-white/10 break-words">
                   SHAP reflects additive statistical feature attributions, not absolute physical causality.
                 </div>
               </div>
 
               {/* Card 2: Run-to-Run Forecast Revision Tracking */}
-              <div className="detail-card flex flex-col justify-between">
-                <div>
-                  <div className="flex items-center justify-between mb-4 border-b border-white/10 pb-3">
-                    <h3 className="text-base font-bold text-white flex items-center gap-2">
-                      <TrendingUp size={16} className="text-white" /> Run-to-Run Forecast Evolution
+              <div className="detail-card flex flex-col justify-between min-w-0 overflow-hidden">
+                <div className="min-w-0">
+                  <div className="flex items-center justify-between mb-4 border-b border-white/10 pb-3 gap-2 min-w-0">
+                    <h3 className="text-base font-bold text-white flex items-center gap-2 truncate">
+                      <TrendingUp size={16} className="text-white shrink-0" />
+                      <span className="truncate">Run-to-Run Evolution</span>
                     </h3>
-                    <span className="mono-label">04 / MULTI-RUN</span>
+                    <span className="mono-label shrink-0">04 / MULTI-RUN</span>
                   </div>
 
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-white/90 font-medium">Inter-cycle Consistency:</span>
-                      <span className={`font-mono-tech text-xs px-2.5 py-0.5 rounded-full border font-semibold ${
+                  <div className="space-y-3 min-w-0">
+                    <div className="flex items-center justify-between gap-2 min-w-0">
+                      <span className="text-sm text-white/90 font-medium truncate">Consistency:</span>
+                      <span className={`font-mono-tech text-xs px-2.5 py-0.5 rounded-full border font-semibold shrink-0 ${
                         revisions?.large_revision
                           ? "bg-red-500/15 text-red-400 border-red-500/40"
                           : "bg-white/[0.06] text-white border-white/20"
@@ -1092,66 +1094,70 @@ export default function Dashboard() {
                       </span>
                     </div>
 
-                    {/* Multi-cycle run progression rows */}
-                    <div className="space-y-2">
+                    {/* Multi-cycle run progression rows - clean responsive 2-column formatting */}
+                    <div className="space-y-2 min-w-0">
                       {dynamicRuns.map((r: any, idx: number) => (
-                        <div key={idx} className="bg-white/[0.03] p-2.5 rounded-xl border border-white/10 flex items-center justify-between text-xs font-mono-tech gap-2 min-w-0">
+                        <div key={idx} className="bg-white/[0.03] p-2.5 rounded-xl border border-white/10 flex flex-col sm:flex-row sm:items-center justify-between text-xs font-mono-tech gap-1.5 min-w-0">
                           <span className="text-white font-semibold truncate">{r.run}</span>
-                          <span className="text-white font-bold shrink-0">{r.rainfall_mm} mm</span>
-                          <span className="text-[#A3A3A3] shrink-0">{r.wind_speed_ms} m/s</span>
-                          <span className="text-[#D4D4D4] shrink-0">{r.temperature_c ?? r.temp_c ?? 25}°C</span>
+                          <div className="flex items-center gap-2 text-right shrink-0">
+                            <span className="text-white font-bold">{r.rainfall_mm}mm</span>
+                            <span className="text-[#A3A3A3]">| {r.wind_speed_ms}m/s</span>
+                            <span className="text-[#D4D4D4]">| {r.temperature_c ?? r.temp_c ?? 25}°C</span>
+                          </div>
                         </div>
                       ))}
                     </div>
 
-                    <div className="text-xs font-mono-tech flex justify-between text-white/90 bg-white/[0.02] p-2.5 rounded-xl border border-white/10">
-                      <span>COMBINED VOLATILITY SCORE:</span>
-                      <span className="text-white font-bold">{dynamicVolatilityScore}</span>
+                    <div className="text-xs font-mono-tech flex justify-between text-white/90 bg-white/[0.02] p-2.5 rounded-xl border border-white/10 gap-2 min-w-0">
+                      <span className="truncate">VOLATILITY SCORE:</span>
+                      <span className="text-white font-bold shrink-0">{dynamicVolatilityScore}</span>
                     </div>
                   </div>
                 </div>
 
-                <div className="text-xs font-mono-tech text-[#A3A3A3] mt-4 pt-3 border-t border-white/10">
+                <div className="text-xs font-mono-tech text-[#A3A3A3] mt-4 pt-3 border-t border-white/10 break-words">
                   Run-to-run divergence across cycles reveals numerical model boundary instability.
                 </div>
               </div>
 
               {/* Card 3: Historical Analogs */}
-              <div className="detail-card flex flex-col justify-between">
-                <div>
-                  <div className="flex items-center justify-between mb-4 border-b border-white/10 pb-3">
-                    <h3 className="text-base font-bold text-white flex items-center gap-2">
-                      <Activity size={16} className="text-white" /> Nearest Historical Analogs
+              <div className="detail-card flex flex-col justify-between min-w-0 overflow-hidden">
+                <div className="min-w-0">
+                  <div className="flex items-center justify-between mb-4 border-b border-white/10 pb-3 gap-2 min-w-0">
+                    <h3 className="text-base font-bold text-white flex items-center gap-2 truncate">
+                      <Activity size={16} className="text-white shrink-0" />
+                      <span className="truncate">Nearest Historical Analogs</span>
                     </h3>
-                    <span className="mono-label">05 / TOP 5 CASES</span>
+                    <span className="mono-label shrink-0">05 / ANALOGS</span>
                   </div>
 
-                  <div>
-                    <div className="flex items-baseline justify-between mb-3 text-sm">
-                      <span className="text-white/90 font-medium">Historical Bust Rate:</span>
-                      <span className="font-mono-tech text-base font-bold text-white">
+                  <div className="min-w-0">
+                    <div className="flex items-baseline justify-between mb-3 text-sm gap-2 min-w-0">
+                      <span className="text-white/90 font-medium truncate">Historical Bust Rate:</span>
+                      <span className="font-mono-tech text-base font-bold text-white shrink-0">
                         {analogSummary ? `${Math.round(analogSummary.historical_analog_bust_rate * 5)} / 5 (${(analogSummary.historical_analog_bust_rate * 100).toFixed(0)}%)` : "2 / 5 (40%)"}
                       </span>
                     </div>
 
-                    <div className="space-y-2">
+                    <div className="space-y-2 min-w-0">
                       {dynamicAnalogs.slice(0, 4).map((a: any, i: number) => {
                         const initTime = a.initialization_time || a.analog_date || `2024-0${8 - i}-15`;
                         const dist = a.similarity_distance ?? a.similarity_score ?? (0.35 + i * 0.12);
                         const isBust = a.bust === 1 || a.bust_occurred === true;
                         return (
                           <div key={i} className="flex justify-between items-center text-xs font-mono-tech bg-white/[0.03] p-2.5 rounded-xl border border-white/10 gap-2 min-w-0">
-                            <span className="text-white font-medium truncate">
-                              #{i + 1} {String(initTime).split(" ")[0]}
-                            </span>
-                            <span className="text-[#A3A3A3] shrink-0">
-                              dist={Number(dist).toFixed(2)}
-                            </span>
-                            <span className={`px-2 py-0.5 rounded-full text-xs font-bold uppercase shrink-0 ${
-                              isBust ? "bg-red-500/15 text-red-400 border border-red-500/40" : "bg-white/[0.06] text-white border border-white/20"
-                            }`}>
-                              {isBust ? "BUST" : "VERIFIED"}
-                            </span>
+                            <div className="flex items-center gap-1.5 min-w-0 truncate">
+                              <span className="text-[#A3A3A3] shrink-0 font-bold">#{i + 1}</span>
+                              <span className="text-white font-medium truncate">{String(initTime).split(" ")[0]}</span>
+                            </div>
+                            <div className="flex items-center gap-2 shrink-0">
+                              <span className="text-[#A3A3A3] text-[11px]">dist={Number(dist).toFixed(2)}</span>
+                              <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase shrink-0 ${
+                                isBust ? "bg-red-500/15 text-red-400 border border-red-500/40" : "bg-white/[0.06] text-white border border-white/20"
+                              }`}>
+                                {isBust ? "BUST" : "VERIFIED"}
+                              </span>
+                            </div>
                           </div>
                         );
                       })}
@@ -1159,7 +1165,7 @@ export default function Dashboard() {
                   </div>
                 </div>
 
-                <div className="text-xs font-mono-tech text-[#A3A3A3] mt-4 pt-3 border-t border-white/10">
+                <div className="text-xs font-mono-tech text-[#A3A3A3] mt-4 pt-3 border-t border-white/10 break-words">
                   Strictly filtered to dates preceding current forecast initialization (t &lt; T₀).
                 </div>
               </div>
