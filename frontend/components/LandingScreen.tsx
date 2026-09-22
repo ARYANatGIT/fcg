@@ -118,10 +118,10 @@ export default function LandingScreen({ onGetStarted }: LandingScreenProps) {
         <div className="pt-2 flex flex-col items-center gap-3">
           <button
             onClick={onGetStarted}
-            className="circle-cta group"
+            className="circle-cta group inline-flex items-center justify-between gap-5 bg-white text-black hover:bg-neutral-100 dark:bg-white dark:text-black rounded-full py-1.5 pl-7 pr-2 font-bold text-sm tracking-wide shadow-2xl transition-all cursor-pointer active:scale-95"
           >
-            <span>ENTER OPERATIONAL COCKPIT</span>
-            <div className="circle-icon">
+            <span className="font-semibold tracking-wider">ENTER OPERATIONAL COCKPIT</span>
+            <div className="circle-icon w-11 h-11 rounded-full bg-black text-white flex items-center justify-center shrink-0 transition-transform group-hover:scale-105">
               <ArrowUpRight size={18} strokeWidth={2.4} className="transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
             </div>
           </button>

@@ -582,7 +582,7 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="noir-app noise-surface min-h-screen text-[#E8E8E5] font-sans antialiased flex flex-col lg:flex-row relative overflow-hidden">
+    <div className="noir-app noise-surface h-screen w-screen overflow-hidden text-[#E8E8E5] font-sans antialiased flex flex-col lg:flex-row relative">
       {/* 1. Ambient Grid & Glow Orbs (from Lovable) */}
       <div className="ambient-grid absolute inset-0 pointer-events-none z-0" aria-hidden="true" />
       <div className="ambient-glow glow-left pointer-events-none" />
@@ -592,7 +592,7 @@ export default function Dashboard() {
       <div className="grain" />
 
       {/* Mobile Top Header (Visible on screen < lg) */}
-      <header className="lg:hidden flex items-center justify-between px-4 py-3 bg-[#080808]/90 border-b border-white/10 sticky top-0 z-40 backdrop-blur-2xl shadow-md">
+      <header className="lg:hidden flex items-center justify-between px-4 py-3 bg-[#080808]/90 border-b border-white/10 sticky top-0 z-40 backdrop-blur-2xl shadow-md shrink-0">
         <div className="flex items-center gap-3">
           <button
             onClick={() => setSidebarOpen((prev) => !prev)}
@@ -629,8 +629,8 @@ export default function Dashboard() {
         />
       )}
 
-      {/* Left Sidebar Navigation (Docked Full Height Rail) */}
-      <aside className={`fixed lg:sticky top-0 left-0 z-50 h-screen w-72 lg:w-72 noir-sidebar border-r border-white/10 flex flex-col justify-between transition-transform duration-200 shrink-0 ${
+      {/* Left Sidebar Navigation (Permanently Docked Full 100vh Rail - Zero Void) */}
+      <aside className={`fixed lg:relative inset-y-0 left-0 z-50 h-screen w-72 lg:w-72 noir-sidebar border-r border-white/10 flex flex-col justify-between transition-transform duration-200 shrink-0 overflow-y-auto ${
         sidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
       }`}>
         <div className="flex flex-col flex-1 overflow-y-auto">
@@ -752,9 +752,9 @@ export default function Dashboard() {
         </div>
       </aside>
 
-      {/* Main Operational Content Body Container */}
-      <div className="flex-1 flex flex-col min-w-0 relative z-10">
-        <main className="max-w-[1600px] w-full mx-auto p-4 sm:p-6 md:p-10 space-y-8 flex-1">
+      {/* Main Operational Content Body Container (Independently Scrolling 100vh) */}
+      <div className="flex-1 h-screen overflow-y-auto overflow-x-hidden flex flex-col min-w-0 relative z-10">
+        <main className="max-w-[1600px] w-full mx-auto p-4 sm:p-6 md:p-10 space-y-8 flex-1 min-w-0">
           
           {/* Global Top-Right Toolbar (TTS Read Aloud, Theme Toggle, Global Search) */}
           <div className="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-white/10">
@@ -774,19 +774,19 @@ export default function Dashboard() {
           </div>
 
         {/* Active Tab Content with Lovable Smooth Content Reveal Motion */}
-        <div key={activeTab} className="content-enter space-y-8">
+        <div key={activeTab} className="content-enter space-y-8 min-w-0">
         
         {/* ========================================================
             VIEW 1: LIVE OPERATIONAL OVERVIEW
             ======================================================== */}
         {activeTab === "cockpit" && (
-          <div className="space-y-8">
+          <div className="space-y-8 min-w-0">
             
             {/* Top Control Bar: Station Selector & Sleek 10-Day Progression Scrubber */}
-            <section className="glass-feature p-5 sm:p-6 flex flex-col xl:flex-row items-stretch xl:items-center justify-between gap-5 border border-white/10">
+            <section className="glass-feature p-5 sm:p-6 flex flex-col xl:flex-row items-stretch xl:items-center justify-between gap-5 border border-white/10 min-w-0">
               
               {/* Left: Station Selection Dropdown */}
-              <div className="flex flex-col sm:flex-row sm:items-center gap-3.5">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-3.5 min-w-0">
                 <label htmlFor="station-select" className="flex items-center gap-2 text-sm font-mono text-white font-bold uppercase tracking-wider shrink-0">
                   <MapPin size={17} className="text-white" /> Station Target:
                 </label>
@@ -798,7 +798,7 @@ export default function Dashboard() {
                     const r = REGIONS.find(item => item.id === e.target.value) || REGIONS[0];
                     setSelectedRegion(r);
                   }}
-                  className="h-11 bg-white/[0.05] border border-white/12 text-white text-sm font-semibold rounded-full px-5 py-2 focus:outline-none focus:border-white/30 transition min-w-[320px] shadow-sm cursor-pointer font-mono"
+                  className="h-11 bg-white/[0.05] border border-white/12 text-white text-sm font-semibold rounded-full px-4 py-2 focus:outline-none focus:border-white/30 transition w-full sm:w-auto min-w-0 sm:min-w-[260px] max-w-full truncate shadow-sm cursor-pointer font-mono"
                 >
                   {REGIONS.map(r => (
                     <option key={r.id} value={r.id} className="bg-[#121212] text-white py-1">
@@ -917,12 +917,12 @@ export default function Dashboard() {
                 <div className="glass-feature flex-1 flex flex-col justify-between p-6 border border-white/10">
                   <div>
                     {/* Header with Risk Badge */}
-                    <div className="flex justify-between items-start border-b border-white/10 pb-4 mb-3">
-                      <div>
+                    <div className="flex justify-between items-start border-b border-white/10 pb-4 mb-3 gap-3 min-w-0">
+                      <div className="min-w-0 flex-1">
                         <span className="mono-label block mb-1">
                           02 / OPERATIONAL EVALUATION
                         </span>
-                        <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
+                        <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight truncate" title={`${selectedRegion.name}, ${selectedRegion.state}`}>
                           {selectedRegion.name}, {selectedRegion.state}
                         </h2>
                       </div>
@@ -1050,10 +1050,10 @@ export default function Dashboard() {
 
                   <div className="space-y-2.5">
                     {shapReasons.slice(0, 4).map((r, i) => (
-                      <div key={i} className="bg-white/[0.03] p-3 rounded-xl border border-white/10 flex items-start justify-between gap-3">
-                        <div className="flex-1">
-                          <div className="font-semibold text-white text-sm">{r.code.replace(/_/g, " ")}</div>
-                          <div className="text-xs text-[#A3A3A3] mt-0.5 leading-snug">{r.text}</div>
+                      <div key={i} className="bg-white/[0.03] p-3 rounded-xl border border-white/10 flex items-start justify-between gap-3 min-w-0">
+                        <div className="flex-1 min-w-0">
+                          <div className="font-semibold text-white text-sm truncate">{r.code.replace(/_/g, " ")}</div>
+                          <div className="text-xs text-[#A3A3A3] mt-0.5 leading-snug break-words">{r.text}</div>
                         </div>
                         <div className={`font-mono-tech text-sm font-bold shrink-0 ${
                           r.contribution >= 0 ? "text-red-400" : "text-[#A3A3A3]"
@@ -1095,11 +1095,11 @@ export default function Dashboard() {
                     {/* Multi-cycle run progression rows */}
                     <div className="space-y-2">
                       {dynamicRuns.map((r: any, idx: number) => (
-                        <div key={idx} className="bg-white/[0.03] p-2.5 rounded-xl border border-white/10 flex items-center justify-between text-xs font-mono-tech">
-                          <span className="text-white font-semibold">{r.run}</span>
-                          <span className="text-white font-bold">{r.rainfall_mm} mm</span>
-                          <span className="text-[#A3A3A3]">{r.wind_speed_ms} m/s</span>
-                          <span className="text-[#D4D4D4]">{r.temperature_c ?? r.temp_c ?? 25}°C</span>
+                        <div key={idx} className="bg-white/[0.03] p-2.5 rounded-xl border border-white/10 flex items-center justify-between text-xs font-mono-tech gap-2 min-w-0">
+                          <span className="text-white font-semibold truncate">{r.run}</span>
+                          <span className="text-white font-bold shrink-0">{r.rainfall_mm} mm</span>
+                          <span className="text-[#A3A3A3] shrink-0">{r.wind_speed_ms} m/s</span>
+                          <span className="text-[#D4D4D4] shrink-0">{r.temperature_c ?? r.temp_c ?? 25}°C</span>
                         </div>
                       ))}
                     </div>
@@ -1140,14 +1140,14 @@ export default function Dashboard() {
                         const dist = a.similarity_distance ?? a.similarity_score ?? (0.35 + i * 0.12);
                         const isBust = a.bust === 1 || a.bust_occurred === true;
                         return (
-                          <div key={i} className="flex justify-between items-center text-xs font-mono-tech bg-white/[0.03] p-2.5 rounded-xl border border-white/10">
-                            <span className="text-white font-medium">
+                          <div key={i} className="flex justify-between items-center text-xs font-mono-tech bg-white/[0.03] p-2.5 rounded-xl border border-white/10 gap-2 min-w-0">
+                            <span className="text-white font-medium truncate">
                               #{i + 1} {String(initTime).split(" ")[0]}
                             </span>
-                            <span className="text-[#A3A3A3]">
+                            <span className="text-[#A3A3A3] shrink-0">
                               dist={Number(dist).toFixed(2)}
                             </span>
-                            <span className={`px-2 py-0.5 rounded-full text-xs font-bold uppercase ${
+                            <span className={`px-2 py-0.5 rounded-full text-xs font-bold uppercase shrink-0 ${
                               isBust ? "bg-red-500/15 text-red-400 border border-red-500/40" : "bg-white/[0.06] text-white border border-white/20"
                             }`}>
                               {isBust ? "BUST" : "VERIFIED"}

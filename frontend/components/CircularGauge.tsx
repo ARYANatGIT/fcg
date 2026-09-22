@@ -19,6 +19,19 @@ export default function CircularGauge({
   strokeWidth = 14,
   color,
 }: CircularGaugeProps) {
+  const [isLightMode, setIsLightMode] = React.useState<boolean>(false);
+
+  React.useEffect(() => {
+    if (typeof window === "undefined") return;
+    const check = () => {
+      setIsLightMode(document.documentElement.classList.contains("light-mode"));
+    };
+    check();
+    const obs = new MutationObserver(check);
+    obs.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
+    return () => obs.disconnect();
+  }, []);
+
   const percentage = Math.min(Math.max(value * 100, 0), 100);
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
@@ -28,13 +41,14 @@ export default function CircularGauge({
   const strokeDashoffset = arcLength - (arcLength * percentage) / 100;
 
   // Determine operational threat color
+  const safeColor = isLightMode ? "#111111" : "#FFFFFF";
   const gaugeColor =
     color ||
     (percentage >= 65
       ? "#ef4444" // Red (High Risk)
       : percentage >= 35
-      ? "#f59e0b" // Amber (Moderate Risk)
-      : "#FFFFFF"); // Pure White (Safe/Robust)
+      ? (isLightMode ? "#d97706" : "#f59e0b") // Amber (Moderate Risk)
+      : safeColor); // Obsidian in Light, Pure White in Dark
 
   const threatLabel =
     percentage >= 65 ? "CRITICAL RISK" : percentage >= 35 ? "ELEVATED RISK" : "ROBUST FORECAST";
