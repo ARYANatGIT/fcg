@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { ShieldCheck, Cpu, BarChart2, CheckCircle2, Activity } from "lucide-react";
+import { API_URL, AUTH_HEADERS } from "../lib/api";
 
 interface LiveModelPerf {
   model_type: string;
@@ -80,13 +81,22 @@ export default function ModelInspector() {
   const [retrainSchedule, setRetrainSchedule] = useState<string>("Every 12 Hours");
 
   useEffect(() => {
-    fetch("/api/model_performance")
-      .then((res) => (res.ok ? res.json() : null))
-      .then((data) => {
-        if (data?.current_model) setLivePerf(data.current_model);
-        if (data?.retraining_schedule) setRetrainSchedule(data.retraining_schedule);
-      })
-      .catch(() => null);
+    async function loadPerf() {
+      try {
+        let res = await fetch("/api/model_performance", { headers: AUTH_HEADERS }).catch(() => null);
+        if (!res || !res.ok) {
+          res = await fetch(`${API_URL}/api/model_performance`, { headers: AUTH_HEADERS }).catch(() => null);
+        }
+        if (res && res.ok) {
+          const data = await res.json();
+          if (data?.current_model) setLivePerf(data.current_model);
+          if (data?.retraining_schedule) setRetrainSchedule(data.retraining_schedule);
+        }
+      } catch (e) {
+        console.warn("Failed to load model performance:", e);
+      }
+    }
+    loadPerf();
   }, []);
 
   return (
@@ -227,9 +237,9 @@ export default function ModelInspector() {
                   </span>
                   <span className="font-mono-tech text-[#D8D8D3] font-bold">{f.shap.toFixed(4)}</span>
                 </div>
-                <div className="w-full bg-white/[0.06] h-2 rounded-full overflow-hidden border border-white/10">
+                <div className="w-full bg-slate-200 dark:bg-white/[0.06] h-2 rounded-full overflow-hidden border border-slate-300 dark:border-white/10">
                   <div
-                    className="h-full bg-[#E8E8E4] rounded-full transition-all duration-500"
+                    className="h-full bg-black dark:bg-[#E8E8E4] rounded-full transition-all duration-500"
                     style={{ width: `${f.pct}%` }}
                   />
                 </div>

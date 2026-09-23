@@ -2,6 +2,15 @@
 
 import React, { useState, useEffect } from "react";
 import { Archive, Search, Calendar, MapPin } from "lucide-react";
+import GliderTabs, { GliderTabItem } from "./GliderTabs";
+import { API_URL, AUTH_HEADERS } from "../lib/api";
+
+const ARCHIVE_LEAD_TABS: GliderTabItem<string>[] = [
+  { id: "all", label: "All Days" },
+  { id: "d1-3", label: "D1–D3" },
+  { id: "d4-6", label: "D4–D6" },
+  { id: "d7-10", label: "D7–D10" },
+];
 
 const HISTORICAL_CASES = [
   {
@@ -105,14 +114,23 @@ export default function HistoricalArchive() {
   const [stateFilter, setStateFilter] = useState("all");
 
   useEffect(() => {
-    fetch("/api/historical_busts")
-      .then((res) => (res.ok ? res.json() : null))
-      .then((data) => {
-        if (data?.cases && Array.isArray(data.cases) && data.cases.length > 0) {
-          setCases(data.cases);
+    async function loadCases() {
+      try {
+        let res = await fetch("/api/historical_busts", { headers: AUTH_HEADERS }).catch(() => null);
+        if (!res || !res.ok) {
+          res = await fetch(`${API_URL}/api/historical_busts`, { headers: AUTH_HEADERS }).catch(() => null);
         }
-      })
-      .catch(() => null);
+        if (res && res.ok) {
+          const data = await res.json();
+          if (data?.cases && Array.isArray(data.cases) && data.cases.length > 0) {
+            setCases(data.cases);
+          }
+        }
+      } catch (e) {
+        console.warn("Failed to load historical busts:", e);
+      }
+    }
+    loadCases();
   }, []);
 
   const filteredCases = cases.filter((c) => {
@@ -153,13 +171,13 @@ export default function HistoricalArchive() {
       </div>
 
       {/* Search & Filter Bar */}
-      <div className="grid grid-cols-1 sm:grid-cols-12 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-12 gap-3 items-center">
         {/* Search */}
-        <div className="sm:col-span-6 relative">
+        <div className="sm:col-span-12 md:col-span-4 lg:col-span-4 relative">
           <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-[#A3A3A3]" />
           <input
             type="text"
-            placeholder="Search by station, state, cyclone, or synoptic event..."
+            placeholder="Search station, state, event..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full h-11 bg-white/[0.04] border border-white/10 rounded-full pl-11 pr-4 text-xs font-mono-tech text-white placeholder-[#A3A3A3] focus:outline-none focus:border-white/30 transition"
@@ -167,7 +185,7 @@ export default function HistoricalArchive() {
         </div>
 
         {/* State Filter */}
-        <div className="sm:col-span-3">
+        <div className="sm:col-span-12 md:col-span-3 lg:col-span-3">
           <select
             value={stateFilter}
             onChange={(e) => setStateFilter(e.target.value)}
@@ -192,26 +210,15 @@ export default function HistoricalArchive() {
           </select>
         </div>
 
-        {/* Lead Filter Pills */}
-        <div className="sm:col-span-3 flex items-center gap-1 bg-white/[0.03] p-1 rounded-full border border-white/10">
-          {[
-            { id: "all", label: "All Days" },
-            { id: "d1-3", label: "D1–D3" },
-            { id: "d4-6", label: "D4–D6" },
-            { id: "d7-10", label: "D7–D10" },
-          ].map((f) => (
-            <button
-              key={f.id}
-              onClick={() => setLeadFilter(f.id)}
-              className={`flex-1 h-9 text-xs font-mono-tech font-semibold rounded-full transition-all cursor-pointer ${
-                leadFilter === f.id
-                  ? "is-active bg-[#E8E8E4] text-[#141414] font-bold shadow-sm"
-                  : "text-[#A3A3A3] hover:text-white"
-              }`}
-            >
-              {f.label}
-            </button>
-          ))}
+        {/* Lead Filter Pills with Glider - Generous 5 cols so all buttons including D7-D10 are 100% visible */}
+        <div className="sm:col-span-12 md:col-span-5 lg:col-span-5 flex items-center min-w-0">
+          <GliderTabs
+            tabs={ARCHIVE_LEAD_TABS}
+            activeTab={leadFilter}
+            onChange={setLeadFilter}
+            size="sm"
+            className="w-full justify-between"
+          />
         </div>
       </div>
 

@@ -339,7 +339,7 @@ export default function TopRightToolbar({
       {/* 1. Global Search Trigger (Ctrl+K) */}
       <button
         onClick={() => setSearchOpen(true)}
-        className="flex items-center gap-2.5 h-10 px-4 py-2 rounded-full bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 text-[#D8D8D3] hover:text-[#E8E8E5] text-xs font-mono-tech transition cursor-pointer shadow-sm"
+        className="flex items-center gap-2.5 h-12 px-5 py-2 rounded-full bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 text-[#D8D8D3] hover:text-[#E8E8E5] text-xs font-mono-tech transition cursor-pointer shadow-sm"
         title="Quick Jump to any Station or View (Ctrl+K)"
       >
         <Search size={15} className="text-[#E8E8E5]" />
@@ -352,7 +352,7 @@ export default function TopRightToolbar({
       {/* 2. Read Page Aloud (1-Click Toggle: Start / Stop with Word Highlighting) */}
       <button
         onClick={handleToggleSpeak}
-        className={`flex items-center gap-2 h-10 px-4 py-2 rounded-full border text-xs font-mono-tech transition cursor-pointer shadow-sm ${
+        className={`flex items-center gap-2 h-12 px-5 py-2 rounded-full border text-xs font-mono-tech transition cursor-pointer shadow-sm ${
           isSpeaking
             ? "bg-white/20 text-white border-white/50 animate-pulse font-bold"
             : "bg-white/[0.04] hover:bg-white/[0.08] text-[#D8D8D3] border-white/10"
@@ -372,49 +372,34 @@ export default function TopRightToolbar({
         )}
       </button>
 
-      {/* 3. Dual-Segment Light / Dark Mode Toggle with Animated Gliding Capsule */}
+      {/* 3. Sliding Toggle Switch: Light / Dark Mode with EXACT Left-Sidebar Glider Motion */}
       <div 
-        className="relative flex items-center bg-white/[0.06] p-1 rounded-full border border-white/12 shadow-inner h-10 select-none backdrop-blur-xl"
-        title={`Currently in ${theme === "dark" ? "Dark" : "Light"} Mode`}
+        className="nav-shell relative flex items-center p-1 rounded-full border border-white/12 shadow-inner h-12 w-[88px] select-none backdrop-blur-xl cursor-pointer bg-white/[0.06] shrink-0"
+        title={`Currently in ${theme === "dark" ? "Dark" : "Light"} Mode (Click to Toggle)`}
+        onClick={toggleTheme}
       >
-        {/* Animated Sliding Glider Capsule */}
+        {/* Animated Sliding Capsule using translate3d for silky 60fps GPU acceleration */}
         <div 
-          className={`absolute top-1 bottom-1 w-[calc(50%-4px)] rounded-full transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] shadow-md pointer-events-none ${
-            theme === "dark"
-              ? "left-[calc(50%+2px)] bg-white text-black"
-              : "left-1 bg-black text-white"
-          }`}
+          className="nav-glider pointer-events-none absolute top-1 bottom-1 left-0 w-10 rounded-full transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] shadow-md"
+          style={{
+            transform: theme === "dark" ? "translate3d(44px, 0, 0)" : "translate3d(4px, 0, 0)",
+          }}
+          aria-hidden="true"
         />
 
-        {/* Light Option Button */}
-        <button
-          type="button"
-          onClick={() => { if (theme !== "light") toggleTheme(); }}
-          className={`relative z-10 flex items-center justify-center gap-1.5 px-3 py-1 text-xs font-mono-tech font-bold rounded-full transition-colors duration-200 cursor-pointer ${
-            theme === "light"
-              ? "text-white"
-              : "text-[#8B8B87] hover:text-white"
-          }`}
-          aria-label="Switch to Light Mode"
-        >
-          <Sun size={14} className={theme === "light" ? "text-amber-400" : "text-[#8B8B87]"} />
-          <span>Light</span>
-        </button>
+        {/* Sun Icon (Left) */}
+        <div className="relative z-10 flex items-center justify-center w-10 h-full bg-transparent border-0 shadow-none pointer-events-none">
+          <Sun size={17} className={`transition-colors duration-300 ${
+            theme === "light" ? "text-white stroke-white drop-shadow-[0_0_4px_rgba(255,255,255,0.8)]" : "text-[#8B8B87]"
+          }`} />
+        </div>
 
-        {/* Dark Option Button */}
-        <button
-          type="button"
-          onClick={() => { if (theme !== "dark") toggleTheme(); }}
-          className={`relative z-10 flex items-center justify-center gap-1.5 px-3 py-1 text-xs font-mono-tech font-bold rounded-full transition-colors duration-200 cursor-pointer ${
-            theme === "dark"
-              ? "text-black"
-              : "text-[#8B8B87] hover:text-white"
-          }`}
-          aria-label="Switch to Dark Mode"
-        >
-          <Moon size={14} className={theme === "dark" ? "text-black" : "text-[#8B8B87]"} />
-          <span>Dark</span>
-        </button>
+        {/* Moon Icon (Right) */}
+        <div className="relative z-10 flex items-center justify-center w-10 h-full bg-transparent border-0 shadow-none pointer-events-none">
+          <Moon size={17} className={`transition-colors duration-300 ${
+            theme === "dark" ? "text-black stroke-black" : "text-[#8B8B87]"
+          }`} />
+        </div>
       </div>
 
       {/* Floating Teleprompter HUD: Displays current word in highlight while reading */}

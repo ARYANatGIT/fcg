@@ -19,6 +19,24 @@ import {
   TrendingUp,
   Filter
 } from "lucide-react";
+import GliderTabs, { GliderTabItem } from "./GliderTabs";
+
+const SEVERITY_TABS: GliderTabItem<string>[] = [
+  { id: "ALL", label: "All" },
+  { id: "WARNING", label: "Warnings" },
+  { id: "WATCH", label: "Watches" },
+  { id: "ADVISORY", label: "Advisories" },
+];
+
+const CATEGORY_TABS: GliderTabItem<string>[] = [
+  { id: "ALL", label: "All Categories" },
+  { id: "western_disturbance", label: "Western Disturbance" },
+  { id: "cyclone", label: "Cyclonic Vortices" },
+  { id: "monsoon", label: "Monsoon Dynamics" },
+  { id: "heatwave", label: "Heatwaves" },
+  { id: "heavy_rainfall", label: "Heavy Rain / Cloudburst" },
+  { id: "fog", label: "Fog & Cold Waves" },
+];
 
 interface WeatherArticle {
   id: string;
@@ -266,29 +284,14 @@ export default function WeatherNewsFeed() {
         </div>
       </div>
 
-      {/* Category Pills */}
-      <div className="flex flex-wrap items-center gap-2">
-        {[
-          { id: "ALL", label: "All Categories" },
-          { id: "western_disturbance", label: "Western Disturbance" },
-          { id: "cyclone", label: "Cyclonic Vortices" },
-          { id: "monsoon", label: "Monsoon Dynamics" },
-          { id: "heatwave", label: "Heatwaves" },
-          { id: "heavy_rainfall", label: "Heavy Rain / Cloudburst" },
-          { id: "fog", label: "Fog & Cold Waves" },
-        ].map((cat) => (
-          <button
-            key={cat.id}
-            onClick={() => setSelectedCategory(cat.id)}
-            className={`px-3.5 py-1.5 rounded-full text-xs font-mono-tech transition-all cursor-pointer border ${
-              selectedCategory === cat.id
-                ? "bg-[#E8E8E4] text-[#141414] border-white font-semibold shadow-sm"
-                : "bg-white/[0.03] text-[#8B8B87] border-white/10 hover:text-white hover:border-white/20"
-            }`}
-          >
-            {cat.label}
-          </button>
-        ))}
+      {/* Category Filter Glider Tabs (Smooth Left-Sidebar Transition & Light Mode White Inversion) */}
+      <div className="overflow-x-auto pb-1 max-w-full">
+        <GliderTabs
+          tabs={CATEGORY_TABS}
+          activeTab={selectedCategory}
+          onChange={setSelectedCategory}
+          size="sm"
+        />
       </div>
 
       {/* Filter Controls & Search */}
@@ -305,26 +308,14 @@ export default function WeatherNewsFeed() {
           />
         </div>
 
-        {/* Severity Filter Tabs */}
-        <div className="md:col-span-4 flex items-center gap-1 bg-black/40 p-1 rounded-full border border-white/10">
-          {[
-            { id: "ALL", label: "All" },
-            { id: "WARNING", label: "Warnings" },
-            { id: "WATCH", label: "Watches" },
-            { id: "ADVISORY", label: "Advisories" },
-          ].map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setSelectedSeverity(tab.id)}
-              className={`flex-1 py-1 px-2 rounded-full text-xs font-mono-tech transition-all cursor-pointer ${
-                selectedSeverity === tab.id
-                  ? "bg-[#E8E8E4] text-[#141414] font-semibold shadow-sm"
-                  : "text-[#8B8B87] hover:text-white"
-              }`}
-            >
-              {tab.label}
-            </button>
-          ))}
+        {/* Severity Filter Tabs with Glider */}
+        <div className="md:col-span-4 flex items-center">
+          <GliderTabs
+            tabs={SEVERITY_TABS}
+            activeTab={selectedSeverity}
+            onChange={setSelectedSeverity}
+            className="w-full justify-between"
+          />
         </div>
 
         {/* Region Filter Dropdown */}

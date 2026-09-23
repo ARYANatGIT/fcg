@@ -34,6 +34,7 @@ import {
   Cpu,
   BarChart2
 } from "lucide-react";
+import { API_URL, AUTH_HEADERS } from "../lib/api";
 import {
   ResponsiveContainer,
   AreaChart,
@@ -46,11 +47,44 @@ import {
   CartesianGrid,
   Legend
 } from "recharts";
+import GliderTabs, { GliderTabItem } from "./GliderTabs";
 
 export type WindyOverlay = "wind" | "rain" | "temp" | "pressure" | "clouds" | "waves" | "thunder";
 export type NWPModel = "ecmwf" | "gfs" | "icon";
 export type AtmosphericLevel = "surface" | "850h" | "700h" | "500h" | "250h";
 const WINDY_API_KEY = process.env.NEXT_PUBLIC_WINDY_API_KEY || "";
+
+const LEAD_DAY_TABS: GliderTabItem<string>[] = [
+  { id: "1", label: "D1" },
+  { id: "3", label: "D3" },
+  { id: "5", label: "D5" },
+  { id: "7", label: "D7" },
+  { id: "10", label: "D10" },
+];
+
+const ATMOSPHERIC_LAYER_TABS: GliderTabItem<WindyOverlay>[] = [
+  { id: "wind", label: "Wind & Streamlines", icon: Wind },
+  { id: "rain", label: "Rain & Radar", icon: CloudRain },
+  { id: "temp", label: "Temperature", icon: Thermometer },
+  { id: "pressure", label: "Pressure Isobars", icon: Gauge },
+  { id: "clouds", label: "Satellite / Clouds", icon: CloudFog },
+  { id: "waves", label: "Ocean Waves", icon: Waves },
+  { id: "thunder", label: "Thunder / CAPE", icon: CloudLightning },
+];
+
+const NWP_MODEL_TABS: GliderTabItem<NWPModel>[] = [
+  { id: "ecmwf", label: "ECMWF IFS (9km)", tag: "Primary" },
+  { id: "gfs", label: "NOAA GFS (22km)", tag: "Global" },
+  { id: "icon", label: "DWD ICON (13km)", tag: "Hi-Res" },
+];
+
+const ALTITUDE_LEVEL_TABS: GliderTabItem<AtmosphericLevel>[] = [
+  { id: "surface", label: "SFC", tag: "10m" },
+  { id: "850h", label: "850h", tag: "1.5km" },
+  { id: "700h", label: "700h", tag: "3km" },
+  { id: "500h", label: "500h", tag: "5.5km" },
+  { id: "250h", label: "250h", tag: "Jet" },
+];
 
 interface StationMeta {
   name: string;
@@ -145,6 +179,46 @@ export default function WindyWeatherMap() {
   const [moistureOffset, setMoistureOffset] = useState<number>(0);
   const [lapseRateOffset, setLapseRateOffset] = useState<number>(0);
 
+  // Light Mode Detection & Regional Fast Switcher 2D Glider
+  const [isLightMode, setIsLightMode] = useState<boolean>(false);
+  const switcherContainerRef = useRef<HTMLDivElement | null>(null);
+  const stationBtnRefs = useRef<{ [key: string]: HTMLButtonElement | null }>({});
+  const [switcherGlider, setSwitcherGlider] = useState<{ left: number; top: number; width: number; height: number }>({ left: 0, top: 0, width: 0, height: 0 });
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const check = () => setIsLightMode(document.documentElement.classList.contains("light-mode"));
+    check();
+    const obs = new MutationObserver(check);
+    obs.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
+    return () => obs.disconnect();
+  }, []);
+
+  const measureSwitcher = useCallback(() => {
+    if (typeof window === "undefined") return;
+    window.requestAnimationFrame(() => {
+      const btn = stationBtnRefs.current[selectedStation.name];
+      if (btn && switcherContainerRef.current) {
+        setSwitcherGlider({
+          left: btn.offsetLeft,
+          top: btn.offsetTop,
+          width: btn.offsetWidth,
+          height: btn.offsetHeight,
+        });
+      }
+    });
+  }, [selectedStation.name]);
+
+  useEffect(() => {
+    measureSwitcher();
+    window.addEventListener("resize", measureSwitcher);
+    const t = setTimeout(measureSwitcher, 60);
+    return () => {
+      window.removeEventListener("resize", measureSwitcher);
+      clearTimeout(t);
+    };
+  }, [measureSwitcher]);
+
   // Live telemetry state
   const [weather, setWeather] = useState<LiveWeatherState>({
     city: "New Delhi",
@@ -227,44 +301,89 @@ export default function WindyWeatherMap() {
 
         setWeather(observedWeather);
 
-        // Compute simulated ECMWF IFS discrepancy
-        const tBias = +(Math.sin(st.lat * 0.5 + lead) * 1.8).toFixed(1);
-        const pDiff = +(Math.cos(st.lon * 0.3 + lead) * 2.5).toFixed(1);
-        const wDiff = +(Math.sin(lead * 0.7) * 2.2).toFixed(1);
-        const rDiff = +(cur.precipitation > 0 ? (cur.precipitation * 0.35 * (lead / 3)).toFixed(1) : "0.0");
+        // Try fetching live ECMWF IFS discrepancy directly from backend
+        let liveWindyLoaded = false;
+        try {
+          let windyRes = await fetch(`/api/windy/forecast?station=${encodeURIComponent(st.name)}&lat=${st.lat}&lon=${st.lon}&lead_day=${lead}`, { headers: AUTH_HEADERS }).catch(() => null);
+          if (!windyRes || !windyRes.ok) {
+            windyRes = await fetch(`${API_URL}/api/windy/forecast?station=${encodeURIComponent(st.name)}&lat=${st.lat}&lon=${st.lon}&lead_day=${lead}`, { headers: AUTH_HEADERS }).catch(() => null);
+          }
+          if (windyRes && windyRes.ok) {
+            const wData = await windyRes.json();
+            const disc = wData.model_discrepancy;
+            const wFc = wData.windy_forecast;
+            if (disc && wFc) {
+              const fVals = wFc.forecast_values || {};
+              const vProf = wFc.multi_level_vertical_profile || {};
+              setWindyAnalysis({
+                tempBias: disc.temperature_bias_celsius ?? 0.0,
+                presDiff: disc.pressure_discrepancy_hpa ?? 0.0,
+                windDiff: disc.wind_speed_error_ms ?? 0.0,
+                rainDiff: disc.precipitation_error_mm ?? 0.0,
+                calibratedBustProb: disc.calibrated_bust_probability ?? 0.15,
+                confidenceScore: disc.forecast_confidence ?? 0.85,
+                diagnostic: disc.physical_diagnostic ?? `ECMWF IFS 9km telemetry analyzed for ${st.name}.`,
+                windyForecast: {
+                  temperature_2m: fVals.temperature_2m ?? observedWeather.temp,
+                  surface_pressure_msl: fVals.surface_pressure_msl ?? observedWeather.pressureMsl,
+                  wind_speed_10m: fVals.wind_speed_10m ?? observedWeather.windSpeed,
+                  precipitation_rate: fVals.precipitation_rate ?? observedWeather.precipitation,
+                },
+                verticalProfile: {
+                  surface: { wind_speed: vProf.surface?.wind_speed ?? observedWeather.windSpeed, temp: vProf.surface?.temp ?? observedWeather.temp },
+                  "850hpa": { wind_speed: vProf["850hpa"]?.wind_speed ?? +(observedWeather.windSpeed * 1.6).toFixed(1), temp: vProf["850hpa"]?.temp ?? +(observedWeather.temp - 7.2).toFixed(1) },
+                  "700hpa": { wind_speed: vProf["700hpa"]?.wind_speed ?? +(observedWeather.windSpeed * 2.2).toFixed(1), temp: vProf["700hpa"]?.temp ?? +(observedWeather.temp - 14.8).toFixed(1) },
+                  "500hpa": { wind_speed: vProf["500hpa"]?.wind_speed ?? +(observedWeather.windSpeed * 3.1).toFixed(1), temp: vProf["500hpa"]?.temp ?? +(observedWeather.temp - 29.5).toFixed(1) },
+                  "250hpa": { wind_speed: vProf["250hpa"]?.wind_speed ?? +(observedWeather.windSpeed * 5.4).toFixed(1), temp: vProf["250hpa"]?.temp ?? +(observedWeather.temp - 53.0).toFixed(1) },
+                },
+              });
+              liveWindyLoaded = true;
+            }
+          }
+        } catch {
+          liveWindyLoaded = false;
+        }
 
-        const computedBust = Math.min(
-          0.92,
-          Math.max(0.12, +(0.18 + Math.abs(tBias) * 0.08 + Math.abs(pDiff) * 0.06 + Math.abs(wDiff) * 0.04 + (lead * 0.045)).toFixed(2))
-        );
+        if (!liveWindyLoaded) {
+          // Compute dynamic ECMWF IFS discrepancy fallback
+          const tBias = +(Math.sin(st.lat * 0.5 + lead) * 1.8).toFixed(1);
+          const pDiff = +(Math.cos(st.lon * 0.3 + lead) * 2.5).toFixed(1);
+          const wDiff = +(Math.sin(lead * 0.7) * 2.2).toFixed(1);
+          const rDiff = +(cur.precipitation > 0 ? (cur.precipitation * 0.35 * (lead / 3)).toFixed(1) : "0.0");
 
-        setWindyAnalysis({
-          tempBias: tBias,
-          presDiff: pDiff,
-          windDiff: wDiff,
-          rainDiff: rDiff,
-          calibratedBustProb: computedBust,
-          confidenceScore: +(0.88 - (lead * 0.03)).toFixed(2),
-          diagnostic:
-            computedBust >= 0.65
-              ? `CRITICAL BUST WARNING: ${model.toUpperCase()} diverges significantly on Day +${lead} convective onset. Thermodynamic indices indicate unmodeled mesoscale instability.`
-              : computedBust >= 0.35
-              ? `MODERATE RISK: Subtle wind shear and boundary-layer moisture discrepancy noted between ${model.toUpperCase()} and ground truth telemetry.`
-              : `HIGH CONFIDENCE: Robust synoptic agreement across ${model.toUpperCase()} ensemble members for ${st.name} region.`,
-          windyForecast: {
-            temperature_2m: +(observedWeather.temp + tBias).toFixed(1),
-            surface_pressure_msl: +(observedWeather.pressureMsl + pDiff).toFixed(1),
-            wind_speed_10m: +(observedWeather.windSpeed + wDiff).toFixed(1),
-            precipitation_rate: Math.max(0, +(observedWeather.precipitation + rDiff).toFixed(1)),
-          },
-          verticalProfile: {
-            surface: { wind_speed: observedWeather.windSpeed, temp: observedWeather.temp },
-            "850hpa": { wind_speed: +(observedWeather.windSpeed * 1.6).toFixed(1), temp: +(observedWeather.temp - 7.2).toFixed(1) },
-            "700hpa": { wind_speed: +(observedWeather.windSpeed * 2.2).toFixed(1), temp: +(observedWeather.temp - 14.8).toFixed(1) },
-            "500hpa": { wind_speed: +(observedWeather.windSpeed * 3.1).toFixed(1), temp: +(observedWeather.temp - 29.5).toFixed(1) },
-            "250hpa": { wind_speed: +(observedWeather.windSpeed * 5.4).toFixed(1), temp: +(observedWeather.temp - 53.0).toFixed(1) },
-          },
-        });
+          const computedBust = Math.min(
+            0.92,
+            Math.max(0.12, +(0.18 + Math.abs(tBias) * 0.08 + Math.abs(pDiff) * 0.06 + Math.abs(wDiff) * 0.04 + (lead * 0.045)).toFixed(2))
+          );
+
+          setWindyAnalysis({
+            tempBias: tBias,
+            presDiff: pDiff,
+            windDiff: wDiff,
+            rainDiff: rDiff,
+            calibratedBustProb: computedBust,
+            confidenceScore: +(0.88 - (lead * 0.03)).toFixed(2),
+            diagnostic:
+              computedBust >= 0.65
+                ? `CRITICAL BUST WARNING: ${model.toUpperCase()} diverges significantly on Day +${lead} convective onset. Thermodynamic indices indicate unmodeled mesoscale instability.`
+                : computedBust >= 0.35
+                ? `MODERATE RISK: Subtle wind shear and boundary-layer moisture discrepancy noted between ${model.toUpperCase()} and ground truth telemetry.`
+                : `HIGH CONFIDENCE: Robust synoptic agreement across ${model.toUpperCase()} ensemble members for ${st.name} region.`,
+            windyForecast: {
+              temperature_2m: +(observedWeather.temp + tBias).toFixed(1),
+              surface_pressure_msl: +(observedWeather.pressureMsl + pDiff).toFixed(1),
+              wind_speed_10m: +(observedWeather.windSpeed + wDiff).toFixed(1),
+              precipitation_rate: Math.max(0, +(observedWeather.precipitation + rDiff).toFixed(1)),
+            },
+            verticalProfile: {
+              surface: { wind_speed: observedWeather.windSpeed, temp: observedWeather.temp },
+              "850hpa": { wind_speed: +(observedWeather.windSpeed * 1.6).toFixed(1), temp: +(observedWeather.temp - 7.2).toFixed(1) },
+              "700hpa": { wind_speed: +(observedWeather.windSpeed * 2.2).toFixed(1), temp: +(observedWeather.temp - 14.8).toFixed(1) },
+              "500hpa": { wind_speed: +(observedWeather.windSpeed * 3.1).toFixed(1), temp: +(observedWeather.temp - 29.5).toFixed(1) },
+              "250hpa": { wind_speed: +(observedWeather.windSpeed * 5.4).toFixed(1), temp: +(observedWeather.temp - 53.0).toFixed(1) },
+            },
+          });
+        }
       }
     } catch (e) {
       console.error("Telemetry fetch error:", e);
@@ -390,22 +509,15 @@ export default function WindyWeatherMap() {
             </select>
           </div>
 
-          {/* Lead Day Selector */}
-          <div className="flex items-center gap-1 bg-black/40 p-1 rounded-full border border-white/10 text-xs font-mono-tech">
-            <span className="text-[#A3A3A3] px-2 uppercase font-semibold text-xs">Lead:</span>
-            {[1, 3, 5, 7, 10].map((d) => (
-              <button
-                key={d}
-                onClick={() => setLeadDay(d)}
-                className={`px-3 py-1 rounded-full transition cursor-pointer text-xs font-mono-tech ${
-                  leadDay === d
-                    ? "bg-[#E8E8E4] text-[#141414] font-bold shadow-sm"
-                    : "text-[#A3A3A3] hover:text-white"
-                }`}
-              >
-                D{d}
-              </button>
-            ))}
+          {/* Lead Day Selector with Smooth Gliding Capsule */}
+          <div className="flex items-center gap-1.5 shrink-0">
+            <span className="text-[#A3A3A3] text-xs font-mono-tech uppercase font-semibold shrink-0">Lead:</span>
+            <GliderTabs
+              tabs={LEAD_DAY_TABS}
+              activeTab={String(leadDay)}
+              onChange={(val) => setLeadDay(Number(val))}
+              size="sm"
+            />
           </div>
 
           {/* Sync Button */}
@@ -440,91 +552,48 @@ export default function WindyWeatherMap() {
           </span>
         </div>
 
-        {/* 7 Clean Monochrome Layer Buttons */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2">
-          {[
-            { id: "wind", label: "Wind & Streamlines", icon: Wind },
-            { id: "rain", label: "Rain & Radar", icon: CloudRain },
-            { id: "temp", label: "Temperature", icon: Thermometer },
-            { id: "pressure", label: "Pressure Isobars", icon: Gauge },
-            { id: "clouds", label: "Satellite / Clouds", icon: CloudFog },
-            { id: "waves", label: "Ocean Waves", icon: Waves },
-            { id: "thunder", label: "Thunder / CAPE", icon: CloudLightning },
-          ].map((lyr) => {
-            const Icon = lyr.icon;
-            const isActive = overlay === lyr.id;
-            return (
-              <button
-                key={lyr.id}
-                onClick={() => setOverlay(lyr.id as WindyOverlay)}
-                className={`p-2.5 rounded-xl border flex items-center justify-center gap-2 transition text-xs font-mono-tech font-semibold cursor-pointer ${
-                  isActive
-                    ? "bg-[#E8E8E4] text-[#141414] border-white font-bold shadow-sm scale-[1.01]"
-                    : "bg-white/[0.03] border-white/10 text-[#A3A3A3] hover:text-white hover:bg-white/[0.06]"
-                }`}
-              >
-                <Icon size={15} className={isActive ? "text-[#141414]" : "text-white/80"} />
-                <span className="truncate">{lyr.label}</span>
-              </button>
-            );
-          })}
+        {/* 7 Clean Monochrome Layer Buttons with Smooth Gliding Capsule */}
+        <div className="overflow-x-auto pb-1 max-w-full">
+          <GliderTabs<WindyOverlay>
+            tabs={ATMOSPHERIC_LAYER_TABS}
+            activeTab={overlay}
+            onChange={(lyr) => setOverlay(lyr)}
+            size="md"
+            className="w-full justify-between"
+          />
         </div>
 
         {/* Numerical Model & Vertical Atmospheric Level Sub-Strip */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-2.5 border-t border-white/10">
-          {/* NWP Numerical Model Selector */}
-          <div className="flex items-center gap-2 bg-white/[0.02] p-2 rounded-xl border border-white/10 text-xs font-mono-tech">
+          {/* NWP Numerical Model Selector with Glider */}
+          <div className="flex items-center gap-2 bg-white/[0.02] p-1.5 rounded-xl border border-white/10 text-xs font-mono-tech overflow-x-auto min-w-0">
             <span className="text-[#A3A3A3] uppercase font-semibold text-xs px-1 shrink-0 flex items-center gap-1">
               <Activity size={13} className="text-white" /> Model:
             </span>
-            <div className="grid grid-cols-3 gap-1.5 flex-1">
-              {[
-                { id: "ecmwf", label: "ECMWF IFS (9km)", tag: "Primary" },
-                { id: "gfs", label: "NOAA GFS (22km)", tag: "Global" },
-                { id: "icon", label: "DWD ICON (13km)", tag: "Hi-Res" },
-              ].map((m) => (
-                <button
-                  key={m.id}
-                  onClick={() => setModel(m.id as NWPModel)}
-                  className={`p-1.5 rounded-lg text-center transition border cursor-pointer ${
-                    model === m.id
-                      ? "bg-[#E8E8E4] text-[#141414] border-white font-bold shadow-sm"
-                      : "bg-white/[0.04] text-[#A3A3A3] border-transparent hover:text-white hover:bg-white/[0.08]"
-                  }`}
-                >
-                  <div className="font-bold text-xs">{m.label}</div>
-                  <div className="text-[10px] opacity-75">{m.tag}</div>
-                </button>
-              ))}
+            <div className="flex-1 overflow-x-auto min-w-0">
+              <GliderTabs<NWPModel>
+                tabs={NWP_MODEL_TABS}
+                activeTab={model}
+                onChange={(m) => setModel(m)}
+                size="sm"
+                className="w-full justify-between"
+              />
             </div>
           </div>
 
-          {/* Vertical Pressure Level */}
-          <div className="flex items-center gap-2 bg-white/[0.02] p-2 rounded-xl border border-white/10 text-xs font-mono-tech">
+          {/* Vertical Pressure Level with Glider */}
+          <div className="flex items-center gap-2 bg-white/[0.02] p-1.5 rounded-xl border border-white/10 text-xs font-mono-tech overflow-x-auto min-w-0">
             <span className="text-[#A3A3A3] uppercase font-semibold text-xs px-1 shrink-0 flex items-center gap-1">
               <Compass size={13} className="text-white" /> Altitude:
             </span>
-            <div className="grid grid-cols-5 gap-1.5 flex-1">
-              {[
-                { id: "surface", label: "SFC", sub: "10m" },
-                { id: "850h", label: "850h", sub: "1.5km" },
-                { id: "700h", label: "700h", sub: "3km" },
-                { id: "500h", label: "500h", sub: "5.5km" },
-                { id: "250h", label: "250h", sub: "Jet" },
-              ].map((lvl) => (
-                <button
-                  key={lvl.id}
-                  onClick={() => setLevel(lvl.id as AtmosphericLevel)}
-                  className={`p-1.5 rounded-lg text-center transition border cursor-pointer ${
-                    level === lvl.id
-                      ? "bg-[#E8E8E4] text-[#141414] border-white font-bold shadow-sm"
-                      : "bg-white/[0.04] text-[#A3A3A3] border-transparent hover:text-white hover:bg-white/[0.08]"
-                  }`}
-                >
-                  <div className="text-xs font-bold">{lvl.label}</div>
-                  <div className="text-[10px] opacity-75">{lvl.sub}</div>
-                </button>
-              ))}
+            <div className="flex-1 overflow-x-auto min-w-0">
+              <GliderTabs<AtmosphericLevel>
+                tabs={ALTITUDE_LEVEL_TABS}
+                activeTab={level}
+                onChange={(lvl) => setLevel(lvl)}
+                size="sm"
+                className="w-full justify-between"
+              />
             </div>
           </div>
         </div>
@@ -704,24 +773,47 @@ export default function WindyWeatherMap() {
               <span className="text-xs font-mono-tech uppercase font-semibold text-[#8B8B87] block">
                 Regional Fast Switcher
               </span>
-              <div className="grid grid-cols-3 gap-1.5">
-                {MAJOR_INDIAN_STATIONS.slice(0, 6).map((city) => (
-                  <button
-                    key={city.name}
-                    onClick={() => setSelectedStation(city)}
-                    className={`p-2 rounded-xl text-left border transition cursor-pointer font-mono-tech ${
-                      selectedStation.name === city.name
-                        ? "bg-[#E8E8E4] text-[#141414] border-white font-bold shadow-sm"
-                        : "bg-white/[0.03] border-white/10 text-[#8B8B87] hover:text-[#E8E8E5] hover:bg-white/[0.06]"
-                    }`}
-                  >
-                    <div className="text-xs font-bold truncate">{city.name}</div>
-                    <div className="flex justify-between items-center mt-1 text-[10px] opacity-75">
-                      <span>{city.region}</span>
-                      <span>D+{leadDay}</span>
-                    </div>
-                  </button>
-                ))}
+              <div 
+                ref={switcherContainerRef}
+                className="relative grid grid-cols-3 gap-1.5 p-1 rounded-2xl bg-black/40 border border-white/10"
+              >
+                {/* 2D Sliding Glider Capsule matching Left Sidebar */}
+                <div
+                  className="nav-glider pointer-events-none absolute rounded-xl z-0 transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] shadow-md"
+                  style={{
+                    transform: `translate3d(${switcherGlider.left}px, ${switcherGlider.top}px, 0)`,
+                    width: `${switcherGlider.width}px`,
+                    height: `${switcherGlider.height}px`,
+                    opacity: switcherGlider.width > 0 ? 1 : 0,
+                  }}
+                  aria-hidden="true"
+                />
+
+                {MAJOR_INDIAN_STATIONS.slice(0, 6).map((city) => {
+                  const isSelected = selectedStation.name === city.name;
+                  return (
+                    <button
+                      key={city.name}
+                      ref={(el) => {
+                        stationBtnRefs.current[city.name] = el;
+                      }}
+                      type="button"
+                      onClick={() => setSelectedStation(city)}
+                      aria-current={isSelected ? "step" : undefined}
+                      className={`relative z-10 p-2.5 rounded-xl text-left border transition-colors duration-300 cursor-pointer font-mono-tech bg-transparent ${
+                        isSelected
+                          ? "nav-item-active is-active font-bold text-white dark:text-black border-transparent shadow-none"
+                          : "border-transparent text-[#8B8B87] hover:text-white"
+                      }`}
+                    >
+                      <div className="text-xs font-bold truncate">{city.name}</div>
+                      <div className="flex justify-between items-center mt-1 text-[10px] opacity-75">
+                        <span>{city.region}</span>
+                        <span>D+{leadDay}</span>
+                      </div>
+                    </button>
+                  );
+                })}
               </div>
             </div>
           </div>
@@ -864,7 +956,7 @@ export default function WindyWeatherMap() {
                 step="0.5"
                 value={surfaceTempOffset}
                 onChange={(e) => setSurfaceTempOffset(parseFloat(e.target.value))}
-                className="w-full"
+                className="w-full cursor-pointer"
               />
 
               <div className="flex items-center justify-between">
@@ -878,7 +970,7 @@ export default function WindyWeatherMap() {
                 step="2"
                 value={moistureOffset}
                 onChange={(e) => setMoistureOffset(parseFloat(e.target.value))}
-                className="w-full"
+                className="w-full cursor-pointer"
               />
             </div>
 
@@ -891,18 +983,18 @@ export default function WindyWeatherMap() {
                   <YAxis tick={{ fill: "#A3A3A3", fontSize: 11, fontFamily: "var(--font-mono-var)" }} />
                   <Tooltip
                     contentStyle={{ 
-                      backgroundColor: "rgba(14, 14, 14, 0.95)", 
-                      borderColor: "rgba(255, 255, 255, 0.12)", 
+                      backgroundColor: isLightMode ? "rgba(255, 255, 255, 0.95)" : "rgba(14, 14, 14, 0.95)", 
+                      borderColor: isLightMode ? "rgba(0, 0, 0, 0.12)" : "rgba(255, 255, 255, 0.12)", 
                       borderRadius: "12px", 
                       fontSize: "12px", 
                       fontFamily: "var(--font-mono-var)",
-                      color: "#FFFFFF" 
+                      color: isLightMode ? "#0F172A" : "#FFFFFF" 
                     }}
                   />
                   <Legend wrapperStyle={{ fontSize: "11px", fontFamily: "var(--font-mono-var)" }} />
                   <Line type="monotone" dataKey="envTemp" stroke="#ef4444" name="Env Temp (°C)" strokeWidth={2} dot={{ r: 2 }} />
                   <Line type="monotone" dataKey="dewTemp" stroke="#A3A3A3" name="Dewpoint (°C)" strokeWidth={2} dot={{ r: 2 }} />
-                  <Line type="monotone" dataKey="parcelTemp" stroke="#FFFFFF" name="Parcel (°C)" strokeWidth={2} strokeDasharray="4 4" dot={{ r: 2 }} />
+                  <Line type="monotone" dataKey="parcelTemp" stroke={isLightMode ? "#0F172A" : "#FFFFFF"} name="Parcel (°C)" strokeWidth={2} strokeDasharray="4 4" dot={{ r: 2 }} />
                 </LineChart>
               </ResponsiveContainer>
             </div>
@@ -943,8 +1035,8 @@ export default function WindyWeatherMap() {
                     <stop offset="95%" stopColor="#ef4444" stopOpacity={0.0} />
                   </linearGradient>
                   <linearGradient id="ecmwfGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#FFFFFF" stopOpacity={0.25} />
-                    <stop offset="95%" stopColor="#FFFFFF" stopOpacity={0.0} />
+                    <stop offset="5%" stopColor={isLightMode ? "#0F172A" : "#FFFFFF"} stopOpacity={0.25} />
+                    <stop offset="95%" stopColor={isLightMode ? "#0F172A" : "#FFFFFF"} stopOpacity={0.0} />
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(255, 255, 255, 0.08)" />
@@ -952,15 +1044,15 @@ export default function WindyWeatherMap() {
                 <YAxis tick={{ fill: "#A3A3A3", fontSize: 11, fontFamily: "var(--font-mono-var)" }} />
                 <Tooltip
                   contentStyle={{ 
-                    backgroundColor: "rgba(14, 14, 14, 0.95)", 
-                    borderColor: "rgba(255, 255, 255, 0.12)", 
+                    backgroundColor: isLightMode ? "rgba(255, 255, 255, 0.95)" : "rgba(14, 14, 14, 0.95)", 
+                    borderColor: isLightMode ? "rgba(0, 0, 0, 0.12)" : "rgba(255, 255, 255, 0.12)", 
                     borderRadius: "12px", 
                     fontSize: "12px", 
                     fontFamily: "var(--font-mono-var)",
-                    color: "#FFFFFF" 
+                    color: isLightMode ? "#0F172A" : "#FFFFFF" 
                   }}
                 />
-                <Area type="monotone" dataKey="ecmwf" stroke="#FFFFFF" strokeWidth={2} fill="url(#ecmwfGrad)" name="ECMWF Forecast (°C)" />
+                <Area type="monotone" dataKey="ecmwf" stroke={isLightMode ? "#0F172A" : "#FFFFFF"} strokeWidth={2} fill="url(#ecmwfGrad)" name="ECMWF Forecast (°C)" />
                 <Area type="monotone" dataKey="gfs" stroke="#A3A3A3" strokeWidth={2} fill="none" name="GFS Forecast (°C)" />
                 <Area type="monotone" dataKey="bustRisk" stroke="#ef4444" strokeWidth={2} fill="url(#bustGrad)" name="Bust Risk (%)" />
               </AreaChart>

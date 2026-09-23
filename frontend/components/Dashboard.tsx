@@ -45,6 +45,8 @@ import WeatherNewsFeed from "./WeatherNewsFeed";
 import MeteorologicalInsights from "./MeteorologicalInsights";
 import AIChatbotModal from "./AIChatbotModal";
 import ActivityHeatmap from "./ActivityHeatmap";
+import GliderTabs, { GliderTabItem } from "./GliderTabs";
+import LeadDayScrubber from "./LeadDayScrubber";
 
 export interface RegionPreset {
   id: string;
@@ -118,6 +120,12 @@ const REGIONS: RegionPreset[] = [
 type ActiveTab = "cockpit" | "windy" | "news" | "insights" | "sandbox" | "regimes" | "model" | "archive" | "opendata";
 type MapLayerMode = "bust_risk" | "rainfall_heatmap" | "temperature_heatmap" | "wind_vectors";
 type ChartMode = "lead_curve" | "multi_model" | "shap_waterfall";
+
+const CHART_MODE_TABS: GliderTabItem<ChartMode>[] = [
+  { id: "lead_curve", label: "10-Day Lead Curve" },
+  { id: "multi_model", label: "Ensemble Consensus" },
+  { id: "shap_waterfall", label: "SHAP Waterfall" },
+];
 
 export default function Dashboard() {
   const [activeTab, setActiveTab] = useState<ActiveTab>("cockpit");
@@ -242,9 +250,17 @@ export default function Dashboard() {
         rainfall: curRain,
       });
 
+      const now = new Date();
+      const validDate = new Date(now.getTime() + day * 24 * 3600 * 1000);
+      const initMonth = now.getMonth() + 1;
+      const startOfYear = new Date(now.getFullYear(), 0, 0);
+      const dayOfYear = Math.floor((now.getTime() - startOfYear.getTime()) / (1000 * 60 * 60 * 24));
+      const daySin = Math.sin((2 * Math.PI * dayOfYear) / 365.25);
+      const dayCos = Math.cos((2 * Math.PI * dayOfYear) / 365.25);
+
       const payload = {
-        initialization_time: "2026-01-05 00:00:00",
-        valid_time: `2026-01-${(5 + day).toString().padStart(2, "0")} 00:00:00`,
+        initialization_time: now.toISOString().replace("T", " ").substring(0, 19),
+        valid_time: validDate.toISOString().replace("T", " ").substring(0, 19),
         latitude: region.lat,
         longitude: region.lon,
         lead_day: day,
@@ -259,10 +275,10 @@ export default function Dashboard() {
           forecast_pressure: mslPressure,
           forecast_humidity: curHumidity,
           forecast_wind_speed: curWind,
-          init_month: 1,
-          init_day_of_year: 5,
-          init_day_sin: 0.086,
-          init_day_cos: 0.996,
+          init_month: initMonth,
+          init_day_of_year: dayOfYear,
+          init_day_sin: Number(daySin.toFixed(4)),
+          init_day_cos: Number(dayCos.toFixed(4)),
           lead_day_squared: day * day,
           forecast_wind_direction: 45.0,
           forecast_temp_humidity_interact: curTemp * curHumidity,
@@ -638,8 +654,8 @@ export default function Dashboard() {
           <div className="p-5 border-b border-white/10">
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-full bg-white/[0.08] border border-white/15 flex items-center justify-center text-white shadow-sm shrink-0">
-                  <Compass size={20} strokeWidth={2} />
+                <div className="w-9 h-9 rounded-full overflow-hidden border border-white/15 flex items-center justify-center shadow-sm shrink-0">
+                  <img src="https://res.cloudinary.com/ds0xjyplo/image/upload/v1790114038/9dfd2098-aa31-4086-886a-565df36df41b_rm6gpt.png" alt="ForecastGuard" className="w-full h-full object-cover" />
                 </div>
                 <div>
                   <h1 className="text-lg font-bold text-white tracking-tight leading-none">
@@ -697,8 +713,8 @@ export default function Dashboard() {
                         }}
                         className={`nav-item flex h-[3rem] w-full items-center justify-between rounded-full px-4 text-left transition-colors duration-500 cursor-pointer ${
                           isActive
-                            ? "bg-transparent text-black dark:text-black font-bold"
-                            : "bg-white/[0.02] text-[#A3A3A3] hover:bg-white/[0.06] hover:text-white"
+                            ? "bg-transparent text-white dark:text-black font-bold"
+                            : "bg-black/[0.02] dark:bg-white/[0.02] text-[#4B5563] dark:text-[#A3A3A3] hover:bg-black/[0.05] dark:hover:bg-white/[0.06] hover:text-[#0A0A0A] dark:hover:text-white"
                         }`}
                       >
                         <div className="flex items-center gap-3">
@@ -707,7 +723,12 @@ export default function Dashboard() {
                           </span>
                           <span className="text-sm font-medium">{tab.label}</span>
                         </div>
-                        <Icon size={16} className={isActive ? "text-black dark:text-black" : "text-[#737373]"} />
+                        <Icon
+                          size={16}
+                          className={`shrink-0 transition-colors duration-300 ${
+                            isActive ? "text-white dark:text-black" : "text-[#52525B] dark:text-[#737373]"
+                          }`}
+                        />
                       </button>
                     </li>
                   );
@@ -783,7 +804,7 @@ export default function Dashboard() {
           <div className="space-y-8 min-w-0">
             
             {/* Top Control Bar: Station Selector & Sleek 10-Day Progression Scrubber */}
-            <section className="glass-feature p-5 sm:p-6 flex flex-col xl:flex-row items-stretch xl:items-center justify-between gap-5 border border-white/10 min-w-0">
+            <section className="glass-feature p-5 sm:p-6 flex flex-col items-stretch gap-5 border border-white/10 min-w-0">
               
               {/* Left: Station Selection Dropdown */}
               <div className="flex flex-col sm:flex-row sm:items-center gap-3.5 min-w-0">
@@ -814,42 +835,19 @@ export default function Dashboard() {
                   <Clock size={17} className="text-white" /> Lead Day:
                 </div>
                 
-                {/* 10 Days in ONE Clean Horizontal Line */}
-                <div className="flex items-center gap-1.5 bg-black/40 p-1.5 rounded-2xl border border-white/10 shrink-0">
-                  {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(d => {
-                    const isSelected = leadDay === d;
-                    const dayPoint = leadCurve.find(pt => pt.lead_day === d);
-                    const dayRiskPct = dayPoint ? dayPoint.bust_probability : (d >= 6 ? 70 : d >= 4 ? 45 : 15);
-                    const isHigh = dayRiskPct >= 65;
-                    const isMod = dayRiskPct >= 35 && dayRiskPct < 65;
-                    const dotColor = isHigh ? "#ef4444" : isMod ? "#f59e0b" : "#FFFFFF";
-
-                    return (
-                      <button
-                        key={d}
-                        onClick={() => setLeadDay(d)}
-                        className={`scrubber-btn min-w-[44px] h-12 text-sm ${isSelected ? "is-active" : ""}`}
-                        title={`Select Forecast Lead Day ${d} (${dayRiskPct}% Bust Risk)`}
-                      >
-                        <span className="leading-none text-xs font-bold">D{d}</span>
-                        <span
-                          className="w-1.5 h-1.5 rounded-full transition-transform"
-                          style={{
-                            backgroundColor: isSelected ? "#000000" : dotColor,
-                            boxShadow: isSelected ? "none" : `0 0 8px ${dotColor}`,
-                          }}
-                        />
-                      </button>
-                    );
-                  })}
-                </div>
+                {/* 10 Days in ONE Clean Horizontal Line with Smooth Glider */}
+                <LeadDayScrubber
+                  leadDay={leadDay}
+                  onChange={setLeadDay}
+                  leadCurve={leadCurve}
+                />
 
                 {/* Play / Pause Scrubber Control */}
                 <button
                   onClick={toggleAutoPlay}
                   className={`h-11 px-5 rounded-full border border-white/10 flex items-center gap-2 text-sm font-mono font-semibold transition cursor-pointer shrink-0 ${
                     isPlayingProgression
-                      ? "bg-white text-black border-white shadow-sm font-bold"
+                      ? "bg-white text-black border-white shadow-sm font-bold is-active"
                       : "bg-white/[0.05] text-white hover:bg-white/[0.1]"
                   }`}
                   title={isPlayingProgression ? "Pause auto-advance (Space)" : "Auto-advance D1–D10 (Space)"}
@@ -1183,32 +1181,14 @@ export default function Dashboard() {
                   </h3>
                 </div>
 
-                {/* Chart Mode Switcher */}
-                <div className="flex items-center gap-1 bg-black/40 p-1 rounded-full border border-white/10">
-                  <button
-                    onClick={() => setChartMode("lead_curve")}
-                    className={`px-3 py-1 text-[12px] font-mono-tech rounded-full transition cursor-pointer ${
-                      chartMode === "lead_curve" ? "bg-[#E8E8E4] text-[#141414] font-semibold shadow-sm" : "text-[#8B8B87] hover:text-white"
-                    }`}
-                  >
-                    10-Day Lead Curve
-                  </button>
-                  <button
-                    onClick={() => setChartMode("multi_model")}
-                    className={`px-3 py-1 text-[12px] font-mono-tech rounded-full transition cursor-pointer ${
-                      chartMode === "multi_model" ? "bg-[#E8E8E4] text-[#141414] font-semibold shadow-sm" : "text-[#8B8B87] hover:text-white"
-                    }`}
-                  >
-                    Ensemble Consensus
-                  </button>
-                  <button
-                    onClick={() => setChartMode("shap_waterfall")}
-                    className={`px-3 py-1 text-[12px] font-mono-tech rounded-full transition cursor-pointer ${
-                      chartMode === "shap_waterfall" ? "bg-[#E8E8E4] text-[#141414] font-semibold shadow-sm" : "text-[#8B8B87] hover:text-white"
-                    }`}
-                  >
-                    SHAP Waterfall
-                  </button>
+                {/* Chart Mode Switcher with Smooth Sidebar-Style Glider */}
+                <div className="overflow-x-auto max-w-full shrink-0">
+                  <GliderTabs<ChartMode>
+                    tabs={CHART_MODE_TABS}
+                    activeTab={chartMode}
+                    onChange={setChartMode}
+                    size="sm"
+                  />
                 </div>
               </div>
 

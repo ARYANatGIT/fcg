@@ -175,7 +175,7 @@ Forecast bust warnings do not supersede official statutory weather bulletins iss
 
         {/* Advisory Body */}
         <div className="p-6 overflow-y-auto flex-1 bg-black/40">
-          <pre className="text-[12.5px] font-mono-tech text-[#D8D8D3] leading-relaxed whitespace-pre-wrap selection:bg-[#E8E8E4] selection:text-[#141414]">
+          <pre className="text-[12.5px] font-mono-tech text-[#D8D8D3] leading-relaxed whitespace-pre-wrap selection:bg-zinc-800 selection:text-white">
             {advisoryText}
           </pre>
         </div>

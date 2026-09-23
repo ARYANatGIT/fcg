@@ -8,14 +8,26 @@ services:
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.9
-      - key: OPENWEATHER_API_KEY
-        sync: false
-      - key: GOOGLE_MAPS_API_KEY
-        sync: false
-      - key: MONGO_URI
-        sync: false
+      - key: APP_ENV
+        value: production
       - key: ALLOWED_ORIGINS
         value: "*"
+      - key: DATA_MODE
+        value: real_time
+      - key: MONGO_URI
+        sync: false
+      - key: MONGO_DB_NAME
+        sync: false
+      - key: OPENWEATHER_API_KEY
+        sync: false
+      - key: WINDY_MAP_API_KEY
+        sync: false
+      - key: CARTO_BASEMAPS_API_KEY
+        sync: false
+      - key: ADMIN_USER
+        sync: false
+      - key: ADMIN_PASS
+        sync: false
 
   - type: web
     name: forecastguard-web
@@ -29,7 +41,13 @@ services:
         value: 20.11.0
       - key: NEXT_PUBLIC_API_URL
         value: https://forecastguard-api.onrender.com
+      - key: NEXT_PUBLIC_WINDY_API_KEY
+        sync: false
       - key: NEXT_PUBLIC_CARTO_API_KEY
         sync: false
-      - key: NEXT_PUBLIC_WINDY_API_KEY
+      - key: NEXT_PUBLIC_OPENWEATHER_API_KEY
+        sync: false
+      - key: NEXT_PUBLIC_ADMIN_USER
+        sync: false
+      - key: NEXT_PUBLIC_ADMIN_PASS
         sync: false

@@ -1,5 +1,6 @@
 import { Manrope, DM_Mono, IBM_Plex_Mono } from "next/font/google";
 import "./globals.css";
+import siteSettings from "../config/siteSettings.json";
 
 const manrope = Manrope({
   subsets: ["latin"],
@@ -34,7 +35,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={`${manrope.variable} ${dmMono.variable} ${ibmPlexMono.variable}`}>
-      <body className="antialiased min-h-screen bg-[var(--noir-canvas)] text-[var(--noir-text)] selection:bg-[#E8E8E4] selection:text-[#141414]">
+      <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+          <link rel="icon" href={siteSettings.faviconUrl} />
+      </head>
+      <body className="antialiased min-h-screen bg-[var(--noir-canvas)] text-[var(--noir-text)] selection:bg-zinc-800 selection:text-white">
         {children}
       </body>
     </html>

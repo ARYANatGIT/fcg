@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useMemo } from "react";
 import { CloudRain, Sun, Wind, Droplets, Calendar, MapPin, RefreshCw } from "lucide-react";
+import GliderTabs, { GliderTabItem } from "./GliderTabs";
 
 interface ActivityHeatmapProps {
   cityName?: string;
@@ -28,6 +29,13 @@ interface DayData {
     condition: string;
   };
 }
+
+const METRIC_TABS: GliderTabItem<MetricMode>[] = [
+  { id: "rainfall", label: "Precipitation", icon: CloudRain },
+  { id: "temperature", label: "Max Temp", icon: Sun },
+  { id: "wind", label: "Peak Wind", icon: Wind },
+  { id: "humidity", label: "Humidity", icon: Droplets },
+];
 
 export default function ActivityHeatmap({
   cityName = "New Delhi",
@@ -294,28 +302,6 @@ export default function ActivityHeatmap({
     return { weeks: weekCols, monthLabels: months, summaryStat: statText };
   }, [cityName, lat, lon, metricMode, liveData]);
 
-  // Color mapping matching pure monochrome scale
-  const getCellColor = (level: number) => {
-    if (isLightMode) {
-      switch (level) {
-        case 4: return "bg-[#141414]";
-        case 3: return "bg-[#52525b]";
-        case 2: return "bg-[#a1a1aa]";
-        case 1: return "bg-[#e4e4e7]";
-        default: return "bg-[#f4f4f5]";
-      }
-    } else {
-      // Pure Monochrome Dark Mode Scale (pure white high intensity)
-      switch (level) {
-        case 4: return "bg-[#FFFFFF] shadow-[0_0_6px_rgba(255,255,255,0.35)]"; // Pure glowing white
-        case 3: return "bg-[#D4D4D8]"; // Crisp silver
-        case 2: return "bg-[#71717A]"; // Mid zinc
-        case 1: return "bg-[#27272A]"; // Deep dark zinc
-        default: return "bg-white/[0.04]"; // Translucent inactive cell
-      }
-    }
-  };
-
   const handleMouseEnter = (e: React.MouseEvent, day: DayData) => {
     const rect = e.currentTarget.getBoundingClientRect();
     setTooltipPos({
@@ -353,48 +339,14 @@ export default function ActivityHeatmap({
           </p>
         </div>
 
-        {/* Metric Selector Tabs */}
-        <div className="flex flex-wrap items-center gap-1.5 bg-black/40 p-1.5 rounded-2xl sm:rounded-full border border-white/10 shrink-0 max-w-full overflow-x-auto">
-          <button
-            onClick={() => setMetricMode("rainfall")}
-            className={`px-3 py-1.5 text-xs font-mono-tech rounded-full transition-all duration-300 flex items-center gap-1.5 cursor-pointer whitespace-nowrap active:scale-95 ${
-              metricMode === "rainfall"
-                ? "bg-[#E8E8E4] text-[#141414] font-semibold shadow-md border border-white"
-                : "text-[#8B8B87] hover:text-white hover:bg-white/[0.05]"
-            }`}
-          >
-            <CloudRain size={12} className="shrink-0" /> Precipitation
-          </button>
-          <button
-            onClick={() => setMetricMode("temperature")}
-            className={`px-3 py-1.5 text-xs font-mono-tech rounded-full transition-all duration-300 flex items-center gap-1.5 cursor-pointer whitespace-nowrap active:scale-95 ${
-              metricMode === "temperature"
-                ? "bg-[#E8E8E4] text-[#141414] font-semibold shadow-md border border-white"
-                : "text-[#8B8B87] hover:text-white hover:bg-white/[0.05]"
-            }`}
-          >
-            <Sun size={12} className="shrink-0" /> Max Temp
-          </button>
-          <button
-            onClick={() => setMetricMode("wind")}
-            className={`px-3 py-1.5 text-xs font-mono-tech rounded-full transition-all duration-300 flex items-center gap-1.5 cursor-pointer whitespace-nowrap active:scale-95 ${
-              metricMode === "wind"
-                ? "bg-[#E8E8E4] text-[#141414] font-semibold shadow-md border border-white"
-                : "text-[#8B8B87] hover:text-white hover:bg-white/[0.05]"
-            }`}
-          >
-            <Wind size={12} className="shrink-0" /> Peak Wind
-          </button>
-          <button
-            onClick={() => setMetricMode("humidity")}
-            className={`px-3 py-1.5 text-xs font-mono-tech rounded-full transition-all duration-300 flex items-center gap-1.5 cursor-pointer whitespace-nowrap active:scale-95 ${
-              metricMode === "humidity"
-                ? "bg-[#E8E8E4] text-[#141414] font-semibold shadow-md border border-white"
-                : "text-[#8B8B87] hover:text-white hover:bg-white/[0.05]"
-            }`}
-          >
-            <Droplets size={12} className="shrink-0" /> Humidity
-          </button>
+        {/* Metric Selector Tabs with Smooth Sidebar-Style Glider */}
+        <div className="overflow-x-auto max-w-full shrink-0">
+          <GliderTabs<MetricMode>
+            tabs={METRIC_TABS}
+            activeTab={metricMode}
+            onChange={setMetricMode}
+            size="sm"
+          />
         </div>
       </div>
 
@@ -432,9 +384,7 @@ export default function ActivityHeatmap({
                       key={dIdx}
                       onMouseEnter={(e) => handleMouseEnter(e, day)}
                       onMouseLeave={handleMouseLeave}
-                      className={`w-[11px] h-[11px] rounded-[2px] transition-all duration-100 cursor-pointer ${getCellColor(
-                        day.level
-                      )} hover:ring-2 hover:ring-white hover:scale-125 z-0 hover:z-20`}
+                      className={`w-[11px] h-[11px] rounded-[2px] transition-all duration-100 cursor-pointer heatmap-box-${day.level} hover:ring-2 hover:ring-white dark:hover:ring-white hover:scale-125 z-0 hover:z-20`}
                     />
                   ))}
                 </div>
@@ -498,11 +448,11 @@ export default function ActivityHeatmap({
         {/* Less ... More Legend */}
         <div className="flex items-center gap-1.5">
           <span>Less</span>
-          <span className={`w-[11px] h-[11px] rounded-[2px] ${getCellColor(0)}`} title="0" />
-          <span className={`w-[11px] h-[11px] rounded-[2px] ${getCellColor(1)}`} title="Level 1" />
-          <span className={`w-[11px] h-[11px] rounded-[2px] ${getCellColor(2)}`} title="Level 2" />
-          <span className={`w-[11px] h-[11px] rounded-[2px] ${getCellColor(3)}`} title="Level 3" />
-          <span className={`w-[11px] h-[11px] rounded-[2px] ${getCellColor(4)}`} title="Level 4" />
+          <span className="w-[11px] h-[11px] rounded-[2px] heatmap-box-0" title="0" />
+          <span className="w-[11px] h-[11px] rounded-[2px] heatmap-box-1" title="Level 1" />
+          <span className="w-[11px] h-[11px] rounded-[2px] heatmap-box-2" title="Level 2" />
+          <span className="w-[11px] h-[11px] rounded-[2px] heatmap-box-3" title="Level 3" />
+          <span className="w-[11px] h-[11px] rounded-[2px] heatmap-box-4" title="Level 4" />
           <span>More</span>
         </div>
       </div>

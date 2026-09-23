@@ -19,11 +19,15 @@ import urllib.request
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Dict, Any, List, Optional
+from dotenv import load_dotenv
 
 # Ensure project root is in sys.path
 ROOT_DIR = Path(__file__).resolve().parent.parent
 if str(ROOT_DIR) not in sys.path:
     sys.path.insert(0, str(ROOT_DIR))
+
+# Load .env variables immediately
+load_dotenv(ROOT_DIR / ".env")
 
 from src.db import (
     get_real_time_collection,
@@ -108,15 +112,19 @@ INDIAN_CITIES = [
 ]
 
 
-def fetch_json_safe(url: str, timeout: int = 10) -> Optional[Dict[str, Any]]:
-    """Helper to safely fetch JSON payloads with HTTP error handling."""
-    try:
-        req = urllib.request.Request(url, headers={"User-Agent": "ForecastGuard-MultiSource/2.0"})
-        with urllib.request.urlopen(req, timeout=timeout) as resp:
-            if resp.status == 200:
-                return json.loads(resp.read().decode("utf-8"))
-    except Exception as e:
-        logger.debug(f"Fetch failed for {url}: {e}")
+def fetch_json_safe(url: str, timeout: int = 12) -> Optional[Dict[str, Any]]:
+    """Helper to safely fetch JSON payloads with HTTP error handling and retry."""
+    for attempt in range(2):
+        try:
+            req = urllib.request.Request(url, headers={"User-Agent": "ForecastGuard-MultiSource/2.0"})
+            with urllib.request.urlopen(req, timeout=timeout) as resp:
+                if resp.status == 200:
+                    return json.loads(resp.read().decode("utf-8"))
+        except Exception as e:
+            if attempt == 0:
+                time.sleep(0.5)
+                continue
+            logger.info(f"Fetch failed for {url[:80]}...: {e}")
     return None
 
 
@@ -319,9 +327,15 @@ def ingest_coastal_marine_and_flood(city: Dict[str, Any], collection) -> Optiona
 
 def ingest_city_openweather(city: Dict[str, Any], collection) -> Optional[str]:
     """Ingests live observations from OpenWeatherMap API."""
-    url = f"https://api.openweathermap.org/data/2.5/weather?lat={city['lat']}&lon={city['lon']}&appid={OPENWEATHER_KEY}&units=metric"
+    key = os.getenv("OPENWEATHER_API_KEY", "") or OPENWEATHER_KEY
+    if not key:
+        logger.warning(f"OpenWeather API key not configured, skipping {city['name']}")
+        return None
+
+    url = f"https://api.openweathermap.org/data/2.5/weather?lat={city['lat']}&lon={city['lon']}&appid={key}&units=metric"
     data = fetch_json_safe(url)
     if not data or "main" not in data:
+        logger.warning(f"OpenWeather fetch returned empty data for {city['name']}")
         return None
 
     main = data["main"]
@@ -351,31 +365,58 @@ def ingest_city_openweather(city: Dict[str, Any], collection) -> Optional[str]:
 
 
 def ingest_city_windy(city: Dict[str, Any], collection) -> Optional[str]:
-    """Ingests ECMWF IFS 9km numerical model forecast telemetry calibrated via Windy.com."""
+    """Ingests ECMWF IFS numerical model forecast telemetry calibrated via Windy.com / ECMWF IFS 0.25°."""
     try:
-        from backend.services.windy_service import windy_service
         now_iso = datetime.now(timezone.utc).isoformat()
-        fc = windy_service.interpolate_windy_ecmwf_forecast(lat=city["lat"], lon=city["lon"], lead_day=5)
+        
+        # 1. Fetch live ECMWF IFS 0.25° numerical model run
+        ecmwf_url = (
+            f"https://api.open-meteo.com/v1/forecast"
+            f"?latitude={city['lat']}&longitude={city['lon']}"
+            f"&models=ecmwf_ifs025"
+            f"&current=temperature_2m,relative_humidity_2m,surface_pressure,wind_speed_10m,wind_direction_10m,precipitation"
+        )
+        ecmwf_data = fetch_json_safe(ecmwf_url)
+        cur = ecmwf_data.get("current", {}) if ecmwf_data else {}
+
+        # 2. Extract calibrated forecast values from Windy ECMWF service
+        from backend.services.windy_service import windy_service
+        fc = windy_service.interpolate_windy_ecmwf_forecast(
+            station=city["name"],
+            lat=city["lat"],
+            lon=city["lon"],
+            lead_day=5
+        )
+        f_vals = fc.get("forecast_values", {})
+
+        temp = float(cur.get("temperature_2m") if cur.get("temperature_2m") is not None else f_vals.get("temperature_2m", 25.0))
+        pressure = float(cur.get("surface_pressure") if cur.get("surface_pressure") is not None else f_vals.get("surface_pressure_msl", 1012.0))
+        rh = float(cur.get("relative_humidity_2m") if cur.get("relative_humidity_2m") is not None else f_vals.get("relative_humidity", 60.0))
+        wind = float(cur.get("wind_speed_10m") if cur.get("wind_speed_10m") is not None else f_vals.get("wind_speed_10m", 5.0))
+        wind_dir = float(cur.get("wind_direction_10m") if cur.get("wind_direction_10m") is not None else f_vals.get("wind_direction_10m", 90.0))
+        precip = float(cur.get("precipitation") if cur.get("precipitation") is not None else f_vals.get("precipitation_rate", 0.0))
+
         doc = {
-            "source": "Windy.com ECMWF IFS 9km Model Ingestion",
+            "source": "Windy.com ECMWF IFS Numerical Model Ingestion",
             "city": city["name"],
             "station": f"{city['name']} Synoptic Met Node",
             "region": city["region"],
             "latitude": city["lat"],
             "longitude": city["lon"],
             "timestamp": now_iso,
-            "observed_time": now_iso,
-            "temperature_2m": float(fc.get("temp_2m", 25.0)),
-            "surface_pressure": float(fc.get("pressure_surface", 1012.0)),
-            "relative_humidity_2m": float(fc.get("rh_2m", 60.0)),
-            "wind_speed_10m": float(fc.get("wind_speed_10m", 5.0)),
-            "precipitation": float(fc.get("convective_rain_mm", 0.0)),
-            "windy_bust_risk": float(fc.get("cape_jkg", 0.0) / 2500.0),
+            "observed_time": cur.get("time") or now_iso,
+            "temperature_2m": temp,
+            "surface_pressure": pressure,
+            "relative_humidity_2m": rh,
+            "wind_speed_10m": wind,
+            "wind_direction_10m": wind_dir,
+            "precipitation": precip,
+            "windy_bust_risk": float(fc.get("ensemble_spread_celsius", 1.2) / 4.0),
         }
         collection.insert_one(doc)
         return "ok"
     except Exception as e:
-        logger.debug(f"Windy ingestion fallback: {e}")
+        logger.warning(f"Windy/ECMWF ingestion error for {city['name']}: {e}")
         return None
 
 

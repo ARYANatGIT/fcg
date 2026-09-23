@@ -15,6 +15,14 @@ import {
   FileArchive,
   AlertCircle
 } from "lucide-react";
+import GliderTabs, { GliderTabItem } from "./GliderTabs";
+import { API_URL, AUTH_HEADERS } from "../lib/api";
+
+const CODE_TABS: GliderTabItem<"curl" | "python" | "node">[] = [
+  { id: "python", label: "Python" },
+  { id: "curl", label: "cURL" },
+  { id: "node", label: "JavaScript" },
+];
 
 export default function OpenDataApiHub() {
   const [apiKey, setApiKey] = useState<string>("");
@@ -24,15 +32,41 @@ export default function OpenDataApiHub() {
   const [activeCodeTab, setActiveCodeTab] = useState<"curl" | "python" | "node">("python");
   const [downloadingFormat, setDownloadingFormat] = useState<string | null>(null);
 
-  const handleGenerateKey = () => {
+  const handleGenerateKey = async () => {
     setIsGenerating(true);
-    setTimeout(() => {
-      const randomHex = Array.from({ length: 24 }, () =>
-        Math.floor(Math.random() * 16).toString(16)
-      ).join("");
-      setApiKey(`fg_live_${randomHex}`);
+    try {
+      let res = await fetch("/api/keys/generate", {
+        method: "POST",
+        headers: { ...AUTH_HEADERS, "Content-Type": "application/json" },
+        body: JSON.stringify({ agency_name: agencyName || "Regional Meteorological Division" }),
+      }).catch(() => null);
+
+      if (!res || !res.ok) {
+        res = await fetch(`${API_URL}/api/keys/generate`, {
+          method: "POST",
+          headers: { ...AUTH_HEADERS, "Content-Type": "application/json" },
+          body: JSON.stringify({ agency_name: agencyName || "Regional Meteorological Division" }),
+        }).catch(() => null);
+      }
+
+      if (res && res.ok) {
+        const data = await res.json();
+        if (data?.api_key) {
+          setApiKey(data.api_key);
+          setIsGenerating(false);
+          return;
+        }
+      }
+    } catch (e) {
+      console.warn("Failed to generate institutional key:", e);
+    } finally {
       setIsGenerating(false);
-    }, 500);
+    }
+
+    const randomHex = Array.from({ length: 24 }, () =>
+      Math.floor(Math.random() * 16).toString(16)
+    ).join("");
+    setApiKey(`fg_live_${randomHex}`);
   };
 
   const handleCopyKey = () => {
@@ -308,33 +342,12 @@ getForecastGuardTelemetry();`
             <h3 className="text-lg font-bold text-white">Integration Code Snippets</h3>
           </div>
 
-          {/* Language Switcher */}
-          <div className="flex items-center gap-1 bg-white/[0.03] p-1 rounded-full border border-white/10">
-            <button
-              onClick={() => setActiveCodeTab("python")}
-              className={`px-3.5 py-1.5 rounded-full text-xs font-mono-tech transition cursor-pointer ${
-                activeCodeTab === "python" ? "is-active bg-[#E8E8E4] text-[#141414] font-bold shadow-sm" : "text-[#A3A3A3] hover:text-white"
-              }`}
-            >
-              Python
-            </button>
-            <button
-              onClick={() => setActiveCodeTab("curl")}
-              className={`px-3.5 py-1.5 rounded-full text-xs font-mono-tech transition cursor-pointer ${
-                activeCodeTab === "curl" ? "is-active bg-[#E8E8E4] text-[#141414] font-bold shadow-sm" : "text-[#A3A3A3] hover:text-white"
-              }`}
-            >
-              cURL
-            </button>
-            <button
-              onClick={() => setActiveCodeTab("node")}
-              className={`px-3.5 py-1.5 rounded-full text-xs font-mono-tech transition cursor-pointer ${
-                activeCodeTab === "node" ? "is-active bg-[#E8E8E4] text-[#141414] font-bold shadow-sm" : "text-[#A3A3A3] hover:text-white"
-              }`}
-            >
-              JavaScript
-            </button>
-          </div>
+          {/* Language Switcher with Glider */}
+          <GliderTabs<"curl" | "python" | "node">
+            tabs={CODE_TABS}
+            activeTab={activeCodeTab}
+            onChange={setActiveCodeTab}
+          />
         </div>
 
         {/* Code View Area */}

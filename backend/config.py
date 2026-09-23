@@ -6,7 +6,7 @@ class Settings(BaseSettings):
     api_host: str = "0.0.0.0"
     api_port: int = 8000
     allowed_origins: str = "http://localhost:3000,http://localhost:5173"
-    data_mode: str = "synthetic" # <-- Add this line
+    data_mode: str = "real_time"
     windy_map_api_key: str = ""
     carto_basemaps_api_key: str = ""
     openweather_api_key: str = ""

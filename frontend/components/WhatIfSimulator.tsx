@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useTransition } from "react";
 import { Sliders, Zap, ArrowRight, RefreshCw, AlertTriangle, ShieldCheck, Thermometer, Wind, CloudRain, Gauge, Droplets } from "lucide-react";
 import CircularGauge from "./CircularGauge";
+import { API_URL, AUTH_HEADERS } from "../lib/api";
 
 interface WhatIfSimulatorProps {
   initialFeatures: {
@@ -97,14 +98,23 @@ export default function WhatIfSimulator({
   const [, startTransition] = useTransition();
 
   useEffect(() => {
-    fetch("/api/whatif_scenarios")
-      .then((res) => (res.ok ? res.json() : null))
-      .then((data) => {
-        if (data?.scenarios && Array.isArray(data.scenarios) && data.scenarios.length > 0) {
-          setPresets(data.scenarios);
+    async function loadScenarios() {
+      try {
+        let res = await fetch("/api/whatif_scenarios", { headers: AUTH_HEADERS }).catch(() => null);
+        if (!res || !res.ok) {
+          res = await fetch(`${API_URL}/api/whatif_scenarios`, { headers: AUTH_HEADERS }).catch(() => null);
         }
-      })
-      .catch(() => null);
+        if (res && res.ok) {
+          const data = await res.json();
+          if (data?.scenarios && Array.isArray(data.scenarios) && data.scenarios.length > 0) {
+            setPresets(data.scenarios);
+          }
+        }
+      } catch (e) {
+        console.warn("Failed to load what-if scenarios:", e);
+      }
+    }
+    loadScenarios();
   }, []);
 
   const handleSaveScenario = async () => {
@@ -117,23 +127,33 @@ export default function WhatIfSimulator({
       }
       const desc = prompt("Enter a brief description:", `${rainfall}mm rain, ${windSpeed}m/s wind, ${temp}°C, ${pressure}hPa at D-${leadDay}`);
 
-      const res = await fetch("/api/whatif_scenarios", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name,
-          desc: desc || "User-defined atmospheric perturbation scenario",
-          rainfall,
-          windSpeed,
-          temp,
-          pressure,
-          humidity,
-          leadDay,
-          category: "custom",
-        }),
+      const bodyData = JSON.stringify({
+        name,
+        desc: desc || "User-defined atmospheric perturbation scenario",
+        rainfall,
+        windSpeed,
+        temp,
+        pressure,
+        humidity,
+        leadDay,
+        category: "custom",
       });
 
-      if (res.ok) {
+      let res = await fetch("/api/whatif_scenarios", {
+        method: "POST",
+        headers: { ...AUTH_HEADERS, "Content-Type": "application/json" },
+        body: bodyData,
+      }).catch(() => null);
+
+      if (!res || !res.ok) {
+        res = await fetch(`${API_URL}/api/whatif_scenarios`, {
+          method: "POST",
+          headers: { ...AUTH_HEADERS, "Content-Type": "application/json" },
+          body: bodyData,
+        }).catch(() => null);
+      }
+
+      if (res && res.ok) {
         const json = await res.json();
         if (json?.scenario) {
           setPresets((prev) => [json.scenario, ...prev]);
@@ -302,7 +322,7 @@ export default function WhatIfSimulator({
               step="1"
               value={rainfall}
               onChange={(e) => setRainfall(Number(e.target.value))}
-              className="w-full accent-white cursor-pointer"
+              className="w-full cursor-pointer"
             />
             <div className="flex justify-between text-xs font-mono-tech text-[#8B8B87]">
               <span>0 mm (Dry)</span>
@@ -327,7 +347,7 @@ export default function WhatIfSimulator({
               step="0.5"
               value={windSpeed}
               onChange={(e) => setWindSpeed(Number(e.target.value))}
-              className="w-full accent-white cursor-pointer"
+              className="w-full cursor-pointer"
             />
             <div className="flex justify-between text-xs font-mono-tech text-[#8B8B87]">
               <span>0 m/s</span>
@@ -352,7 +372,7 @@ export default function WhatIfSimulator({
               step="0.5"
               value={temp}
               onChange={(e) => setTemp(Number(e.target.value))}
-              className="w-full accent-white cursor-pointer"
+              className="w-full cursor-pointer"
             />
             <div className="flex justify-between text-xs font-mono-tech text-[#8B8B87]">
               <span>5 °C</span>
@@ -377,7 +397,7 @@ export default function WhatIfSimulator({
               step="0.5"
               value={pressure}
               onChange={(e) => setPressure(Number(e.target.value))}
-              className="w-full accent-white cursor-pointer"
+              className="w-full cursor-pointer"
             />
             <div className="flex justify-between text-xs font-mono-tech text-[#8B8B87]">
               <span>975 hPa (Depression)</span>
@@ -402,7 +422,7 @@ export default function WhatIfSimulator({
               step="1"
               value={humidity}
               onChange={(e) => setHumidity(Number(e.target.value))}
-              className="w-full accent-white cursor-pointer"
+              className="w-full cursor-pointer"
             />
             <div className="flex justify-between text-xs font-mono-tech text-[#8B8B87]">
               <span>15% (Dry)</span>
@@ -427,7 +447,7 @@ export default function WhatIfSimulator({
               step="1"
               value={leadDay}
               onChange={(e) => setLeadDay(Number(e.target.value))}
-              className="w-full accent-white cursor-pointer"
+              className="w-full cursor-pointer"
             />
             <div className="flex justify-between text-xs font-mono-tech text-[#8B8B87]">
               <span>Day 1 (Short)</span>
