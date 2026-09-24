@@ -48,13 +48,12 @@ OPENWEATHER_KEY = os.getenv("OPENWEATHER_API_KEY", "")
 WINDY_KEY = os.getenv("WINDY_MAP_API_KEY", "")
 
 def calibrate_elevation_google_maps(city: Dict[str, Any]) -> float:
-    """Uses Google Maps Elevation API / SRTM to accurately calibrate surface elevation for MSL pressure normalization."""
-    try:
-        from backend.services.google_weather_service import google_weather_service
-        elev_info = google_weather_service.get_elevation(city["lat"], city["lon"])
-        return float(elev_info.get("elevation_m", 100.0))
-    except Exception:
-        return 100.0
+    """Uses Google Maps Elevation API to accurately calibrate surface elevation for MSL pressure normalization."""
+    url = f"https://maps.googleapis.com/maps/api/elevation/json?locations={city['lat']},{city['lon']}&key={GOOGLE_MAPS_KEY}"
+    data = fetch_json_safe(url)
+    if data and data.get("status") == "OK" and data.get("results"):
+        return float(data["results"][0].get("elevation", 100.0))
+    return 100.0
 
 # Registry of 43 Major Indian Cities across all meteorological sectors
 INDIAN_CITIES = [
@@ -422,29 +421,39 @@ def ingest_city_windy(city: Dict[str, Any], collection) -> Optional[str]:
 
 
 def ingest_city_google(city: Dict[str, Any], collection) -> Optional[str]:
-    """Ingests Google Maps Elevation, Topography, and Environmental Telemetry."""
+    """Ingests official real-time meteorological observations from Google Weather API (weather.googleapis.com)."""
     try:
         from backend.services.google_weather_service import google_weather_service
-        g_data = google_weather_service.get_weather_telemetry(city["lat"], city["lon"], city["name"])
-        now_iso = datetime.now(timezone.utc).isoformat()
-
+        telemetry = google_weather_service.get_weather_telemetry(city["lat"], city["lon"], city["name"])
+        cond = telemetry.get("current_conditions", {})
+        
         doc = {
-            "source": "Google Maps Platform & Environmental Telemetry",
+            "source": telemetry.get("source", "Google Weather API (weather.googleapis.com)"),
             "city": city["name"],
             "station": f"{city['name']} Synoptic Met Node",
             "region": city["region"],
             "latitude": city["lat"],
             "longitude": city["lon"],
-            "elevation": g_data.get("elevation_meters", 100.0),
-            "msl_correction_hpa": g_data.get("msl_correction_hpa", 11.2),
-            "topographic_roughness": g_data.get("topographic_roughness", "Plains / Lowland"),
-            "timestamp": now_iso,
-            "air_quality": g_data.get("air_quality", {}),
+            "timestamp": telemetry.get("timestamp") or datetime.now(timezone.utc).isoformat(),
+            "observed_time": cond.get("timestamp") or datetime.now(timezone.utc).isoformat(),
+            "temperature_2m": cond.get("temperature", 25.0),
+            "surface_pressure": cond.get("pressure_msl", 1012.0),
+            "relative_humidity_2m": cond.get("humidity", 55),
+            "wind_speed_10m": cond.get("wind_speed", 3.0),
+            "wind_direction_10m": cond.get("wind_direction", 90),
+            "precipitation": cond.get("precipitation", 0.0),
+            "precipitation_probability": cond.get("precipitation_probability", 0),
+            "weather_condition": cond.get("weather_condition", "Clear"),
+            "weather_icon": cond.get("weather_icon", ""),
+            "uv_index": cond.get("uv_index", 0),
+            "elevation_meters": telemetry.get("elevation_meters", 160.0),
+            "msl_correction_hpa": telemetry.get("msl_correction_hpa", 18.0),
+            "forecast_days": telemetry.get("forecast_days", [])
         }
         collection.insert_one(doc)
         return "ok"
     except Exception as e:
-        logger.warning(f"Google ingestion error for {city['name']}: {e}")
+        logger.warning(f"Google Weather ingestion error for {city['name']}: {e}")
         return None
 
 
@@ -454,7 +463,7 @@ def run_full_extraction_cycle(cities: List[Dict[str, Any]] = INDIAN_CITIES) -> D
     - Open-Meteo Live & Hourly Surface Weather
     - OpenWeatherMap Global Observations
     - Windy.com ECMWF IFS 9km Numerical Guidance
-    - Google Maps Topography & Environmental Telemetry
+    - Google Weather API (weather.googleapis.com)
     - CAMS Air Quality & Environmental Composition
     - ECMWF IFS ENS 51-Member Ensemble Spread
     - Coastal Marine Wave Physics & GloFAS Flood Discharge
@@ -481,7 +490,7 @@ def run_full_extraction_cycle(cities: List[Dict[str, Any]] = INDIAN_CITIES) -> D
             if ingest_city_windy(city, real_time_col):
                 counts["windy"] += 1
 
-            # 4. Google Maps Topography & Environmental Telemetry
+            # 4. Google Weather API Real-Time Ingestion
             if ingest_city_google(city, real_time_col):
                 counts["google"] += 1
 
@@ -523,6 +532,7 @@ def main():
         print(f"Open-Meteo Ingested:   {counts.get('open_meteo', 0)}")
         print(f"OpenWeather Ingested: {counts.get('open_weather', 0)}")
         print(f"Windy.com Ingested:   {counts.get('windy', 0)}")
+        print(f"Google Weather:       {counts.get('google', 0)}")
         print(f"Air Quality Records:  {counts.get('air_quality', 0)}")
         print(f"Ensemble Spread:      {counts.get('ensemble', 0)}")
         print(f"Marine & Flood:       {counts.get('marine_flood', 0)}")

@@ -1121,6 +1121,7 @@ def get_openweather_current(
     return openweather_service.get_current_weather(lat=c_lat, lon=c_lon, city_name=city_meta["name"] if city_meta else target_city)
 
 
+@app.get("/api/google/weather")
 def get_google_weather(
     station: Optional[str] = Query(None, description="Station or city name"),
     lat: Optional[float] = Query(None, description="Latitude"),

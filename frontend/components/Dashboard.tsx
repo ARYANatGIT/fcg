@@ -17,7 +17,7 @@ import {
   XAxis, YAxis, Tooltip, CartesianGrid, ReferenceLine, Cell, Legend
 } from "recharts";
 import Link from "next/link";
-import { analyzeForecast, getHealth, getSpatialGrid, generateLocalAnalysis, getGoogleWeather, AUTH_HEADERS } from "@/lib/api";
+import { analyzeForecast, getHealth, getSpatialGrid, generateLocalAnalysis, getGoogleWeather, GoogleWeatherResponse, AUTH_HEADERS } from "@/lib/api";
 import dynamic from "next/dynamic";
 import { AnalysisResponse, StationData } from "@/lib/types";
 
@@ -166,30 +166,7 @@ export default function Dashboard() {
   const [mapLayer, setMapLayer] = useState<MapLayerMode>("rainfall_heatmap");
   const [chartMode, setChartMode] = useState<ChartMode>("lead_curve");
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [googleMet, setGoogleMet] = useState<{
-    status?: string;
-    source?: string;
-    city?: string;
-    elevation_meters?: number;
-    msl_correction_hpa?: number;
-    topographic_roughness?: string;
-    elevation?: {
-      elevation_meters?: number;
-      resolution_meters?: number;
-      source?: string;
-    };
-    topography?: {
-      roughness?: string;
-      hypsometric_msl_correction_hpa?: number;
-      terrain_influence?: string;
-    };
-    air_quality?: {
-      aqi: number;
-      category: string;
-      dominant_pollutant: string;
-      source?: string;
-    };
-  } | null>(null);
+  const [googleMet, setGoogleMet] = useState<GoogleWeatherResponse | null>(null);
 
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -263,11 +240,11 @@ export default function Dashboard() {
         // Fallback cleanly to region presets
       }
 
-      // Fetch Google Elevation, Topography, and Environmental Telemetry
+      // Fetch Google Weather API (weather.googleapis.com)
       getGoogleWeather(region.name, region.lat, region.lon)
         .then((gData) => {
-          if (gData?.elevation) {
-            setGoogleMet(gData as typeof googleMet);
+          if (gData && gData.status === "success") {
+            setGoogleMet(gData);
           }
         })
         .catch(() => null);
@@ -1055,37 +1032,48 @@ export default function Dashboard() {
                     </div>
                   </div>
 
-                  {/* Google Maps Topography & Environmental Calibration */}
+                  {/* Google Weather API Live Real-Time Environmental Strip */}
                   {googleMet && (
                     <div className="mt-3.5 pt-3 border-t border-white/10 flex flex-wrap items-center justify-between gap-3 text-xs font-mono-tech">
                       <div className="flex items-center gap-2">
                         <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0" />
-                        <span className="text-white/70 font-medium">Google Topography:</span>
+                        <span className="text-white/70 font-medium">Google Weather:</span>
                         <span className="text-white font-bold">
-                          {googleMet.elevation_meters ?? googleMet.elevation?.elevation_meters ?? 0}m MSL
+                          {googleMet.current_conditions?.weather_condition || "Clear"} ({googleMet.current_conditions?.temperature ?? telemetry.temp}°C)
                         </span>
                         <span className="text-white/40">
-                          ({googleMet.topographic_roughness ?? googleMet.topography?.roughness ?? "Plain"})
+                          Feels {googleMet.current_conditions?.feels_like ?? googleMet.current_conditions?.temperature ?? telemetry.temp}°C
                         </span>
                       </div>
                       <div className="flex items-center gap-4 text-white/80">
                         <div>
                           <span className="text-white/50 mr-1">MSL Baro:</span>
                           <span className="text-white font-semibold">
-                            +{googleMet.msl_correction_hpa ?? googleMet.topography?.hypsometric_msl_correction_hpa ?? 0} hPa
+                            {googleMet.current_conditions?.pressure_msl ?? telemetry.pressure.toFixed(1)} hPa
                           </span>
                         </div>
-                        {googleMet.air_quality && (
+                        <div>
+                          <span className="text-white/50 mr-1">Elevation:</span>
+                          <span className="text-white font-semibold">
+                            {googleMet.elevation_meters ?? 0}m ({googleMet.topographic_roughness})
+                          </span>
+                        </div>
+                        <div>
+                          <span className="text-white/50 mr-1">RH:</span>
+                          <span className="text-white font-semibold">
+                            {googleMet.current_conditions?.humidity ?? telemetry.humidity}%
+                          </span>
+                        </div>
+                        {googleMet.current_conditions?.uv_index !== undefined && (
                           <div>
-                            <span className="text-white/50 mr-1">AQI:</span>
-                            <span className="font-bold text-white">
-                              {googleMet.air_quality.aqi} ({googleMet.air_quality.category})
+                            <span className="text-white/50 mr-1">UV:</span>
+                            <span className="text-white font-semibold">
+                              {googleMet.current_conditions.uv_index}
                             </span>
-                            <span className="text-white/40 ml-1">[{googleMet.air_quality.dominant_pollutant}]</span>
                           </div>
                         )}
                         <span className="text-[10px] text-white/50 border border-white/10 px-1.5 py-0.5 rounded font-mono">
-                          {googleMet.source?.includes("Google") ? "Google Maps API" : "SRTM/CAMS Consensus"}
+                          weather.googleapis.com
                         </span>
                       </div>
                     </div>

@@ -10,7 +10,6 @@ class Settings(BaseSettings):
     windy_map_api_key: str = ""
     carto_basemaps_api_key: str = ""
     openweather_api_key: str = ""
-    google_maps_api_key: str = ""
     
     @property
     def cors_origins(self) -> List[str]:
