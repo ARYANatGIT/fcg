@@ -30,6 +30,7 @@ from api.main import (
     save_chat_session_message,
     delete_chat_session,
     get_openweather_current,
+    get_google_weather,
     get_synoptic_regimes,
     get_historical_busts,
     get_whatif_scenarios,
@@ -215,6 +216,7 @@ app.add_api_route("/api/chat/session", get_chat_session, methods=["GET"])
 app.add_api_route("/api/chat/session/save", save_chat_session_message, methods=["POST"])
 app.add_api_route("/api/chat/session/delete", delete_chat_session, methods=["POST", "DELETE"])
 app.add_api_route("/api/openweather/current", get_openweather_current, methods=["GET"])
+app.add_api_route("/api/google/weather", get_google_weather, methods=["GET"])
 app.add_api_route("/api/synoptic_regimes", get_synoptic_regimes, methods=["GET"])
 app.add_api_route("/api/historical_busts", get_historical_busts, methods=["GET"])
 app.add_api_route("/api/whatif_scenarios", get_whatif_scenarios, methods=["GET"])

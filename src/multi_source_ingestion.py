@@ -48,12 +48,13 @@ OPENWEATHER_KEY = os.getenv("OPENWEATHER_API_KEY", "")
 WINDY_KEY = os.getenv("WINDY_MAP_API_KEY", "")
 
 def calibrate_elevation_google_maps(city: Dict[str, Any]) -> float:
-    """Uses Google Maps Elevation API to accurately calibrate surface elevation for MSL pressure normalization."""
-    url = f"https://maps.googleapis.com/maps/api/elevation/json?locations={city['lat']},{city['lon']}&key={GOOGLE_MAPS_KEY}"
-    data = fetch_json_safe(url)
-    if data and data.get("status") == "OK" and data.get("results"):
-        return float(data["results"][0].get("elevation", 100.0))
-    return 100.0
+    """Uses Google Maps Elevation API / SRTM to accurately calibrate surface elevation for MSL pressure normalization."""
+    try:
+        from backend.services.google_weather_service import google_weather_service
+        elev_info = google_weather_service.get_elevation(city["lat"], city["lon"])
+        return float(elev_info.get("elevation_m", 100.0))
+    except Exception:
+        return 100.0
 
 # Registry of 43 Major Indian Cities across all meteorological sectors
 INDIAN_CITIES = [
@@ -420,18 +421,46 @@ def ingest_city_windy(city: Dict[str, Any], collection) -> Optional[str]:
         return None
 
 
+def ingest_city_google(city: Dict[str, Any], collection) -> Optional[str]:
+    """Ingests Google Maps Elevation, Topography, and Environmental Telemetry."""
+    try:
+        from backend.services.google_weather_service import google_weather_service
+        g_data = google_weather_service.get_weather_telemetry(city["lat"], city["lon"], city["name"])
+        now_iso = datetime.now(timezone.utc).isoformat()
+
+        doc = {
+            "source": "Google Maps Platform & Environmental Telemetry",
+            "city": city["name"],
+            "station": f"{city['name']} Synoptic Met Node",
+            "region": city["region"],
+            "latitude": city["lat"],
+            "longitude": city["lon"],
+            "elevation": g_data.get("elevation_meters", 100.0),
+            "msl_correction_hpa": g_data.get("msl_correction_hpa", 11.2),
+            "topographic_roughness": g_data.get("topographic_roughness", "Plains / Lowland"),
+            "timestamp": now_iso,
+            "air_quality": g_data.get("air_quality", {}),
+        }
+        collection.insert_one(doc)
+        return "ok"
+    except Exception as e:
+        logger.warning(f"Google ingestion error for {city['name']}: {e}")
+        return None
+
+
 def run_full_extraction_cycle(cities: List[Dict[str, Any]] = INDIAN_CITIES) -> Dict[str, int]:
     """
     Executes extraction across all registered Indian cities for:
     - Open-Meteo Live & Hourly Surface Weather
     - OpenWeatherMap Global Observations
     - Windy.com ECMWF IFS 9km Numerical Guidance
+    - Google Maps Topography & Environmental Telemetry
     - CAMS Air Quality & Environmental Composition
     - ECMWF IFS ENS 51-Member Ensemble Spread
     - Coastal Marine Wave Physics & GloFAS Flood Discharge
     """
     logger.info(f"Starting multi-source extraction across {len(cities)} major Indian cities...")
-    counts = {"open_meteo": 0, "open_weather": 0, "windy": 0, "air_quality": 0, "ensemble": 0, "marine_flood": 0}
+    counts = {"open_meteo": 0, "open_weather": 0, "windy": 0, "google": 0, "air_quality": 0, "ensemble": 0, "marine_flood": 0}
 
     real_time_col = get_real_time_collection()
     aq_col = get_air_quality_collection()
@@ -452,15 +481,19 @@ def run_full_extraction_cycle(cities: List[Dict[str, Any]] = INDIAN_CITIES) -> D
             if ingest_city_windy(city, real_time_col):
                 counts["windy"] += 1
 
-            # 4. Air Quality (CAMS)
+            # 4. Google Maps Topography & Environmental Telemetry
+            if ingest_city_google(city, real_time_col):
+                counts["google"] += 1
+
+            # 5. Air Quality (CAMS)
             if ingest_city_air_quality(city, aq_col):
                 counts["air_quality"] += 1
 
-            # 5. ECMWF Ensemble Spread (51 members)
+            # 6. ECMWF Ensemble Spread (51 members)
             if ingest_city_ensemble_spread(city, ens_col):
                 counts["ensemble"] += 1
 
-            # 6. Marine & Flood Guidance
+            # 7. Marine & Flood Guidance
             if city["is_coastal"]:
                 if ingest_coastal_marine_and_flood(city, mf_col):
                     counts["marine_flood"] += 1

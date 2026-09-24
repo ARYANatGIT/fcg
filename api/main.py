@@ -1121,6 +1121,20 @@ def get_openweather_current(
     return openweather_service.get_current_weather(lat=c_lat, lon=c_lon, city_name=city_meta["name"] if city_meta else target_city)
 
 
+def get_google_weather(
+    station: Optional[str] = Query(None, description="Station or city name"),
+    lat: Optional[float] = Query(None, description="Latitude"),
+    lon: Optional[float] = Query(None, description="Longitude")
+):
+    """Fetches real-time environmental, elevation, and atmospheric telemetry via Google Weather Service."""
+    from backend.services.google_weather_service import google_weather_service
+    target_city = station or "New Delhi"
+    city_meta = next((c for c in INDIAN_CITIES if c["name"].lower() == target_city.lower()), None)
+    c_lat = lat if lat is not None else (city_meta["lat"] if city_meta else 28.6139)
+    c_lon = lon if lon is not None else (city_meta["lon"] if city_meta else 77.2090)
+    return google_weather_service.get_weather_telemetry(lat=c_lat, lon=c_lon, city_name=city_meta["name"] if city_meta else target_city)
+
+
 class KeyGenerationRequest(BaseModel):
     agency_name: str
 

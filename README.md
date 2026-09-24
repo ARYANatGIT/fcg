@@ -110,9 +110,9 @@ Efficiency is guaranteed via local tree traversal in $\mathcal{O}(T L D^2)$ time
 ```
                                  DATA INGESTION LAYER
  ┌──────────────────────┐  ┌──────────────────────┐  ┌──────────────────────┐  ┌──────────────────────┐
- │   Open-Meteo High-   │  │   OpenWeatherMap     │  │   Windy.com API      │  │   Elevation Model    │
- │   Resolution Sync    │  │   Real-Time Node     │  │   ECMWF IFS 9km      │  │   & Climatology      │
- │ (Live/Hourly/Past14) │  │ (Temp/Press/Wind/Rain│  │ (CAPE/Soundings/Wave)│  │ (MSL Pressure Norm)  │
+ │   Open-Meteo High-   │  │   OpenWeatherMap     │  │   Windy.com API      │  │   Google Maps        │
+ │   Resolution Sync    │  │   Real-Time Node     │  │   ECMWF IFS 9km      │  │   Elevation & Air    │
+ │ (Live/Hourly/Past14) │  │ (Temp/Press/Wind/Rain│  │ (CAPE/Soundings/Wave)│  │ (Topography/MSL/AQI) │
  └──────────┬───────────┘  └──────────┬───────────┘  └──────────┬───────────┘  └──────────┬───────────┘
             │                         │                         │                         │
             └─────────────────────────┼─────────────────────────┴─────────────────────────┘
@@ -359,6 +359,7 @@ This strips NoSQL operators (`$ne`, `$gt`, `$where`) and script tags, neutralizi
 | `DATA_MODE` | No | `synthetic` | Operation mode (`synthetic` for offline simulation, `live` for MoES feeds) |
 | `ADMIN_USER` | Yes | `admin` | Administrative Basic Auth username for protected API endpoints |
 | `ADMIN_PASS` | Yes | *Configured in `.env`* | Administrative Basic Auth password for protected API endpoints |
+| `GOOGLE_MAPS_API_KEY` | Optional | `""` | Google Maps Platform API key (Elevation, Topography & Environmental Telemetry) |
 | `WINDY_MAP_API_KEY` | Optional | `""` | Official Windy Map Forecast API key for model layers |
 | `OPENWEATHER_API_KEY` | Optional | `""` | OpenWeatherMap API key for live ground-truth telemetry |
 | `CARTO_BASEMAPS_API_KEY` | Optional | `""` | CARTO Basemaps API key for high-contrast vector cartography |
@@ -370,6 +371,7 @@ This strips NoSQL operators (`$ne`, `$gt`, `$where`) and script tags, neutralizi
 | `NEXT_PUBLIC_API_URL` | Yes | `http://localhost:8000` | Backend API URL (use Render backend URL in production) |
 | `NEXT_PUBLIC_ADMIN_USER` | Yes | `admin` | Client username used for authenticating with backend API |
 | `NEXT_PUBLIC_ADMIN_PASS` | Yes | *Configured in `.env.local`* | Client password used for authenticating with backend API |
+| `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` | Optional | `""` | Client-side Google Maps Platform key for elevation & topography |
 | `NEXT_PUBLIC_WINDY_API_KEY` | Optional | `""` | Client-side Windy Map Forecast API key |
 | `NEXT_PUBLIC_CARTO_API_KEY` | Optional | `""` | Client-side CARTO Basemaps key |
 | `NEXT_PUBLIC_OPENWEATHER_API_KEY` | Optional | `""` | Client-side OpenWeatherMap key |
@@ -438,8 +440,8 @@ ForecastGuard includes a production [`render.yaml`](file:///c:/SIH-26079/render.
    - **`forecastguard-api`**: Python web service running Uvicorn.
    - **`forecastguard-web`**: Node.js web service running Next.js.
 5. In the Render Dashboard, set the required environment variables marked with `sync: false`:
-   - Under `forecastguard-api`: set `MONGO_URI`, `ADMIN_USER`, `ADMIN_PASS`, and any external API keys (`OPENWEATHER_API_KEY`, `WINDY_MAP_API_KEY`, `CARTO_BASEMAPS_API_KEY`).
-   - Under `forecastguard-web`: set `NEXT_PUBLIC_ADMIN_USER`, `NEXT_PUBLIC_ADMIN_PASS`, and client API keys (`NEXT_PUBLIC_WINDY_API_KEY`, `NEXT_PUBLIC_CARTO_API_KEY`, `NEXT_PUBLIC_OPENWEATHER_API_KEY`).
+   - Under `forecastguard-api`: set `MONGO_URI`, `ADMIN_USER`, `ADMIN_PASS`, and any external API keys (`GOOGLE_MAPS_API_KEY`, `OPENWEATHER_API_KEY`, `WINDY_MAP_API_KEY`, `CARTO_BASEMAPS_API_KEY`).
+   - Under `forecastguard-web`: set `NEXT_PUBLIC_ADMIN_USER`, `NEXT_PUBLIC_ADMIN_PASS`, and client API keys (`NEXT_PUBLIC_GOOGLE_MAPS_API_KEY`, `NEXT_PUBLIC_WINDY_API_KEY`, `NEXT_PUBLIC_CARTO_API_KEY`, `NEXT_PUBLIC_OPENWEATHER_API_KEY`).
 6. Deploy! Render will build and deploy both services with automatic HTTPS certificates.
 
 ---
