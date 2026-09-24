@@ -369,23 +369,7 @@ The frontend will be operational at `http://localhost:3000` and the backend serv
 
 ---
 
-## 8. Deployment via Render Cloud (`render.yaml`)
-
-ForecastGuard includes a production [`render.yaml`](render.yaml) blueprint enabling one-click deployment:
-
-### 8.1 Steps to Deploy on Render
-1. Push your repository to GitHub (`https://github.com/ARYANatGIT/fcg.git`).
-2. Log in to the [Render Cloud Dashboard](https://dashboard.render.com).
-3. Click **New +** → **Blueprint** and connect your GitHub repository.
-4. Render will read `render.yaml` and provision two services:
-   - **`forecastguard-api`**: Python web service running Uvicorn ASGI server.
-   - **`forecastguard-web`**: Node.js web service running Next.js.
-5. In the Render Dashboard under **Environment**, configure the necessary database connection and operational credentials.
-6. Deploy! Render builds and deploys both services with automatic zero-downtime rolling deploys and managed TLS certificates.
-
----
-
-## 9. Automated Verification Suite
+## 8. Automated Verification Suite
 
 Execute the automated verification commands to test model inference, calibration mathematics, and frontend bundle integrity:
 
@@ -405,7 +389,7 @@ print('ForecastGuard ML Bundle & Calibration Mapping: VERIFIED')
 
 ---
 
-## 10. Operational Credits & Scientific Data Providers
+## 9. Operational Credits & Scientific Data Providers
 
 ForecastGuard is built upon rigorous meteorological research, open science standards, and authoritative observational data. We gratefully acknowledge the data, models, and computational services provided by:
 
