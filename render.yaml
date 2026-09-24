@@ -24,6 +24,8 @@ services:
         sync: false
       - key: CARTO_BASEMAPS_API_KEY
         sync: false
+      - key: GOOGLE_MAPS_API_KEY
+        sync: false
       - key: ADMIN_USER
         sync: false
       - key: ADMIN_PASS
@@ -46,6 +48,8 @@ services:
       - key: NEXT_PUBLIC_CARTO_API_KEY
         sync: false
       - key: NEXT_PUBLIC_OPENWEATHER_API_KEY
+        sync: false
+      - key: NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
         sync: false
       - key: NEXT_PUBLIC_ADMIN_USER
         sync: false
