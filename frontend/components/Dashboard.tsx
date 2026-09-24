@@ -117,9 +117,38 @@ const REGIONS: RegionPreset[] = [
   { id: "agartala", name: "Agartala", state: "Tripura (Northeast Hills)", lat: 23.8315, lon: 91.2868, rainfall: 45.0, windSpeed: 5.2, temp: 24.0, pressure: 1011.0, humidity: 84.0, category: "convective" },
 ];
 
-type ActiveTab = "cockpit" | "windy" | "news" | "insights" | "sandbox" | "regimes" | "model" | "archive" | "opendata";
+export type ActiveTab = "cockpit" | "windy" | "news" | "insights" | "sandbox" | "regimes" | "model" | "archive" | "opendata";
 type MapLayerMode = "bust_risk" | "rainfall_heatmap" | "temperature_heatmap" | "wind_vectors";
 type ChartMode = "lead_curve" | "multi_model" | "shap_waterfall";
+
+export const TAB_ROUTES: Record<ActiveTab, string> = {
+  cockpit: "/cockpit",
+  windy: "/wind-radar",
+  news: "/alerts",
+  insights: "/diagnostics",
+  sandbox: "/simulation",
+  regimes: "/regimes",
+  model: "/benchmarks",
+  archive: "/archive",
+  opendata: "/opendata",
+};
+
+export const ROUTE_TO_TAB: Record<string, ActiveTab> = {
+  "/cockpit": "cockpit",
+  "/wind-radar": "windy",
+  "/windy": "windy",
+  "/alerts": "news",
+  "/news": "news",
+  "/diagnostics": "insights",
+  "/insights": "insights",
+  "/simulation": "sandbox",
+  "/sandbox": "sandbox",
+  "/regimes": "regimes",
+  "/benchmarks": "model",
+  "/model": "model",
+  "/archive": "archive",
+  "/opendata": "opendata",
+};
 
 const CHART_MODE_TABS: GliderTabItem<ChartMode>[] = [
   { id: "lead_curve", label: "10-Day Lead Curve" },
@@ -127,9 +156,17 @@ const CHART_MODE_TABS: GliderTabItem<ChartMode>[] = [
   { id: "shap_waterfall", label: "SHAP Waterfall" },
 ];
 
-export default function Dashboard() {
-  const [activeTab, setActiveTab] = useState<ActiveTab>("cockpit");
-  const [showLanding, setShowLanding] = useState<boolean>(true);
+export interface DashboardProps {
+  initialTab?: ActiveTab;
+  initialShowLanding?: boolean;
+}
+
+export default function Dashboard({
+  initialTab = "cockpit",
+  initialShowLanding = true
+}: DashboardProps) {
+  const [activeTab, setActiveTab] = useState<ActiveTab>(initialTab);
+  const [showLanding, setShowLanding] = useState<boolean>(initialShowLanding);
   const [apiHealth, setApiHealth] = useState(false);
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState<AnalysisResponse | null>(() => 
@@ -170,31 +207,68 @@ export default function Dashboard() {
 
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
-  const handleDismissLanding = () => {
+  const handleDismissLanding = useCallback(() => {
     setShowLanding(false);
-  };
-
-  // Sync tab with URL
-  useEffect(() => {
+    setActiveTab("cockpit");
     if (typeof window !== "undefined") {
-      const hash = window.location.hash.replace("#", "");
-      if (["cockpit", "windy", "news", "insights", "sandbox", "regimes", "model", "archive", "opendata"].includes(hash)) {
-        setActiveTab(hash as ActiveTab);
-      }
-      const params = new URLSearchParams(window.location.search);
-      const tab = params.get("tab");
-      if (tab && ["cockpit", "windy", "news", "insights", "sandbox", "regimes", "model", "archive", "opendata"].includes(tab)) {
-        setActiveTab(tab as ActiveTab);
+      window.history.pushState(null, "", "/cockpit");
+    }
+  }, []);
+
+  const handleTabChange = useCallback((tab: ActiveTab) => {
+    setActiveTab(tab);
+    setShowLanding(false);
+    if (typeof window !== "undefined") {
+      const targetPath = TAB_ROUTES[tab] || "/cockpit";
+      if (window.location.pathname !== targetPath || window.location.hash) {
+        window.history.pushState(null, "", targetPath);
       }
     }
   }, []);
 
-  const handleTabChange = (tab: ActiveTab) => {
-    setActiveTab(tab);
+  // Sync tab and landing state with URL pathname & handle popstate
+  useEffect(() => {
     if (typeof window !== "undefined") {
-      window.location.hash = tab;
+      const pathname = window.location.pathname;
+      if (pathname === "/" || pathname === "") {
+        // If on root landing page, remove any stale hash like #cockpit
+        if (window.location.hash) {
+          window.history.replaceState(null, "", "/");
+        }
+      } else {
+        const mappedTab = ROUTE_TO_TAB[pathname];
+        if (mappedTab) {
+          setActiveTab(mappedTab);
+          setShowLanding(false);
+          if (window.location.hash) {
+            window.history.replaceState(null, "", TAB_ROUTES[mappedTab] || pathname);
+          }
+        }
+      }
+
+      const params = new URLSearchParams(window.location.search);
+      const tabParam = params.get("tab");
+      if (tabParam && tabParam in TAB_ROUTES) {
+        handleTabChange(tabParam as ActiveTab);
+      }
+
+      const handlePopState = () => {
+        const path = window.location.pathname;
+        if (path === "/" || path === "") {
+          setShowLanding(true);
+        } else {
+          const tab = ROUTE_TO_TAB[path];
+          if (tab) {
+            setActiveTab(tab);
+            setShowLanding(false);
+          }
+        }
+      };
+
+      window.addEventListener("popstate", handlePopState);
+      return () => window.removeEventListener("popstate", handlePopState);
     }
-  };
+  }, [handleTabChange]);
 
   // Load Regional Stations for India Map
   const loadSpatialGrid = useCallback(async (day: number) => {
@@ -335,11 +409,11 @@ export default function Dashboard() {
       if (["INPUT", "TEXTAREA", "SELECT"].includes((e.target as HTMLElement)?.tagName)) {
         return;
       }
-      if (e.key === "1") setActiveTab("cockpit");
-      if (e.key === "2") setActiveTab("sandbox");
-      if (e.key === "3") setActiveTab("regimes");
-      if (e.key === "4") setActiveTab("model");
-      if (e.key === "5") setActiveTab("archive");
+      if (e.key === "1") handleTabChange("cockpit");
+      if (e.key === "2") handleTabChange("sandbox");
+      if (e.key === "3") handleTabChange("regimes");
+      if (e.key === "4") handleTabChange("model");
+      if (e.key === "5") handleTabChange("archive");
       if (e.key === " " || e.code === "Space") {
         e.preventDefault();
         setIsPlayingProgression(prev => !prev);
@@ -397,7 +471,7 @@ export default function Dashboard() {
       humidity: params.humidity
     }));
     setLeadDay(params.leadDay);
-    setActiveTab("cockpit");
+    handleTabChange("cockpit");
   };
 
   // Callback from Synoptic Regimes
@@ -426,7 +500,7 @@ export default function Dashboard() {
       category: "convective"
     });
     setLeadDay(regime.leadDay);
-    setActiveTab("cockpit");
+    handleTabChange("cockpit");
   };
 
   const pred: any = data?.data?.prediction_and_explanation?.prediction_details || data?.data?.prediction_and_explanation;
@@ -604,7 +678,12 @@ export default function Dashboard() {
   }, [analogs, telemetry, leadDay]);
 
   if (showLanding) {
-    return <LandingScreen onGetStarted={handleDismissLanding} />;
+    return (
+      <LandingScreen
+        onGetStarted={handleDismissLanding}
+        onSelectTab={(tab) => handleTabChange(tab as ActiveTab)}
+      />
+    );
   }
 
   return (
@@ -797,7 +876,7 @@ export default function Dashboard() {
               onSelectStation={(stName) => {
                 const r = REGIONS.find(item => item.name.toLowerCase() === stName.toLowerCase() || item.id === stName.toLowerCase());
                 if (r) setSelectedRegion(r);
-                setActiveTab("cockpit");
+                handleTabChange("cockpit");
               }}
               onSelectTab={(tabId) => handleTabChange(tabId as ActiveTab)}
               stations={REGIONS}

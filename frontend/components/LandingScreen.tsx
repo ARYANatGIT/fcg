@@ -22,9 +22,10 @@ import TopRightToolbar from "./TopRightToolbar";
 
 interface LandingScreenProps {
   onGetStarted: () => void;
+  onSelectTab?: (tab: string) => void;
 }
 
-export default function LandingScreen({ onGetStarted }: LandingScreenProps) {
+export default function LandingScreen({ onGetStarted, onSelectTab }: LandingScreenProps) {
   const [pulseCount, setPulseCount] = useState<number>(0);
 
   useEffect(() => {
@@ -81,10 +82,34 @@ export default function LandingScreen({ onGetStarted }: LandingScreenProps) {
 
         {/* Numbered Category Tabs (Noir Index Style) */}
         <div className="hidden lg:flex items-center gap-1 text-xs font-mono-tech text-[#8B8B87]">
-          <span className="px-3 py-1 rounded-full bg-white/[0.04] text-[#E8E8E5] border border-white/10">01 COCKPIT</span>
-          <span className="px-3 py-1 rounded-full hover:text-[#E8E8E5] transition">02 CARTOGRAPHY</span>
-          <span className="px-3 py-1 rounded-full hover:text-[#E8E8E5] transition">03 DIAGNOSTICS</span>
-          <span className="px-3 py-1 rounded-full hover:text-[#E8E8E5] transition">04 SIMULATION</span>
+          <button 
+            type="button" 
+            onClick={() => (onSelectTab ? onSelectTab("cockpit") : onGetStarted())}
+            className="px-3 py-1 rounded-full bg-white/[0.04] text-[#E8E8E5] border border-white/10 hover:bg-white/[0.08] transition cursor-pointer"
+          >
+            01 COCKPIT
+          </button>
+          <button 
+            type="button" 
+            onClick={() => (onSelectTab ? onSelectTab("windy") : onGetStarted())}
+            className="px-3 py-1 rounded-full hover:text-[#E8E8E5] hover:bg-white/[0.04] transition cursor-pointer"
+          >
+            02 WIND &amp; RADAR
+          </button>
+          <button 
+            type="button" 
+            onClick={() => (onSelectTab ? onSelectTab("insights") : onGetStarted())}
+            className="px-3 py-1 rounded-full hover:text-[#E8E8E5] hover:bg-white/[0.04] transition cursor-pointer"
+          >
+            03 DIAGNOSTICS
+          </button>
+          <button 
+            type="button" 
+            onClick={() => (onSelectTab ? onSelectTab("sandbox") : onGetStarted())}
+            className="px-3 py-1 rounded-full hover:text-[#E8E8E5] hover:bg-white/[0.04] transition cursor-pointer"
+          >
+            04 SIMULATION
+          </button>
         </div>
 
         <div className="flex items-center gap-3">
@@ -92,7 +117,7 @@ export default function LandingScreen({ onGetStarted }: LandingScreenProps) {
             <span className="status-dot-active" />
             <span>NCUM 9km Global Ensemble</span>
           </div>
-          <TopRightToolbar onSelectTab={() => onGetStarted()} />
+          <TopRightToolbar onSelectTab={(tabId) => (onSelectTab ? onSelectTab(tabId) : onGetStarted())} />
         </div>
       </header>
 

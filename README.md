@@ -110,9 +110,9 @@ Efficiency is guaranteed via local tree traversal in $\mathcal{O}(T L D^2)$ time
 ```
                                  DATA INGESTION LAYER
  ┌──────────────────────┐  ┌──────────────────────┐  ┌──────────────────────┐  ┌──────────────────────┐
- │   Open-Meteo High-   │  │   OpenWeatherMap     │  │   Windy.com API      │  │   Google Weather &   │
- │   Resolution Sync    │  │   Real-Time Node     │  │   ECMWF IFS 9km      │  │   Maps Platform      │
- │ (Live/Hourly/Past14) │  │ (Temp/Press/Wind/Rain│  │ (CAPE/Soundings/Wave)│  │ (Live/Forecast/Elev) │
+ │   Open-Meteo High-   │  │   OpenWeatherMap &   │  │   Windy.com API      │  │   Google Weather &   │
+ │   Resolution Sync    │  │   Ground Observations│  │   ECMWF IFS 9km      │  │   Maps Geospatial    │
+ │ (Live/Hourly/Past14) │  │ (Temp/Press/Wind/Rain│  │ (CAPE/Soundings/Wave)│  │ (MSL/Elevation/Days) │
  └──────────┬───────────┘  └──────────┬───────────┘  └──────────┬───────────┘  └──────────┬───────────┘
             │                         │                         │                         │
             └─────────────────────────┼─────────────────────────┴─────────────────────────┘
@@ -317,72 +317,51 @@ ForecastGuard organizes operational capabilities into 9 integrated operational d
 - **Dataset Export**: One-click download of verified forecast evaluation datasets in standard CSV and JSON formats.
 
 ---
-
-## 7. Security, Privacy & Environment Governance
-
-### 7.1 Zero Confidentiality in Source Control
-ForecastGuard enforces strict credential hygiene:
-- **No API keys, database connection strings, or passwords are hardcoded in source code.**
-- All sensitive variables are loaded dynamically from environment files (`.env` for backend, `.env.local` for frontend) or container runtime settings.
-- `.env` and `.env*.local` are strictly excluded from version control via `.gitignore`.
-- Environment configurations are managed directly through `.env` (backend) and `frontend/.env.local` (frontend).
-
-### 7.2 Defensive HTTP Headers
-Every HTTP response from the FastAPI application includes mandatory security headers:
-- `X-Content-Type-Options: nosniff` (mitigates MIME-type confusion attacks)
-- `X-Frame-Options: SAMEORIGIN` (prevents clickjacking via malicious iframe embedding)
-- `X-XSS-Protection: 1; mode=block` (activates browser cross-site scripting filters)
-- `Referrer-Policy: strict-origin-when-cross-origin` (prevents sensitive path leakage)
-- `Strict-Transport-Security: max-age=31536000; includeSubDomains` (enforces HTTPS)
-
-### 7.3 Injection Defense & Input Sanitization
-User-controlled parameters across all database query routes are sanitized via regular expression filtering:
-```python
-re.sub(r"[^\w\s\-\.,()]", "", input_val).strip()[:64]
-```
-This strips NoSQL operators (`$ne`, `$gt`, `$where`) and script tags, neutralizing NoSQL and SQL injection vectors.
-
 ---
 
-## 8. Local Installation & Deployment Guide
+## 7. Local Installation & Deployment Guide
 
-### 8.1 Prerequisites
+### 7.1 Prerequisites
 - **Python**: Version `3.11` or higher
 - **Node.js**: Version `20.x` or higher
 - **npm**: Version `10.x` or higher
 - **Git**: Installed and configured
 
-### 8.2 Step-by-Step Setup
+### 7.2 Step-by-Step Setup
 
 ```bash
 # 1. Clone the repository
 git clone https://github.com/ARYANatGIT/fcg.git
 cd fcg
 
-# 2. Set up Python virtual environment
+# 2. Configure Backend Environment
+# Configure .env at the project root with your credentials and parameters
+
+# 3. Set up Python virtual environment
 python -m venv venv
 # On Windows:
 venv\Scripts\activate
 # On Linux/macOS:
 source venv/bin/activate
 
-# 3. Install Python dependencies
+# 4. Install Python dependencies
 pip install -r requirements.txt
 
-# 4. Start the FastAPI backend service
+# 5. Start the FastAPI backend service
 uvicorn backend.main:app --host 0.0.0.0 --port 8000 --reload
 ```
 
 In a separate terminal window:
 
 ```bash
-# 5. Navigate to frontend directory
+# 6. Configure Frontend Environment
 cd frontend
+# Configure .env.local with your backend API URL and settings
 
-# 6. Install Node.js dependencies
+# 7. Install Node.js dependencies
 npm install
 
-# 7. Start the Next.js development server
+# 8. Start the Next.js development server
 npm run dev
 ```
 
@@ -390,11 +369,11 @@ The frontend will be operational at `http://localhost:3000` and the backend serv
 
 ---
 
-## 9. Deployment via Render Cloud (`render.yaml`)
+## 8. Deployment via Render Cloud (`render.yaml`)
 
-ForecastGuard includes an automated production [`render.yaml`](render.yaml) blueprint enabling continuous integration and deployment:
+ForecastGuard includes a production [`render.yaml`](render.yaml) blueprint enabling one-click deployment:
 
-### 9.1 Steps to Deploy on Render
+### 8.1 Steps to Deploy on Render
 1. Push your repository to GitHub (`https://github.com/ARYANatGIT/fcg.git`).
 2. Log in to the [Render Cloud Dashboard](https://dashboard.render.com).
 3. Click **New +** → **Blueprint** and connect your GitHub repository.
@@ -406,7 +385,7 @@ ForecastGuard includes an automated production [`render.yaml`](render.yaml) blue
 
 ---
 
-## 10. Automated Verification Suite
+## 9. Automated Verification Suite
 
 Execute the automated verification commands to test model inference, calibration mathematics, and frontend bundle integrity:
 
@@ -426,7 +405,7 @@ print('ForecastGuard ML Bundle & Calibration Mapping: VERIFIED')
 
 ---
 
-## 11. Credits & Operational Data Sources
+## 10. Operational Credits & Scientific Data Providers
 
 ForecastGuard is built upon rigorous meteorological research, open science standards, and authoritative observational data. We gratefully acknowledge the data, models, and computational services provided by:
 
@@ -441,3 +420,8 @@ ForecastGuard is built upon rigorous meteorological research, open science stand
 - **Global Flood Awareness System (GloFAS)**: Hydrological river discharge and regional flood hazard modeling.
 - **Survey of India** & **CARTO**: Official cartographic boundary datasets and high-contrast cartography.
 
+---
+
+## 11. Institutional Disclaimer
+
+ForecastGuard is an operational meteorological research system designed to support operational forecasters by quantifying numerical weather prediction uncertainty and estimating conditional bust probabilities. All operational warnings should be interpreted in conjunction with official synoptic bulletins issued by the **India Meteorological Department (IMD)** and **National Centre for Medium Range Weather Forecasting (NCMRWF)**.
