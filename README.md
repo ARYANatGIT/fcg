@@ -110,9 +110,9 @@ Efficiency is guaranteed via local tree traversal in $\mathcal{O}(T L D^2)$ time
 ```
                                  DATA INGESTION LAYER
  ┌──────────────────────┐  ┌──────────────────────┐  ┌──────────────────────┐  ┌──────────────────────┐
- │   Open-Meteo High-   │  │   OpenWeatherMap     │  │   Windy.com API      │  │   Elevation Model    │
- │   Resolution Sync    │  │   Real-Time Node     │  │   ECMWF IFS 9km      │  │   & Climatology      │
- │ (Live/Hourly/Past14) │  │ (Temp/Press/Wind/Rain│  │ (CAPE/Soundings/Wave)│  │ (MSL Pressure Norm)  │
+ │   Open-Meteo High-   │  │   OpenWeatherMap     │  │   Windy.com API      │  │   Google Weather &   │
+ │   Resolution Sync    │  │   Real-Time Node     │  │   ECMWF IFS 9km      │  │   Maps Platform      │
+ │ (Live/Hourly/Past14) │  │ (Temp/Press/Wind/Rain│  │ (CAPE/Soundings/Wave)│  │ (Live/Forecast/Elev) │
  └──────────┬───────────┘  └──────────┬───────────┘  └──────────┬───────────┘  └──────────┬───────────┘
             │                         │                         │                         │
             └─────────────────────────┼─────────────────────────┴─────────────────────────┘
@@ -187,7 +187,7 @@ Efficiency is guaranteed via local tree traversal in $\mathcal{O}(T L D^2)$ time
 ## 5. Directory Structure
 
 ```
-SIH-26079/
+fcg/
 ├── backend/                              # Production FastAPI Microservice
 │   ├── main.py                           # Application Gateway, Security Middleware & Endpoints
 │   ├── config.py                         # Pydantic Settings & Environment Constants
@@ -344,81 +344,45 @@ This strips NoSQL operators (`$ne`, `$gt`, `$where`) and script tags, neutralizi
 
 ---
 
-## 8. Environment Variables Reference
+## 8. Local Installation & Deployment Guide
 
-### 8.1 Backend Environment Variables (`.env`)
-
-| Variable Name | Required | Default Value | Description |
-| :--- | :--- | :--- | :--- |
-| `MONGO_URI` | Yes | `mongodb://localhost:27017/forecastguard` | MongoDB connection URI (Atlas cloud or local instance) |
-| `MONGO_DB_NAME` | Yes | `forecastguard` | Target MongoDB database name |
-| `APP_ENV` | No | `development` | Runtime environment (`development` or `production`) |
-| `API_HOST` | No | `0.0.0.0` | Bind host for FastAPI server |
-| `API_PORT` | No | `8000` | Port for FastAPI server |
-| `ALLOWED_ORIGINS` | No | `http://localhost:3000,http://localhost:5173` | Allowed CORS origins (comma-separated, or `*`) |
-| `DATA_MODE` | No | `synthetic` | Operation mode (`synthetic` for offline simulation, `live` for MoES feeds) |
-| `ADMIN_USER` | Yes | `admin` | Administrative Basic Auth username for protected API endpoints |
-| `ADMIN_PASS` | Yes | *Configured in `.env`* | Administrative Basic Auth password for protected API endpoints |
-| `WINDY_MAP_API_KEY` | Optional | `""` | Official Windy Map Forecast API key for model layers |
-| `OPENWEATHER_API_KEY` | Optional | `""` | OpenWeatherMap API key for live ground-truth telemetry |
-| `CARTO_BASEMAPS_API_KEY` | Optional | `""` | CARTO Basemaps API key for high-contrast vector cartography |
-
-### 8.2 Frontend Environment Variables (`frontend/.env.local`)
-
-| Variable Name | Required | Default Value | Description |
-| :--- | :--- | :--- | :--- |
-| `NEXT_PUBLIC_API_URL` | Yes | `http://localhost:8000` | Backend API URL (use Render backend URL in production) |
-| `NEXT_PUBLIC_ADMIN_USER` | Yes | `admin` | Client username used for authenticating with backend API |
-| `NEXT_PUBLIC_ADMIN_PASS` | Yes | *Configured in `.env.local`* | Client password used for authenticating with backend API |
-| `NEXT_PUBLIC_WINDY_API_KEY` | Optional | `""` | Client-side Windy Map Forecast API key |
-| `NEXT_PUBLIC_CARTO_API_KEY` | Optional | `""` | Client-side CARTO Basemaps key |
-| `NEXT_PUBLIC_OPENWEATHER_API_KEY` | Optional | `""` | Client-side OpenWeatherMap key |
-
----
-
-## 9. Local Installation & Deployment Guide
-
-### 9.1 Prerequisites
+### 8.1 Prerequisites
 - **Python**: Version `3.11` or higher
 - **Node.js**: Version `20.x` or higher
 - **npm**: Version `10.x` or higher
 - **Git**: Installed and configured
 
-### 9.2 Step-by-Step Setup
+### 8.2 Step-by-Step Setup
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/ARYANatGIT/SIH-26079.git
-cd SIH-26079
+git clone https://github.com/ARYANatGIT/fcg.git
+cd fcg
 
-# 2. Configure Backend Environment
-# Create/configure .env at the root with your credentials and keys (refer to Section 8.1)
-
-# 3. Set up Python virtual environment
+# 2. Set up Python virtual environment
 python -m venv venv
 # On Windows:
 venv\Scripts\activate
 # On Linux/macOS:
 source venv/bin/activate
 
-# 4. Install Python dependencies
+# 3. Install Python dependencies
 pip install -r requirements.txt
 
-# 5. Start the FastAPI backend service
+# 4. Start the FastAPI backend service
 uvicorn backend.main:app --host 0.0.0.0 --port 8000 --reload
 ```
 
 In a separate terminal window:
 
 ```bash
-# 6. Configure Frontend Environment
+# 5. Navigate to frontend directory
 cd frontend
-# Create/configure .env.local with your backend API URL and keys (refer to Section 8.2)
 
-# 7. Install Node.js dependencies
+# 6. Install Node.js dependencies
 npm install
 
-# 8. Start the Next.js development server
+# 7. Start the Next.js development server
 npm run dev
 ```
 
@@ -426,25 +390,23 @@ The frontend will be operational at `http://localhost:3000` and the backend serv
 
 ---
 
-## 10. Deployment via Render Cloud (`render.yaml`)
+## 9. Deployment via Render Cloud (`render.yaml`)
 
-ForecastGuard includes a production [`render.yaml`](file:///c:/SIH-26079/render.yaml) blueprint enabling one-click deployment:
+ForecastGuard includes an automated production [`render.yaml`](render.yaml) blueprint enabling continuous integration and deployment:
 
-### 10.1 Steps to Deploy on Render
-1. Push your repository to GitHub.
+### 9.1 Steps to Deploy on Render
+1. Push your repository to GitHub (`https://github.com/ARYANatGIT/fcg.git`).
 2. Log in to the [Render Cloud Dashboard](https://dashboard.render.com).
 3. Click **New +** → **Blueprint** and connect your GitHub repository.
 4. Render will read `render.yaml` and provision two services:
-   - **`forecastguard-api`**: Python web service running Uvicorn.
+   - **`forecastguard-api`**: Python web service running Uvicorn ASGI server.
    - **`forecastguard-web`**: Node.js web service running Next.js.
-5. In the Render Dashboard, set the required environment variables marked with `sync: false`:
-   - Under `forecastguard-api`: set `MONGO_URI`, `ADMIN_USER`, `ADMIN_PASS`, and any external API keys (`OPENWEATHER_API_KEY`, `WINDY_MAP_API_KEY`, `CARTO_BASEMAPS_API_KEY`).
-   - Under `forecastguard-web`: set `NEXT_PUBLIC_ADMIN_USER`, `NEXT_PUBLIC_ADMIN_PASS`, and client API keys (`NEXT_PUBLIC_WINDY_API_KEY`, `NEXT_PUBLIC_CARTO_API_KEY`, `NEXT_PUBLIC_OPENWEATHER_API_KEY`).
-6. Deploy! Render will build and deploy both services with automatic HTTPS certificates.
+5. In the Render Dashboard under **Environment**, configure the necessary database connection and operational credentials.
+6. Deploy! Render builds and deploys both services with automatic zero-downtime rolling deploys and managed TLS certificates.
 
 ---
 
-## 11. Automated Verification Suite
+## 10. Automated Verification Suite
 
 Execute the automated verification commands to test model inference, calibration mathematics, and frontend bundle integrity:
 
@@ -464,6 +426,18 @@ print('ForecastGuard ML Bundle & Calibration Mapping: VERIFIED')
 
 ---
 
-## 12. Institutional Disclaimer
+## 11. Credits & Operational Data Sources
 
-ForecastGuard is an operational meteorological research system designed to support operational forecasters by quantifying numerical weather prediction uncertainty and estimating conditional bust probabilities. All operational warnings should be interpreted in conjunction with official synoptic bulletins issued by the **India Meteorological Department (IMD)** and **National Centre for Medium Range Weather Forecasting (NCMRWF)**.
+ForecastGuard is built upon rigorous meteorological research, open science standards, and authoritative observational data. We gratefully acknowledge the data, models, and computational services provided by:
+
+- **Ministry of Earth Sciences (MoES)** & **National Centre for Medium Range Weather Forecasting (NCMRWF)**, Government of India: Operational numerical weather prediction domain specifications, NCUM high-resolution modeling framework, and meteorological guidance.
+- **India Meteorological Department (IMD)**, MoES: Ground truth Automatic Weather Station (AWS) observations, synoptic regimes, and operational forecast bust verification standards.
+- **Google Weather & Google Maps Platform**: High-resolution atmospheric conditions, multi-day weather forecasting, and geospatial terrain calculations.
+- **European Centre for Medium-Range Weather Forecasts (ECMWF)**: ECMWF Integrated Forecasting System (IFS) 9km numerical model data and 51-member ensemble prediction system (ENS).
+- **Open-Meteo**: High-resolution numerical weather prediction model synchronization, historical meteorological archives, and global elevation datasets.
+- **OpenWeatherMap**: Real-time synoptic meteorological observations and global weather monitoring networks.
+- **Windy.com**: Atmospheric streamline vector flow dynamics and high-resolution numerical model visualization.
+- **Copernicus Atmosphere Monitoring Service (CAMS)**: European air quality, atmospheric chemical composition, aerosol optical depth, and particulate concentration tracking.
+- **Global Flood Awareness System (GloFAS)**: Hydrological river discharge and regional flood hazard modeling.
+- **Survey of India** & **CARTO**: Official cartographic boundary datasets and high-contrast cartography.
+

@@ -1,9 +1,10 @@
+import os
 from pydantic import BaseModel, Field, model_validator
 from typing import Dict, Any, List, Optional
 
 class APIResponseBase(BaseModel):
     status: str = "success"
-    metadata: Dict[str, Any] = {"data_status": "synthetic"}
+    metadata: Dict[str, Any] = Field(default_factory=lambda: {"data_status": os.getenv("DATA_MODE", "real_time")})
 
 class ForecastRequest(BaseModel):
     initialization_time: str

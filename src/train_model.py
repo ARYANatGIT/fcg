@@ -28,7 +28,7 @@ MODEL_OUTPUT_DIR = ROOT_DIR / "models"
 MODEL_OUTPUT_PATH = MODEL_OUTPUT_DIR / "lgbm_regression.joblib"
 
 
-def load_data_from_mongodb() -> pd.DataFrame:
+def load_data_from_mongodb(limit: int = 50000) -> pd.DataFrame:
     """Queries the real_time_data MongoDB collection and returns a DataFrame across all monitored cities."""
     collection = get_real_time_collection()
     projection = {
@@ -42,16 +42,12 @@ def load_data_from_mongodb() -> pd.DataFrame:
         "wind_speed_10m": 1,
         "_id": 0,
     }
-    logger.info("Streaming documents from MongoDB collection 'real_time_data'...")
-    cursor = collection.find({}, projection).batch_size(1000)
-    records = []
-    for doc in cursor:
-        records.append(doc)
-        if len(records) % 5000 == 0:
-            logger.info(f"Loaded {len(records)} records...")
+    logger.info(f"Streaming up to {limit} recent observations from MongoDB collection 'real_time_data'...")
+    cursor = collection.find({}, projection).sort("timestamp", -1).limit(limit).batch_size(2000)
+    records = list(cursor)
 
     if not records:
-        raise ValueError("No records found in MongoDB collection 'real_time_data'. Run src/data_ingestion.py first.")
+        raise ValueError("No records found in MongoDB collection 'real_time_data'. Run src/multi_source_ingestion.py first.")
 
     df = pd.DataFrame(records)
     logger.info(f"Loaded total {len(df)} raw records from MongoDB collection 'real_time_data'.")
